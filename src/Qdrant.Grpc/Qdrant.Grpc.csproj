@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Title>Qdrant .NET client</Title>
+    <Description>.NET client for Qdrant vector database</Description>
+    <TargetFrameworks>net462; net471; netstandard2.0; net6.0; net7.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.22.4" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.53.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.54.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="protos\$(QdrantVersion)\*.proto" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GeneratedText><![CDATA[
+namespace Qdrant.Grpc%3B
+
+public partial class QdrantGrpcClient
+{
+    /// <summary>
+    /// The version of qdrant from which this client was created
+    /// </summary>
+    public const string QdrantVersion = "$(QdrantVersion)"%3B
+}
+      ]]></GeneratedText>
+  </PropertyGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)QdrantGrpcClient.g.cs">
+    <PropertyGroup>
+      <GeneratedFilePath>$(IntermediateOutputPath)QdrantGrpcClient.g.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
+
+
+</Project>

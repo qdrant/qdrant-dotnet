@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "minver-cli": {
+      "version": "2.5.0",
+      "commands": [
+        "minver"
+      ]
+    },
+    "nupkg-validator": {
+      "version": "0.5.0",
+      "commands": [
+        "nupkg-validator"
+      ]
+    },
+    "docfx": {
+      "version": "2.67.5",
+      "commands": [
+        "docfx"
+      ]
+    }
+  }
+}

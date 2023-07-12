@@ -1,0 +1,31 @@
+service:
+  # Use HTTPS for the REST API
+  enable_tls: true
+
+  # Set an api-key.
+  api_key: password!
+
+# TLS configuration.
+# Required if either service.enable_tls or cluster.p2p.enable_tls is true.
+tls:
+  # Server certificate chain file
+  cert: ./tls/cert.pem
+
+  # Server private key file
+  key: ./tls/key.pem
+
+  # Certificate authority certificate file.
+  # This certificate will be used to validate the certificates
+  # presented by other nodes during inter-cluster communication.
+  #
+  # If verify_https_client_certificate is true, it will verify
+  # HTTPS client certificate
+  #
+  # Required if cluster.p2p.enable_tls is true.
+  ca_cert: ./tls/cacert.pem
+
+  # TTL, in seconds, to re-load certificate from disk. Useful for certificate rotations,
+  # Only works for HTTPS endpoints, gRPC endpoints (including intra-cluster communication)
+  # doesn't support certificate re-load
+  cert_ttl: 3600
+
