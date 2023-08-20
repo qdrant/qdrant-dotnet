@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**\**" />
+    <None Remove="_site\**" />
+    <None Remove="bin\**" />
+    <None Remove="**\**" />
+    <None Include="api\*.md" />
+    <None Include="documentation\**" />
+    <None Include="images\**" />
+    <None Include="index.md" />
+    <None Include="docfx.json" />
+    <None Include=".gitignore" />
+    <None Include="toc.yml" />
+  </ItemGroup>
+  
+</Project>

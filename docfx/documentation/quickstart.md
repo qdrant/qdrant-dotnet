@@ -12,7 +12,26 @@ dotnet add package Qdrant.Grpc
 
 Create a new instance of the client with
 
+# [.NET](#tab/net)
+
 [!code-csharp[](../../examples/Examples/Client.cs#CreateClient)]
+
+# [.NET Framework](#tab/netframework)
+
+> [!IMPORTANT]
+>
+> .NET Framework has limited supported for gRPC over HTTP/2, but it can be enabled by
+>
+> - Configuring qdrant to use TLS, and you **must** use HTTPS, so you will need to set up
+>   [server certificate validation](connecting.md#validating-self-signed-tls-certificates)
+> - Referencing [Grpc.Net.Client.Web](https://www.nuget.org/packages/Grpc.Net.Client.Web) and configuring `GrpcWebHandler` as the `HttpHandler`
+> - Referencing [System.Net.Http.WinHttpHandler](https://www.nuget.org/packages/System.Net.Http.WinHttpHandler/) 6.0.1 or later, and configuring `WinHttpHandler` as the inner handler for  `GrpcWebHandler`
+>
+> See [Configure gRPC-Web with the .NET gRPC client](https://learn.microsoft.com/en-au/aspnet/core/grpc/grpcweb?view=aspnetcore-7.0#configure-grpc-web-with-the-net-grpc-client) and use [gRPC client with .NET Standard 2.0](https://learn.microsoft.com/en-au/aspnet/core/grpc/netstandard?view=aspnetcore-7.0#net-framework) for further details.
+
+[!code-csharp[](../../examples/Examples/Client.cs#CreateClientNetFramework)]
+
+---
 
 The client is thread safe, so create a single instance and reuse it.
 
@@ -29,7 +48,7 @@ Points can be indexed with
 
 [!code-csharp[](../../examples/Examples/Points.cs#Upsert)]
 
-The write ordering
+The write ordering defines the ordering guarantees of the operation.
 
 ## Search
 

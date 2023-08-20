@@ -1,13 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net471;net7.0</TargetFrameworks>
+        <TargetFramework Condition="'$(OS)' != 'Windows_NT'">net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Qdrant.Grpc\Qdrant.Grpc.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net462' Or '$(TargetFramework)' == 'net471'">
+      <PackageReference Include="Grpc.Net.Client.Web" Version="2.55.0" />
+      <PackageReference Include="System.Net.Http.WinHttpHandler" Version="7.0.0" />
     </ItemGroup>
   
 </Project>

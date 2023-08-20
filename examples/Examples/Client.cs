@@ -1,4 +1,7 @@
-﻿using Grpc.Core;
+#if NETFRAMEWORK
+using Grpc.Net.Client.Web;
+#endif
+
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Qdrant.Grpc;
@@ -14,6 +17,23 @@ public class Client
 		var client = new QdrantGrpcClient(channel);
 		#endregion
 	}
+
+#if NETFRAMEWORK
+	public void CreateClientNetFramework()
+	{
+		#region CreateClientNetFramework
+		var channel = GrpcChannel.ForAddress("https://localhost:6334", new GrpcChannelOptions
+		{
+			HttpHandler = new GrpcWebHandler(new WinHttpHandler
+			{
+				ServerCertificateValidationCallback =
+					CertificateValidation.Thumbprint("<certificate thumbprint>")
+			})
+		});
+		var client = new QdrantGrpcClient(channel);
+		#endregion
+	}
+#endif
 
 	public void CreateWithApiKey()
 	{
@@ -38,10 +58,34 @@ public class Client
 		#endregion
 	}
 
+#if NETFRAMEWORK
+	public void CreateWithGrpcChannelNetFramework()
+	{
+		#region CreateWithGrpcChannelNetFramework
+		var channel = GrpcChannel.ForAddress("https://localhost:6334", new GrpcChannelOptions
+		{
+			MaxRetryAttempts = 2,
+			MaxReceiveMessageSize = 8_388_608, // 8MB
+			HttpHandler = new GrpcWebHandler(new WinHttpHandler
+			{
+				ServerCertificateValidationCallback =
+					CertificateValidation.Thumbprint("<certificate thumbprint>")
+			})
+		});
+		var callInvoker = channel.Intercept(metadata =>
+		{
+			metadata.Add("api-key", "<api key>");
+			return metadata;
+		});
+		var client = new QdrantGrpcClient(callInvoker);
+		#endregion
+	}
+#endif
+
 	public void CreateWithGrpcChannel()
 	{
 		#region CreateClientWithGrpcChannel
-		var channel = GrpcChannel.ForAddress("http://localhost:6334", new GrpcChannelOptions
+		var channel = GrpcChannel.ForAddress("https://localhost:6334", new GrpcChannelOptions
 		{
 			MaxRetryAttempts = 2,
 			MaxReceiveMessageSize = 8_388_608, // 8MB

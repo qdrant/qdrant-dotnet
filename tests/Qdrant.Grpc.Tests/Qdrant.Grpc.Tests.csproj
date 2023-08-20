@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <TargetFramework>net7.0</TargetFramework>
+      <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net462;net471;net6.0;net7.0</TargetFrameworks>
+      <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">net6.0;net7.0</TargetFrameworks>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -17,6 +18,11 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>   
       </PackageReference>
       <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    </ItemGroup>
+  
+    <ItemGroup Condition="'$(TargetFramework)' == 'net462' Or '$(TargetFramework)' == 'net471'">
+      <PackageReference Include="Grpc.Net.Client.Web" Version="2.55.0" />
+      <PackageReference Include="System.Net.Http.WinHttpHandler" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>

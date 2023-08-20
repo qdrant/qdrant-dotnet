@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Grpc.Core;
 using Moq;
 using Qdrant;

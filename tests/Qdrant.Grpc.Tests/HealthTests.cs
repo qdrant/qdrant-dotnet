@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Xunit;
 
 namespace Qdrant.Grpc.Tests;
@@ -6,29 +6,25 @@ namespace Qdrant.Grpc.Tests;
 [Collection("Qdrant")]
 public class HealthTests
 {
-    private readonly QdrantGrpcClient _client;
+	private readonly QdrantGrpcClient _client;
 
-    public HealthTests(QdrantFixture qdrantFixture)
-    {
-        var address = QdrantChannel.ForAddress($"http://{qdrantFixture.Host}:{qdrantFixture.GrpcPort}");
-        _client = new QdrantGrpcClient(address);
-    }
+	public HealthTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateGrpcClient();
 
-    [Fact]
-    public void HealthCheck()
-    {
-        var response = _client.Qdrant.HealthCheck(new HealthCheckRequest());
+	[Fact]
+	public void HealthCheck()
+	{
+		var response = _client.Qdrant.HealthCheck(new HealthCheckRequest());
 
-        response.Title.Should().NotBeNullOrEmpty();
-        response.Version.Should().NotBeNullOrEmpty();
-    }
+		response.Title.Should().NotBeNullOrEmpty();
+		response.Version.Should().NotBeNullOrEmpty();
+	}
 
-    [Fact]
-    public async Task HealthCheckAsync()
-    {
-	    var response = await _client.Qdrant.HealthCheckAsync(new HealthCheckRequest());
+	[Fact]
+	public async Task HealthCheckAsync()
+	{
+		var response = await _client.Qdrant.HealthCheckAsync(new HealthCheckRequest());
 
-	    response.Title.Should().NotBeNullOrEmpty();
-	    response.Version.Should().NotBeNullOrEmpty();
-    }
+		response.Title.Should().NotBeNullOrEmpty();
+		response.Version.Should().NotBeNullOrEmpty();
+	}
 }

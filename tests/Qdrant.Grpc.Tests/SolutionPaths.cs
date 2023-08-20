@@ -1,4 +1,4 @@
-﻿namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Grpc.Tests;
 
 public static class SolutionPaths
 {

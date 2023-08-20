@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Grpc.Net.Client;
 using Qdrant;
 using Xunit;
@@ -10,11 +10,7 @@ public class CollectionTests
 {
 	private readonly QdrantGrpcClient _client;
 
-	public CollectionTests(QdrantFixture qdrantFixture)
-	{
-		var address = QdrantChannel.ForAddress($"http://{qdrantFixture.Host}:{qdrantFixture.GrpcPort}");
-		_client = new QdrantGrpcClient(address);
-	}
+	public CollectionTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateGrpcClient();
 
 	[Fact]
 	public void CanCreateCollection()

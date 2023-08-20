@@ -1,4 +1,4 @@
-﻿using Grpc.Core;
+using Grpc.Core;
 
 namespace Qdrant.Grpc;
 

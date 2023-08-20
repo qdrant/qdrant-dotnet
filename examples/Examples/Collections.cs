@@ -1,4 +1,4 @@
-﻿using Grpc.Net.Client;
+using Grpc.Net.Client;
 using Qdrant;
 using Qdrant.Grpc;
 
@@ -17,7 +17,8 @@ public class Collections
 			CollectionName = "my_collection",
 			VectorsConfig = new VectorsConfig
 			{
-				Params = new VectorParams {
+				Params = new VectorParams
+				{
 					Size = 1536,
 					Distance = Distance.Cosine
 				}

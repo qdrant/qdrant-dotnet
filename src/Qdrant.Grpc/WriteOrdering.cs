@@ -1,4 +1,4 @@
-﻿namespace Qdrant.Grpc;
+namespace Qdrant.Grpc;
 
 /// <summary>
 /// Write ordering can be specified for any write request to serialize it through a single “leader” node, which
