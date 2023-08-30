@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -49,7 +50,7 @@ public static class CertificateValidation
 
 	private static bool ValidateThumbprint(X509Certificate certificate, string thumbprint)
 	{
-#if DOTNETCORE && !NETSTANDARD
+#if NET6_0_OR_GREATER
 		var certificateThumbprint = certificate.GetCertHashString(HashAlgorithmName.SHA256);
 #else
 		using var sha256 = SHA256.Create();

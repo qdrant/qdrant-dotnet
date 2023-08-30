@@ -1,7 +1,7 @@
 #if NETFRAMEWORK
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using Grpc.Net.Client.Web;
+using System.Net.Http;
 #endif
 
 using System.Security.Authentication;
@@ -34,10 +34,10 @@ public class ApiKeyCertificateThumbprintTests
 #if NETFRAMEWORK
 		var channel = GrpcChannel.ForAddress(_address, new GrpcChannelOptions
 		{
-			HttpHandler = new GrpcWebHandler(new WinHttpHandler
+			HttpHandler = new WinHttpHandler
 			{
 				ServerCertificateValidationCallback = CertificateValidation.Thumbprint(CertificateThumbprint)
-			})
+			}
 		});
 		var callInvoker = channel.Intercept(metadata =>
 		{
@@ -67,10 +67,10 @@ public class ApiKeyCertificateThumbprintTests
 #if NETFRAMEWORK
 		var callInvoker = GrpcChannel.ForAddress(_address, new GrpcChannelOptions
 		{
-			HttpHandler = new GrpcWebHandler(new WinHttpHandler
+			HttpHandler = new WinHttpHandler
 			{
 				ServerCertificateValidationCallback = CertificateValidation.Thumbprint(CertificateThumbprint)
-			})
+			}
 		}).CreateCallInvoker();
 #else
 		var callInvoker = QdrantChannel.ForAddress(_address,
@@ -93,7 +93,7 @@ public class ApiKeyCertificateThumbprintTests
 #if NETFRAMEWORK
 		var channel = GrpcChannel.ForAddress(_address, new GrpcChannelOptions
 		{
-			HttpHandler = new GrpcWebHandler(new WinHttpHandler())
+			HttpHandler = new WinHttpHandler()
 		});
 		var callInvoker = channel.Intercept(metadata =>
 		{

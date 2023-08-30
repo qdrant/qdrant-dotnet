@@ -3,7 +3,7 @@
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))"/>
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    
+
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\keys\keypair.snk</AssemblyOriginatorKeyFile>
 
@@ -13,7 +13,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>

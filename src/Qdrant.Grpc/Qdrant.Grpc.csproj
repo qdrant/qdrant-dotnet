@@ -3,19 +3,14 @@
   <PropertyGroup>
     <Title>Qdrant .NET client</Title>
     <Description>.NET client for Qdrant vector database</Description>
-    <TargetFrameworks>net462;net471;netstandard2.0;net6.0;net7.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <IsPackable>true</IsPackable>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <TargetFrameworks>net462;netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(DeveloperBuild)' == 'True'">net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.22.4" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.53.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.54.0">
+    <PackageReference Include="Google.Protobuf" Version="3.24.2" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.57.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.57.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -49,6 +44,5 @@ public partial class QdrantGrpcClient
     </ItemGroup>
     <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
   </Target>
-
 
 </Project>
