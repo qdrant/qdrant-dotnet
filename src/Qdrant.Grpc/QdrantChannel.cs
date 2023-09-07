@@ -1,4 +1,3 @@
-using System.Net.Http;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
