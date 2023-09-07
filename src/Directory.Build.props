@@ -5,9 +5,9 @@
     <IsPackable>true</IsPackable>
     
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\keys\keypair.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(SolutionRoot)build\keys\keypair.snk</AssemblyOriginatorKeyFile>
 
-<!--    <PackageIcon>nuget-icon.png</PackageIcon>-->
+    <PackageIcon>nuget-icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,13 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="." CopyToOutputDirectory="PreserveNewest"/>
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="." CopyToOutputDirectory="PreserveNewest" />
-<!--    <Content Include="..\..\nuget-icon.png" CopyToOutputDirectory="PreserveNewest">-->
-<!--      <Link>nuget-icon.png</Link>-->
-<!--      <Pack>True</Pack>-->
-<!--      <PackagePath>nuget-icon.png</PackagePath>-->
-<!--    </Content>-->
+    <None Include="$(SolutionRoot)README.md" Pack="true" PackagePath="." />
+    <None Include="$(SolutionRoot)LICENSE" Pack="true" PackagePath="." />
+    <None Include="$(SolutionRoot)nuget-icon.png" Pack="true" PackagePath="." />
   </ItemGroup>
 
   <!-- suppress warnings for netstandard2.0 xml docs -->
