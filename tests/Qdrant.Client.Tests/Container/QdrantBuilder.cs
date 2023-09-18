@@ -6,7 +6,7 @@ namespace Qdrant.Client.Tests.Container;
 
 public sealed class QdrantBuilder : ContainerBuilder<QdrantBuilder, QdrantContainer, QdrantConfiguration>
 {
-	public const string QdrantImage = "qdrant/qdrant:v1.4.1";
+	public const string QdrantImage = "qdrant/qdrant:" + QdrantGrpcClient.QdrantVersion;
 
 	public const ushort QdrantHttpPort = 6333;
 
