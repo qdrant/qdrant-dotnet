@@ -2,10 +2,10 @@
 
 ## Installing
 
-The [gRPC client is available on nuget](https://www.nuget.org/packages/Qdrant.Grpc), and can be installed with
+The [gRPC client is available on nuget](https://www.nuget.org/packages/Qdrant.Client), and can be installed with
 
 ```sh
-dotnet add package Qdrant.Grpc
+dotnet add package Qdrant.Client
 ```
 
 ## Creating the client

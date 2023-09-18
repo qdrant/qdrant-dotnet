@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qdrant.Grpc", "src\Qdrant.Grpc\Qdrant.Grpc.csproj", "{CBEA50A5-9A0C-486E-BCE5-223E978627C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qdrant.Client", "src\Qdrant.Client\Qdrant.Client.csproj", "{CBEA50A5-9A0C-486E-BCE5-223E978627C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qdrant.Grpc.Tests", "tests\Qdrant.Grpc.Tests\Qdrant.Grpc.Tests.csproj", "{7D5DDA3D-ADAC-4193-9FA9-5A62EC6ED784}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qdrant.Client.Tests", "tests\Qdrant.Client.Tests\Qdrant.Client.Tests.csproj", "{7D5DDA3D-ADAC-4193-9FA9-5A62EC6ED784}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Build", "build\Build.csproj", "{C202A4B5-DE75-424E-B3A2-A3BF4123FB0D}"
 EndProject

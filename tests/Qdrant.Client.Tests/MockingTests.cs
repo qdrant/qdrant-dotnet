@@ -2,9 +2,10 @@ using FluentAssertions;
 using Grpc.Core;
 using Moq;
 using Qdrant;
+using Qdrant.Client;
 using Xunit;
 
-namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Client.Tests;
 
 public class MockingTests
 {

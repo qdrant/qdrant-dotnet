@@ -2,7 +2,7 @@ using Docker.DotNet.Models;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 
-namespace Qdrant.Grpc.Tests.Container;
+namespace Qdrant.Client.Tests.Container;
 
 public sealed class QdrantBuilder : ContainerBuilder<QdrantBuilder, QdrantContainer, QdrantConfiguration>
 {

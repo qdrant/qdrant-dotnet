@@ -1,6 +1,6 @@
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using Qdrant.Grpc;
+using Qdrant.Client;
 
 #if NETFRAMEWORK
 using System.Net.Http;

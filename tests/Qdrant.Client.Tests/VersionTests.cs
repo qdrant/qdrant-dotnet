@@ -2,7 +2,7 @@ using System.Xml.Linq;
 using FluentAssertions;
 using Xunit;
 
-namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Client.Tests;
 
 public class VersionTests
 {

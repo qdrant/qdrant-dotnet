@@ -1,9 +1,10 @@
 using FluentAssertions;
 using Grpc.Net.Client;
 using Qdrant;
+using Qdrant.Client;
 using Xunit;
 
-namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Client.Tests;
 
 [Collection("Qdrant")]
 public class CollectionTests
