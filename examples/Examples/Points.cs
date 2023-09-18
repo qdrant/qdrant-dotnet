@@ -1,6 +1,6 @@
 using Grpc.Net.Client;
 using Qdrant;
-using Qdrant.Grpc;
+using Qdrant.Client;
 
 namespace Examples;
 

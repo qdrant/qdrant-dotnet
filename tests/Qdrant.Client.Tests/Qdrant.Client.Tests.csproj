@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Qdrant.Grpc\Qdrant.Grpc.csproj" />
+      <ProjectReference Include="..\..\src\Qdrant.Client\Qdrant.Client.csproj" />
     </ItemGroup>
 
 </Project>

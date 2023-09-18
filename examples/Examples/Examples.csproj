@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\Qdrant.Grpc\Qdrant.Grpc.csproj" />
+      <ProjectReference Include="..\..\src\Qdrant.Client\Qdrant.Client.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net462'">

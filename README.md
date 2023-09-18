@@ -11,7 +11,7 @@
 ### Installing
 
 ```sh
-dotnet add package Qdrant.Grpc
+dotnet add package Qdrant.Client
 ```
 
 ### Documentation
@@ -22,6 +22,6 @@ dotnet add package Qdrant.Grpc
 [Qdrant-image]:
 https://img.shields.io/badge/Documentation-blue
 
-[Qdrant-nuget-url]:https://www.nuget.org/packages/Qdrant.Grpc/
+[Qdrant-nuget-url]:https://www.nuget.org/packages/Qdrant.Client/
 [Qdrant-image]:
-https://img.shields.io/nuget/v/Qdrant.Grpc.svg
+https://img.shields.io/nuget/v/Qdrant.Client.svg

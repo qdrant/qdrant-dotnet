@@ -1,13 +1,12 @@
-using Qdrant.Grpc.Tests.Container;
+using Qdrant.Client.Tests.Container;
 using Xunit;
 
 #if NETFRAMEWORK
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using System.Net.Http;
 #endif
 
-namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Client.Tests;
 
 [CollectionDefinition("Qdrant")]
 public sealed class QdrantCollection : ICollectionFixture<QdrantFixture> { }

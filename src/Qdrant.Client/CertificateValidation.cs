@@ -2,7 +2,7 @@ using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Qdrant.Grpc;
+namespace Qdrant.Client;
 
 /// <summary>
 /// Server Certificate validation methods

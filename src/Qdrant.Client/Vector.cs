@@ -1,4 +1,4 @@
-namespace Qdrant.Grpc;
+namespace Qdrant.Client;
 
 /// <summary>
 /// A vector

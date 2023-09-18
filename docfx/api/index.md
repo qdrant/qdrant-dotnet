@@ -2,6 +2,6 @@
 
 
 
-## Qdrant.Grpc
+## Qdrant.Client
 
 

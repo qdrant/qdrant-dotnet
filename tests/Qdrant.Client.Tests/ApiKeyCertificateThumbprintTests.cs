@@ -1,7 +1,6 @@
 #if NETFRAMEWORK
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
-using System.Net.Http;
 #endif
 
 using System.Security.Authentication;
@@ -9,7 +8,7 @@ using FluentAssertions;
 using Grpc.Core;
 using Xunit;
 
-namespace Qdrant.Grpc.Tests;
+namespace Qdrant.Client.Tests;
 
 [Collection("QdrantSecured")]
 public class ApiKeyCertificateThumbprintTests

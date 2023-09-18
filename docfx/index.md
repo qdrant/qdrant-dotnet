@@ -8,10 +8,10 @@
 
 ### Installing
 
-The [gRPC client is available on nuget](https://www.nuget.org/packages/Qdrant.Grpc), and can be installed with
+The [gRPC client is available on nuget](https://www.nuget.org/packages/Qdrant.Client), and can be installed with
 
 ```sh
-dotnet add package Qdrant.Grpc
+dotnet add package Qdrant.Client
 ```
 
 See [quickstart](documentation/quickstart.md) for getting started.
@@ -20,6 +20,6 @@ See [quickstart](documentation/quickstart.md) for getting started.
 [Documentation-image]:
 https://img.shields.io/badge/Documentation-blue
 
-[Qdrant-nuget-url]:https://www.nuget.org/packages/Qdrant.Grpc/
+[Qdrant-nuget-url]:https://www.nuget.org/packages/Qdrant.Client/
 [Qdrant-image]:
-https://img.shields.io/nuget/v/Qdrant.Grpc.svg
+https://img.shields.io/nuget/v/Qdrant.Client.svg
