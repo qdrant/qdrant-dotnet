@@ -40,7 +40,7 @@ public class ApiKeyCertificateThumbprintTests
 		});
 		var callInvoker = channel.Intercept(metadata =>
 		{
-			metadata.Add("api-key", "password!");
+			metadata.Add("api-key", ApiKey);
 			return metadata;
 		});
 
@@ -100,7 +100,7 @@ public class ApiKeyCertificateThumbprintTests
 		});
 		var callInvoker = channel.Intercept(metadata =>
 		{
-			metadata.Add("api-key", "password!");
+			metadata.Add("api-key", ApiKey);
 			return metadata;
 		});
 #else
