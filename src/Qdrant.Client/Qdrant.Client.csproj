@@ -17,12 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="protos\$(QdrantVersion)\*.proto" />
+    <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="Grpc\protos\$(QdrantVersion)\*.proto" />
   </ItemGroup>
+
 
   <PropertyGroup>
     <GeneratedText><![CDATA[
-namespace Qdrant.Client%3B
+namespace Qdrant.Client.Grpc%3B
 
 public partial class QdrantGrpcClient
 {

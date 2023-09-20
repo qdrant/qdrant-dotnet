@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Qdrant.Client;
+namespace Qdrant.Client.Grpc;
 
 /// <summary>
 /// Call invoker that throws <c>NotImplementedException</c> for all requests.

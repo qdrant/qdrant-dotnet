@@ -12,7 +12,7 @@ using static SimpleExec.Command;
 const string envVarMissing = " environment variable is missing. Aborting.";
 const string packOutput = "nuget";
 const string protosDir = "protos";
-const string project = "Qdrant.Client";
+const string project = "Qdrant.Client.Grpc";
 
 var doc = XDocument.Load("Directory.Build.props");
 var qdrantVersion = doc.Descendants(XName.Get("QdrantVersion", "http://schemas.microsoft.com/developer/msbuild/2003"))

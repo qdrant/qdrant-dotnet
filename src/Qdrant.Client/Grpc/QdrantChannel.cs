@@ -2,7 +2,7 @@ using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 
-namespace Qdrant.Client;
+namespace Qdrant.Client.Grpc;
 
 /// <summary>
 /// A gRPC channel to Qdrant service.

@@ -1,15 +1,17 @@
 using FluentAssertions;
 using Qdrant.Client;
+using Qdrant.Client.Grpc;
+using Qdrant.Client.Tests;
 using Xunit;
 
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client.Grpc;
 
 [Collection("Qdrant")]
-public class HealthTests
+public class GrpcHealthTests
 {
 	private readonly QdrantGrpcClient _client;
 
-	public HealthTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateGrpcClient();
+	public GrpcHealthTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateGrpcClient();
 
 	[Fact]
 	public void HealthCheck()

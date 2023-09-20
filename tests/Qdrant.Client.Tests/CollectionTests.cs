@@ -1,53 +1,39 @@
 using FluentAssertions;
-using Grpc.Net.Client;
-using Qdrant;
-using Qdrant.Client;
+using Grpc.Core;
+using Qdrant.Client.Grpc;
 using Xunit;
 
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client;
 
 [Collection("Qdrant")]
 public class CollectionTests
 {
-	private readonly QdrantGrpcClient _client;
+	private readonly QdrantClient _client;
 
-	public CollectionTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateGrpcClient();
+	public CollectionTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateClient();
 
 	[Fact]
-	public void CanCreateCollection()
-	{
-		var createResponse = _client.Collections.Create(new CreateCollection
-		{
-			CollectionName = "collection_1",
-			VectorsConfig = new VectorsConfig
-			{
-				Params = new VectorParams { Size = 4, Distance = Distance.Cosine }
-			}
-		});
+	public Task Create()
+		=> _client.CreateCollectionAsync(
+			"collection_1",
+			new() { Params = new VectorParams { Size = 4, Distance = Distance.Cosine } });
 
-		createResponse.Result.Should().BeTrue();
-		createResponse.Time.Should().BeGreaterThan(0);
+	[Fact]
+	public async Task GetInfo()
+	{
+		await _client.CreateCollectionAsync(
+			"collection_1",
+			new() { Params = new VectorParams { Size = 4, Distance = Distance.Cosine } });
+
+		var info = await _client.GetCollectionInfoAsync("collection_1");
+
+		info.Status.Should().Be(CollectionStatus.Green);
 	}
 
 	[Fact]
-	public async Task CanDeleteCollection()
+	public async Task GetInfo_with_missing_collection()
 	{
-		var createResponse = await _client.Collections.CreateAsync(new CreateCollection
-		{
-			CollectionName = "collection_2",
-			VectorsConfig = new VectorsConfig
-			{
-				Params = new VectorParams { Size = 4, Distance = Distance.Cosine }
-			}
-		});
-
-		createResponse.Result.Should().BeTrue();
-
-		var deleteResponse = await _client.Collections.DeleteAsync(new DeleteCollection
-		{
-			CollectionName = "collection_2",
-		});
-
-		createResponse.Result.Should().BeTrue();
+		var exception = await Assert.ThrowsAsync<RpcException>(() => _client.GetCollectionInfoAsync("collection_1"));
+		exception.StatusCode.Should().Be(StatusCode.NotFound);
 	}
 }

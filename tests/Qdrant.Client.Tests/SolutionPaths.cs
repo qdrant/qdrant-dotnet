@@ -1,4 +1,4 @@
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client;
 
 public static class SolutionPaths
 {
