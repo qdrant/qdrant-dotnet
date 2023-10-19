@@ -2,9 +2,9 @@ using System.Xml.Linq;
 using FluentAssertions;
 using Xunit;
 
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client.Grpc;
 
-public class VersionTests
+public class GrpcVersionTests
 {
 	[Fact]
 	public void VersionMatchesBuildVersion()

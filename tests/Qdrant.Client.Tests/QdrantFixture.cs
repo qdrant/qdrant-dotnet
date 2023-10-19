@@ -1,3 +1,4 @@
+using Qdrant.Client.Grpc;
 using Qdrant.Client.Tests.Container;
 using Xunit;
 
@@ -6,7 +7,7 @@ using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 #endif
 
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client;
 
 [CollectionDefinition("Qdrant")]
 public sealed class QdrantCollection : ICollectionFixture<QdrantFixture> { }
@@ -40,6 +41,9 @@ public sealed class QdrantFixture : IAsyncLifetime
 	public Task InitializeAsync() => _container.StartAsync();
 
 	public Task DisposeAsync() => _container.DisposeAsync().AsTask();
+
+	public QdrantClient CreateClient()
+		=> new(CreateGrpcClient());
 
 	public QdrantGrpcClient CreateGrpcClient()
 	{

@@ -1,6 +1,7 @@
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using Qdrant.Client;
+using Qdrant.Client.Grpc;
 
 #if NETFRAMEWORK
 using System.Net.Http;
@@ -21,7 +22,7 @@ public class Client
 #if NETFRAMEWORK
 	public void CreateClientNetFramework()
 	{
-		#region CreateClientNetFramework
+	#region CreateClientNetFramework
 		var channel = GrpcChannel.ForAddress("https://localhost:6334", new GrpcChannelOptions
 		{
 			HttpHandler = new WinHttpHandler
@@ -31,7 +32,7 @@ public class Client
 			}
 		});
 		var client = new QdrantGrpcClient(channel);
-		#endregion
+	#endregion
 	}
 #endif
 
@@ -61,7 +62,7 @@ public class Client
 #if NETFRAMEWORK
 	public void CreateWithGrpcChannelNetFramework()
 	{
-		#region CreateWithGrpcChannelNetFramework
+	#region CreateWithGrpcChannelNetFramework
 		var channel = GrpcChannel.ForAddress("https://localhost:6334", new GrpcChannelOptions
 		{
 			MaxRetryAttempts = 2,
@@ -78,7 +79,7 @@ public class Client
 			return metadata;
 		});
 		var client = new QdrantGrpcClient(callInvoker);
-		#endregion
+	#endregion
 	}
 #endif
 

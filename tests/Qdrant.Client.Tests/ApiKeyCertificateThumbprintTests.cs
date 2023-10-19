@@ -6,9 +6,10 @@ using Grpc.Net.Client;
 using System.Security.Authentication;
 using FluentAssertions;
 using Grpc.Core;
+using Qdrant.Client.Grpc;
 using Xunit;
 
-namespace Qdrant.Client.Tests;
+namespace Qdrant.Client;
 
 [Collection("QdrantSecured")]
 public class ApiKeyCertificateThumbprintTests

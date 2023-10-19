@@ -3,6 +3,7 @@
     <PropertyGroup>
       <TargetFrameworks>net462;net6.0</TargetFrameworks>
       <TargetFrameworks Condition="'$(DeveloperBuild)' == 'True'">net6.0</TargetFrameworks>
+      <RootNamespace>Qdrant.Client</RootNamespace>
       <IsPackable>false</IsPackable>
     </PropertyGroup>
 
@@ -26,5 +27,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Qdrant.Client\Qdrant.Client.csproj" />
     </ItemGroup>
+
 
 </Project>

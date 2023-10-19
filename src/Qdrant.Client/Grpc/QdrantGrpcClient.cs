@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Qdrant.Client;
+namespace Qdrant.Client.Grpc;
 
 /// <summary>
 /// gRPC client for qdrant vector database
