@@ -6,13 +6,12 @@ namespace Qdrant.Client;
 public class ClientConfiguration
 {
 	/// <summary>
-	/// The API key to sue
+	/// The API key to use.
 	/// </summary>
 	public string? ApiKey { get; set; }
 
 	/// <summary>
-	/// The certificate thumbprint to use when using a
-	/// self-signed certificate for TLS
+	/// The certificate thumbprint to use when using a self-signed certificate for TLS.
 	/// </summary>
 	public string? CertificateThumbprint { get; set; }
 }

@@ -64,7 +64,7 @@ public sealed class QdrantFixture : IAsyncLifetime
 		});
 		return new QdrantGrpcClient(callInvoker);
 #else
-		return new QdrantGrpcClient(QdrantChannel.ForAddress($"http://{Host}:{GrpcPort}"));
+		return new QdrantGrpcClient(Host, GrpcPort);
 #endif
 	}
 }
