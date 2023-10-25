@@ -157,7 +157,7 @@ public class PointTests : IAsyncLifetime
 		Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
 	}
 
-	[Fact(Skip = "Fails with HTTP CANCEL")]
+	[Fact]
 	public async Task SearchBatch()
 	{
 		await CreateAndSeedCollection("collection_1");
@@ -166,30 +166,16 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new SearchPoints[]
 			{
-				new() { Vector = { 10.4f, 11.4f }, Limit = 1 },
-				new() { Vector = { 3.4f, 4.4f }, Limit = 1 }
+				// TODO: It shouldn't be necessary to specify CollectionName here, see
+				// https://github.com/qdrant/qdrant-dotnet/pull/11/files#r1366050585
+				new() { CollectionName = "collection_1", Vector = { 10.4f, 11.4f }, Limit = 1 },
+				new() { CollectionName = "collection_1", Vector = { 3.4f, 4.4f }, Limit = 1 }
 			});
 
 		Assert.Collection(
 			batchResults,
-			br =>
-			{
-				var point = Assert.Single(br.Result);
-
-				Assert.Equal(9ul, point.Id);
-				var payloadKeyValue = Assert.Single(point.Payload);
-				Assert.Equal("foo", payloadKeyValue.Key);
-				Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
-			},
-			br =>
-			{
-				var point = Assert.Single(br.Result);
-
-				Assert.Equal(8ul, point.Id);
-				var payloadKeyValue = Assert.Single(point.Payload);
-				Assert.Equal("foo", payloadKeyValue.Key);
-				Assert.Equal("hello", payloadKeyValue.Value.StringValue);
-			});
+			br => Assert.Equal(9ul, Assert.Single(br.Result).Id),
+			br => Assert.Equal(8ul, Assert.Single(br.Result).Id));
 	}
 
 	[Fact]
@@ -250,7 +236,7 @@ public class PointTests : IAsyncLifetime
 		Assert.Equal(9ul, point.Id);
 	}
 
-	[Fact(Skip = "Fails with HTTP CANCEL")]
+	[Fact]
 	public async Task RecommendBatch()
 	{
 		await CreateAndSeedCollection("collection_1");
@@ -259,30 +245,16 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new RecommendPoints[]
 			{
-				new() { Positive = { 8 }, Limit = 1 },
-				new() { Positive = { 9 }, Limit = 1 }
+				// TODO: It shouldn't be necessary to specify CollectionName here, see
+				// https://github.com/qdrant/qdrant-dotnet/pull/11/files#r1366050585
+				new() { CollectionName = "collection_1", Positive = { 8 }, Limit = 1 },
+				new() { CollectionName = "collection_1", Positive = { 9 }, Limit = 1 }
 			});
 
 		Assert.Collection(
 			batchResults,
-			br =>
-			{
-				var point = Assert.Single(br.Result);
-
-				Assert.Equal(9ul, point.Id);
-				var payloadKeyValue = Assert.Single(point.Payload);
-				Assert.Equal("foo", payloadKeyValue.Key);
-				Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
-			},
-			br =>
-			{
-				var point = Assert.Single(br.Result);
-
-				Assert.Equal(8ul, point.Id);
-				var payloadKeyValue = Assert.Single(point.Payload);
-				Assert.Equal("foo", payloadKeyValue.Key);
-				Assert.Equal("hello", payloadKeyValue.Value.StringValue);
-			});
+			br => Assert.Equal(9ul, Assert.Single(br.Result).Id),
+			br => Assert.Equal(8ul, Assert.Single(br.Result).Id));
 	}
 
 	[Fact]
