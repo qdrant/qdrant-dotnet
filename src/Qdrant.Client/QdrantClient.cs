@@ -843,7 +843,7 @@ public class QdrantClient
 	/// Delete points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="numIds">The IDs to delete.</param>
+	/// <param name="ids">The numeric IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
 	/// <param name="cancellationToken">
@@ -851,13 +851,13 @@ public class QdrantClient
 	/// </param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
 	}
@@ -866,7 +866,7 @@ public class QdrantClient
 	/// Delete points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="guidIds">The IDs to delete.</param>
+	/// <param name="ids">The GUID IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
 	/// <param name="cancellationToken">
@@ -874,13 +874,13 @@ public class QdrantClient
 	/// </param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
 	}
@@ -1068,7 +1068,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="vectors">List of vector names to delete.</param>
-	/// <param name="numIds">The IDs to delete.</param>
+	/// <param name="ids">The numeric IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1077,13 +1077,13 @@ public class QdrantClient
 	private Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return DeleteVectorsAsync(
 			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
@@ -1095,7 +1095,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="vectors">List of vector names to delete.</param>
-	/// <param name="guidIds">The IDs to delete.</param>
+	/// <param name="ids">The GUID IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1104,13 +1104,13 @@ public class QdrantClient
 	private Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return DeleteVectorsAsync(
 			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
@@ -1204,7 +1204,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="numIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The numeric IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1213,13 +1213,13 @@ public class QdrantClient
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return SetPayloadAsync(
 			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1230,7 +1230,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="guidIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The GUID IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1239,13 +1239,13 @@ public class QdrantClient
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return SetPayloadAsync(
 			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1345,7 +1345,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="numIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The numeric IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1354,13 +1354,13 @@ public class QdrantClient
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return OverwritePayloadAsync(
 			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1371,7 +1371,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="guidIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The GUID IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1380,13 +1380,13 @@ public class QdrantClient
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return OverwritePayloadAsync(
 			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1486,7 +1486,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="numIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The numeric IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1495,13 +1495,13 @@ public class QdrantClient
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return DeletePayloadAsync(
 			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1512,7 +1512,7 @@ public class QdrantClient
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="guidIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The GUID IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1521,13 +1521,13 @@ public class QdrantClient
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return DeletePayloadAsync(
 			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1621,7 +1621,7 @@ public class QdrantClient
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="numIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The numeric IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1629,13 +1629,13 @@ public class QdrantClient
 	/// </param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
-		IReadOnlyList<ulong> numIds,
+		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(numIds.Select(id => new PointId { Num = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return ClearPayloadAsync(
 			collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
@@ -1645,7 +1645,7 @@ public class QdrantClient
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="guidIds">The IDs for which to set the payload.</param>
+	/// <param name="ids">The GUID IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1653,13 +1653,13 @@ public class QdrantClient
 	/// </param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
-		IReadOnlyList<string> guidIds,
+		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(guidIds.Select(id => new PointId { Uuid = id }));
+		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return ClearPayloadAsync(
 			collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
