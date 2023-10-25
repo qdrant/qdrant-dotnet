@@ -16,7 +16,7 @@ public class Points
 		var pointsOperationResponse = await client.Points.UpsertAsync(new UpsertPoints
 		{
 			CollectionName = "my_collection",
-			Ordering = WriteOrderingType.Medium,
+			Ordering = new() { Type = WriteOrderingType.Medium },
 			Wait = true,
 			Points =
 			{
