@@ -1286,9 +1286,9 @@ public class QdrantClient
 			Wait = wait,
 		};
 
-		foreach (var (key, value) in payload)
+		foreach (var kvp in payload)
 		{
-			request.Payload[key] = value;
+			request.Payload[kvp.Key] = kvp.Value;
 		}
 
 		if (pointsSelector is not null)
@@ -1427,9 +1427,9 @@ public class QdrantClient
 			Wait = wait
 		};
 
-		foreach (var (key, value) in payload)
+		foreach (var kvp in payload)
 		{
-			request.Payload[key] = value;
+			request.Payload[kvp.Key] = kvp.Value;
 		}
 
 		if (pointsSelector is not null)
