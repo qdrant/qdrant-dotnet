@@ -77,28 +77,22 @@ cmd.SetHandler(async () =>
 				reader.WriteEntryToDirectory(protosTagDir);
 		}
 
-		// add csharp namespace to proto files if they don't contain one
+		// add csharp namespace to qdrant package proto files if they don't contain one
 		foreach (var file in Directory.EnumerateFiles(protosTagDir))
 		{
 			var contents = File.ReadAllLines(file).ToList();
 			if (contents.Any(line => line.Contains("option csharp_namespace")))
 				continue;
 
-			var index = 0;
 			for (var i = 0; i < contents.Count; i++)
 			{
-				if (contents[i].StartsWith("syntax") ||
-					contents[i].StartsWith("import") ||
-					contents[i].StartsWith("package") ||
-					contents[i].StartsWith("//") ||
-					string.IsNullOrWhiteSpace(contents[i]))
-					continue;
-
-				index = i;
-				break;
+				if (contents[i].StartsWith("package qdrant"))
+				{
+					contents.Insert(i + 1, $"option csharp_namespace = \"{project}\";");
+					break;
+				}
 			}
 
-			contents.Insert(index, $"option csharp_namespace = \"{project}\";");
 			File.WriteAllLines(file, contents);
 		}
 	});

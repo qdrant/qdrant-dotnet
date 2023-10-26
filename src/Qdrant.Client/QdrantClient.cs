@@ -984,7 +984,8 @@ public class QdrantClient
 		ReadConsistency? readConsistency = null,
 		CancellationToken cancellationToken = default)
 	{
-		var request = new GetPoints {
+		var request = new GetPoints
+		{
 			CollectionName = collectionName,
 			WithPayload = payloadSelector,
 			WithVectors = vectorSelector
@@ -2453,8 +2454,8 @@ public class QdrantClient
 	private static void Populate(RepeatedField<float> repeatedField, ReadOnlyMemory<float> memory)
 	{
 		if (MemoryMarshal.TryGetArray(memory, out var segment) &&
-		    segment.Offset == 0 &&
-		    segment.Count == segment.Array!.Length)
+			segment.Offset == 0 &&
+			segment.Count == segment.Array!.Length)
 		{
 			repeatedField.Add(segment.Array);
 		}

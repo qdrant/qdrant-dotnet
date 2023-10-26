@@ -31,17 +31,17 @@ public class CollectionTests : IAsyncLifetime
 	}
 
 	[Fact]
-    public async Task RecreateCollection()
-    {
-	    await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+	public async Task RecreateCollection()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
 
-	    await _client.RecreateCollectionAsync(
-		    "collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+		await _client.RecreateCollectionAsync(
+			"collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
 
-	    Assert.Contains(await _client.ListCollectionsAsync(), c => c == "collection_1");
-    }
+		Assert.Contains(await _client.ListCollectionsAsync(), c => c == "collection_1");
+	}
 
-    [Fact]
+	[Fact]
 	public async Task ListCollections()
 	{
 		Assert.Empty(await _client.ListCollectionsAsync());
