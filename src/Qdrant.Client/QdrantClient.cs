@@ -1948,6 +1948,12 @@ public class QdrantClient
 			CollectionName = collectionName,
 		};
 
+		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
+		foreach (var search in searches)
+		{
+			search.CollectionName = collectionName;
+		}
+
 		request.SearchPoints.AddRange(searches);
 
 		if (readConsistency is not null)
@@ -2257,6 +2263,12 @@ public class QdrantClient
 		{
 			CollectionName = collectionName,
 		};
+
+		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
+		foreach (var search in recommendSearches)
+		{
+			search.CollectionName = collectionName;
+		}
 
 		request.RecommendPoints.AddRange(recommendSearches);
 

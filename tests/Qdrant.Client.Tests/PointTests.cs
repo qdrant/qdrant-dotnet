@@ -166,10 +166,8 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new SearchPoints[]
 			{
-				// TODO: It shouldn't be necessary to specify CollectionName here, see
-				// https://github.com/qdrant/qdrant-dotnet/pull/11/files#r1366050585
-				new() { CollectionName = "collection_1", Vector = { 10.4f, 11.4f }, Limit = 1 },
-				new() { CollectionName = "collection_1", Vector = { 3.4f, 4.4f }, Limit = 1 }
+				new() { Vector = { 10.4f, 11.4f }, Limit = 1 },
+				new() { Vector = { 3.4f, 4.4f }, Limit = 1 }
 			});
 
 		Assert.Collection(
@@ -245,10 +243,8 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new RecommendPoints[]
 			{
-				// TODO: It shouldn't be necessary to specify CollectionName here, see
-				// https://github.com/qdrant/qdrant-dotnet/pull/11/files#r1366050585
-				new() { CollectionName = "collection_1", Positive = { 8 }, Limit = 1 },
-				new() { CollectionName = "collection_1", Positive = { 9 }, Limit = 1 }
+				new() { Positive = { 8 }, Limit = 1 },
+				new() { Positive = { 9 }, Limit = 1 }
 			});
 
 		Assert.Collection(
