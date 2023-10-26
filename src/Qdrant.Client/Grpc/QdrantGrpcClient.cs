@@ -3,7 +3,7 @@ using Grpc.Core;
 namespace Qdrant.Client.Grpc;
 
 /// <summary>
-/// gRPC client for qdrant vector database
+/// Low-level gRPC client for qdrant vector database. Consider using <see cref="QdrantClient" /> instead.
 /// </summary>
 public partial class QdrantGrpcClient
 {

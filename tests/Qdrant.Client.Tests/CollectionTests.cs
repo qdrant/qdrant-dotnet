@@ -13,10 +13,35 @@ public class CollectionTests : IAsyncLifetime
 	public CollectionTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateClient();
 
 	[Fact]
-	public Task CreateCollection()
-		=> _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+	public async Task CreateCollection()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+		Assert.Contains(await _client.ListCollectionsAsync(), c => c == "collection_1");
+	}
 
 	[Fact]
+	public async Task CreateCollection_for_existing_collection()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+		await Assert.ThrowsAsync<RpcException>(
+			() => _client.CreateCollectionAsync("collection_1",
+				new VectorParams { Size = 4, Distance = Distance.Cosine }));
+	}
+
+	[Fact]
+    public async Task RecreateCollection()
+    {
+	    await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+	    await _client.RecreateCollectionAsync(
+		    "collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+	    Assert.Contains(await _client.ListCollectionsAsync(), c => c == "collection_1");
+    }
+
+    [Fact]
 	public async Task ListCollections()
 	{
 		Assert.Empty(await _client.ListCollectionsAsync());

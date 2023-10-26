@@ -1,15 +1,10 @@
 using FluentAssertions;
-using Grpc.Net.Client;
-using Qdrant;
-using Qdrant.Client;
-using Qdrant.Client.Grpc;
-using Qdrant.Client.Tests;
 using Xunit;
 
 namespace Qdrant.Client.Grpc;
 
 [Collection("Qdrant")]
-public class GrpcCollectionTests
+public class GrpcCollectionTests : IAsyncLifetime
 {
 	private readonly QdrantGrpcClient _client;
 
@@ -36,7 +31,7 @@ public class GrpcCollectionTests
 	{
 		var createResponse = await _client.Collections.CreateAsync(new CreateCollection
 		{
-			CollectionName = "collection_2",
+			CollectionName = "collection_1",
 			VectorsConfig = new VectorsConfig
 			{
 				Params = new VectorParams { Size = 4, Distance = Distance.Cosine }
@@ -47,9 +42,21 @@ public class GrpcCollectionTests
 
 		var deleteResponse = await _client.Collections.DeleteAsync(new DeleteCollection
 		{
-			CollectionName = "collection_2",
+			CollectionName = "collection_1",
 		});
 
 		createResponse.Result.Should().BeTrue();
 	}
+
+	public async Task InitializeAsync()
+	{
+		var response = await _client.Collections.ListAsync(new ListCollectionsRequest());
+
+		foreach (var collection in response.Collections)
+		{
+			await _client.Collections.DeleteAsync(new() { CollectionName = collection.Name });
+		}
+	}
+
+	public Task DisposeAsync() => Task.CompletedTask;
 }
