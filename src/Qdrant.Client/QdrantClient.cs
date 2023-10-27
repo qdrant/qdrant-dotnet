@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Google.Protobuf.Collections;
+using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Qdrant.Client.Grpc;
@@ -20,6 +21,7 @@ public class QdrantClient : IDisposable
 	private readonly Collections.CollectionsClient _collectionsClient;
 	private readonly Points.PointsClient _pointsClient;
 
+	private TimeSpan _grpcTimeout;
 	private readonly ILogger _logger;
 
 	/// <summary>Instantiates a new Qdrant client.</summary>
@@ -27,43 +29,62 @@ public class QdrantClient : IDisposable
 	/// <param name="port">The port to connect to. Defaults to 6334.</param>
 	/// <param name="https">Whether to encrypt the connection using HTTPS. Defaults to <c>false</c>.</param>
 	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
 	/// </remarks>
 	public QdrantClient(
-		string host, int port = 6334, bool https = false, string? apiKey = null, ILoggerFactory? loggerFactory = null)
-		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, loggerFactory)
+		string host,
+		int port = 6334,
+		bool https = false,
+		string? apiKey = null,
+		TimeSpan grpcTimeout = default,
+		ILoggerFactory? loggerFactory = null)
+		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, grpcTimeout, loggerFactory)
 	{
 	}
 
 	/// <summary>Instantiates a new Qdrant client.</summary>
 	/// <param name="address">The address to connect to.</param>
 	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
 	/// </remarks>
-	public QdrantClient(System.Uri address, string? apiKey = null, ILoggerFactory? loggerFactory = null)
-		: this(new QdrantGrpcClient(address, apiKey), ownsGrpcClient: true, loggerFactory)
+	public QdrantClient(
+		System.Uri address,
+		string? apiKey = null,
+		TimeSpan grpcTimeout = default,
+		ILoggerFactory? loggerFactory = null)
+		: this(new QdrantGrpcClient(address, apiKey), ownsGrpcClient: true, grpcTimeout, loggerFactory)
 	{
 	}
 
 	/// <summary>Instantiates a new Qdrant client.</summary>
 	/// <param name="grpcClient">The low-level gRPC client to use.</param>
+	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
 	/// </remarks>
-	public QdrantClient(QdrantGrpcClient grpcClient, ILoggerFactory? loggerFactory = null)
-		: this(grpcClient, ownsGrpcClient: false, loggerFactory)
+	public QdrantClient(
+		QdrantGrpcClient grpcClient,
+		TimeSpan grpcTimeout = default,
+		ILoggerFactory? loggerFactory = null)
+		: this(grpcClient, ownsGrpcClient: false, grpcTimeout, loggerFactory)
 	{
 	}
 
-	private QdrantClient(QdrantGrpcClient grpcClient, bool ownsGrpcClient, ILoggerFactory? loggerFactory = null)
+	private QdrantClient(
+		QdrantGrpcClient grpcClient,
+		bool ownsGrpcClient,
+		TimeSpan grpcTimeout = default,
+		ILoggerFactory? loggerFactory = null)
 	{
 		_grpcClient = grpcClient;
 		_ownsGrpcClient = ownsGrpcClient;
@@ -71,6 +92,7 @@ public class QdrantClient : IDisposable
 		_collectionsClient = grpcClient.Collections;
 		_pointsClient = grpcClient.Points;
 
+		_grpcTimeout = grpcTimeout;
 		_logger = loggerFactory?.CreateLogger("Qdrant.Client") ?? NullLogger.Instance;
 	}
 
@@ -231,7 +253,9 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _collectionsClient.CreateAsync(request, cancellationToken: cancellationToken)
+			var response = await _collectionsClient.CreateAsync(request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			if (!response.Result)
@@ -405,7 +429,9 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient.GetAsync(
-					new GetCollectionInfoRequest { CollectionName = collectionName }, cancellationToken: cancellationToken)
+					new GetCollectionInfoRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -431,7 +457,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.ListAsync(new ListCollectionsRequest(), cancellationToken: cancellationToken)
+				.ListAsync(
+					new ListCollectionsRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			var names = new string[response.Collections.Count];
@@ -463,7 +492,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.DeleteAsync(new DeleteCollection { CollectionName = collectionName }, cancellationToken: cancellationToken)
+				.DeleteAsync(
+					new DeleteCollection { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			if (!response.Result)
@@ -600,7 +632,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.UpdateAsync(request, cancellationToken: cancellationToken)
+				.UpdateAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			if (!response.Result)
@@ -754,7 +789,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.UpdateAliasesAsync(request, cancellationToken: cancellationToken)
+				.UpdateAliasesAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			if (!response.Result)
@@ -788,7 +826,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.ListCollectionAliasesAsync(request, cancellationToken: cancellationToken)
+				.ListCollectionAliasesAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			var names = new string[response.Aliases.Count];
@@ -819,7 +860,10 @@ public class QdrantClient : IDisposable
 		try
 		{
 			var response = await _collectionsClient
-				.ListAliasesAsync(new ListAliasesRequest(), cancellationToken: cancellationToken)
+				.ListAliasesAsync(
+					new ListAliasesRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Aliases;
@@ -870,7 +914,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.UpsertAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.UpsertAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -970,7 +1017,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.DeleteAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.DeleteAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1046,7 +1096,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.GetAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.GetAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1093,7 +1146,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.UpdateVectorsAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.UpdateVectorsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1209,7 +1265,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.DeleteVectorsAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.DeleteVectorsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1350,7 +1409,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.SetPayloadAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.SetPayloadAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1491,7 +1553,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.OverwritePayloadAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.OverwritePayloadAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1629,7 +1694,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.DeletePayloadAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.DeletePayloadAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1755,7 +1823,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.ClearPayloadAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.ClearPayloadAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1825,7 +1896,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.CreateFieldIndexAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.CreateFieldIndexAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1871,7 +1945,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.DeleteFieldIndexAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.DeleteFieldIndexAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -1960,7 +2037,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.SearchAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.SearchAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -2010,7 +2090,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.SearchBatchAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.SearchBatchAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -2109,7 +2192,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.SearchGroupsAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.SearchGroupsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result.Groups;
@@ -2172,7 +2258,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.ScrollAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.ScrollAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response;
@@ -2275,7 +2364,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.RecommendAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.RecommendAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -2326,7 +2418,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.RecommendBatchAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.RecommendBatchAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result;
@@ -2435,7 +2530,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.RecommendGroupsAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.RecommendGroupsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result.Groups;
@@ -2480,7 +2578,10 @@ public class QdrantClient : IDisposable
 
 		try
 		{
-			var response = await _pointsClient.CountAsync(request, cancellationToken: cancellationToken)
+			var response = await _pointsClient.CountAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
 			return response.Result.Count;
