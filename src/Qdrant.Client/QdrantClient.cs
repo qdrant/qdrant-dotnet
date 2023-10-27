@@ -11,19 +11,63 @@ namespace Qdrant.Client;
 /// <summary>
 /// Client for the Qdrant vector database.
 /// </summary>
-public class QdrantClient
+public class QdrantClient : IDisposable
 {
+	private readonly QdrantGrpcClient _grpcClient;
+	private readonly bool _ownsGrpcClient;
+	private bool _isDisposed;
+
 	private readonly Collections.CollectionsClient _collectionsClient;
 	private readonly Points.PointsClient _pointsClient;
+
 	private readonly ILogger _logger;
 
-	/// <summary>
-	/// Instantiates a new Qdrant client.
-	/// </summary>
+	/// <summary>Instantiates a new Qdrant client.</summary>
+	/// <param name="host">The host to connect to.</param>
+	/// <param name="port">The port to connect to. Defaults to 6334.</param>
+	/// <param name="https">Whether to encrypt the connection using HTTPS. Defaults to <c>false</c>.</param>
+	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <remarks>
+	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
+	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
+	/// </remarks>
+	public QdrantClient(
+		string host, int port = 6334, bool https = false, string? apiKey = null, ILoggerFactory? loggerFactory = null)
+		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, loggerFactory)
+	{
+	}
+
+	/// <summary>Instantiates a new Qdrant client.</summary>
+	/// <param name="address">The address to connect to.</param>
+	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <remarks>
+	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
+	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
+	/// </remarks>
+	public QdrantClient(System.Uri address, string? apiKey = null, ILoggerFactory? loggerFactory = null)
+		: this(new QdrantGrpcClient(address, apiKey), ownsGrpcClient: true, loggerFactory)
+	{
+	}
+
+	/// <summary>Instantiates a new Qdrant client.</summary>
 	/// <param name="grpcClient">The low-level gRPC client to use.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <remarks>
+	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
+	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
+	/// </remarks>
 	public QdrantClient(QdrantGrpcClient grpcClient, ILoggerFactory? loggerFactory = null)
+		: this(grpcClient, ownsGrpcClient: false, loggerFactory)
 	{
+	}
+
+	private QdrantClient(QdrantGrpcClient grpcClient, bool ownsGrpcClient, ILoggerFactory? loggerFactory = null)
+	{
+		_grpcClient = grpcClient;
+		_ownsGrpcClient = ownsGrpcClient;
+
 		_collectionsClient = grpcClient.Collections;
 		_pointsClient = grpcClient.Points;
 
@@ -2477,4 +2521,21 @@ public class QdrantClient
 				? (ulong)seconds
 				: throw new ArgumentException("Sub-second components in timeout are not supported")
 		};
+
+
+	/// <inheritdoc />
+	public void Dispose()
+	{
+		if (_isDisposed)
+		{
+			return;
+		}
+
+		if (_ownsGrpcClient)
+		{
+			_grpcClient.Dispose();
+		}
+
+		_isDisposed = true;
+	}
 }
