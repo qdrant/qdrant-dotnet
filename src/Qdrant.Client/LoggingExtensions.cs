@@ -102,6 +102,28 @@ internal static partial class LoggingExtensions
 
 	#endregion Point management
 
+	#region Snapshot management
+
+	[LoggerMessage(4000, LogLevel.Debug, "Create snapshot of '{collection}'")]
+	public static partial void CreateSnapshot(this ILogger logger, string collection);
+
+	[LoggerMessage(4001, LogLevel.Debug, "List snapshots for '{collection}'")]
+	public static partial void ListSnapshots(this ILogger logger, string collection);
+
+	[LoggerMessage(4002, LogLevel.Debug, "Delete snapshot '{snapshot}' for '{collection}'")]
+	public static partial void DeleteSnapshot(this ILogger logger, string collection, string snapshot);
+
+	[LoggerMessage(4003, LogLevel.Debug, "Create snapshot for a whole storage")]
+	public static partial void CreateFullSnapshot(this ILogger logger);
+
+	[LoggerMessage(4004, LogLevel.Debug, "List snapshots for a whole storage")]
+	public static partial void ListFullSnapshots(this ILogger logger);
+
+	[LoggerMessage(4005, LogLevel.Debug, "Delete snapshot '{snapshot}' for a whole storage")]
+	public static partial void DeleteFullSnapshot(this ILogger logger, string snapshot);
+
+	#endregion
+
 	[LoggerMessage(99999, LogLevel.Error, "Operation failed: {operation}")]
 	public static partial void OperationFailed(this ILogger logger, string operation, Exception exception);
 }
