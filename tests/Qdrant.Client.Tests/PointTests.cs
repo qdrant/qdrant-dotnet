@@ -157,7 +157,6 @@ public class PointTests : IAsyncLifetime
 		var points = await _client.SearchAsync(
 			"collection_1",
 			new[] { 10.4f, 11.4f },
-			payloadSelector: true,
 			limit: 1);
 
 		points.Should().HaveCount(1);

@@ -1997,7 +1997,7 @@ public class QdrantClient : IDisposable
 			CollectionName = collectionName,
 			Limit = limit,
 			Offset = offset,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = false },
+			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
 			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
 		};
 
