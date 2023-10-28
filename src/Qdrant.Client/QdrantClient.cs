@@ -2601,23 +2601,25 @@ public class QdrantClient : IDisposable
 	#region Snapshot management
 
 	/// <summary>
-	/// Create snapshot for a given collection
+	/// Create snapshot for a given collection.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<CreateSnapshotResponse> CreateSnapshotAsync(string collectionName, CancellationToken cancellationToken = default)
+	public async Task<SnapshotDescription> CreateSnapshotAsync(string collectionName, CancellationToken cancellationToken = default)
 	{
 		_logger.CreateSnapshot(collectionName);
 
 		try
 		{
 			var response = await _snapshotsClient.CreateAsync(
-					new CreateSnapshotRequest { CollectionName = collectionName }, cancellationToken: cancellationToken)
+					new CreateSnapshotRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			return response;
+			return response.SnapshotDescription;
 		}
 		catch (Exception e)
 		{
@@ -2628,23 +2630,25 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// Get list of snapshots for a collection
+	/// Get list of snapshots for a collection.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<ListSnapshotsResponse> ListSnapshotsAsync(string collectionName, CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<SnapshotDescription>> ListSnapshotsAsync(string collectionName, CancellationToken cancellationToken = default)
 	{
 		_logger.ListSnapshots(collectionName);
 
 		try
 		{
 			var response = await _snapshotsClient.ListAsync(
-					new ListSnapshotsRequest { CollectionName = collectionName }, cancellationToken: cancellationToken)
+					new ListSnapshotsRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			return response;
+			return response.SnapshotDescriptions;
 		}
 		catch (Exception e)
 		{
@@ -2655,24 +2659,24 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// Delete snapshot for a given collection
+	/// Delete snapshot for a given collection.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
 	/// <param name="snapshotName">The name of the snapshot</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<DeleteSnapshotResponse> DeleteSnapshotAsync(string collectionName, string snapshotName, CancellationToken cancellationToken = default)
+	public async Task DeleteSnapshotAsync(string collectionName, string snapshotName, CancellationToken cancellationToken = default)
 	{
 		_logger.DeleteSnapshot(collectionName, snapshotName);
 
 		try
 		{
-			var response = await _snapshotsClient.DeleteAsync(
-					new DeleteSnapshotRequest { CollectionName = collectionName, SnapshotName = snapshotName }, cancellationToken: cancellationToken)
+			await _snapshotsClient.DeleteAsync(
+					new DeleteSnapshotRequest { CollectionName = collectionName, SnapshotName = snapshotName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
-
-			return response;
 		}
 		catch (Exception e)
 		{
@@ -2683,22 +2687,24 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// Create snapshot for a whole storage
+	/// Create snapshot for a whole storage.
 	/// </summary>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<CreateSnapshotResponse> CreateFullSnapshotAsync(CancellationToken cancellationToken = default)
+	public async Task<SnapshotDescription> CreateFullSnapshotAsync(CancellationToken cancellationToken = default)
 	{
 		_logger.CreateFullSnapshot();
 
 		try
 		{
 			var response = await _snapshotsClient.CreateFullAsync(
-					new CreateFullSnapshotRequest(), cancellationToken: cancellationToken)
+					new CreateFullSnapshotRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			return response;
+			return response.SnapshotDescription;
 		}
 		catch (Exception e)
 		{
@@ -2709,22 +2715,24 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// List all snapshots for a whole storage
+	/// List all snapshots for a whole storage.
 	/// </summary>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<ListSnapshotsResponse> ListFullSnapshotsAsync(CancellationToken cancellationToken = default)
+	public async Task<IReadOnlyList<SnapshotDescription>> ListFullSnapshotsAsync(CancellationToken cancellationToken = default)
 	{
 		_logger.ListFullSnapshots();
 
 		try
 		{
 			var response = await _snapshotsClient.ListFullAsync(
-					new ListFullSnapshotsRequest(), cancellationToken: cancellationToken)
+					new ListFullSnapshotsRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
 
-			return response;
+			return response.SnapshotDescriptions;
 		}
 		catch (Exception e)
 		{
@@ -2735,23 +2743,23 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// Delete snapshot for a whole storage
+	/// Delete snapshot for a whole storage.
 	/// </summary>
 	/// <param name="snapshotName">The name of the snapshot</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<DeleteSnapshotResponse> DeleteFullSnapshotAsync(string snapshotName, CancellationToken cancellationToken = default)
+	public async Task DeleteFullSnapshotAsync(string snapshotName, CancellationToken cancellationToken = default)
 	{
 		_logger.DeleteFullSnapshot(snapshotName);
 
 		try
 		{
-			var response = await _snapshotsClient.DeleteFullAsync(
-					new DeleteFullSnapshotRequest { SnapshotName = snapshotName }, cancellationToken: cancellationToken)
+			await _snapshotsClient.DeleteFullAsync(
+					new DeleteFullSnapshotRequest { SnapshotName = snapshotName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
-
-			return response;
 		}
 		catch (Exception e)
 		{
@@ -2760,7 +2768,6 @@ public class QdrantClient : IDisposable
 			throw;
 		}
 	}
-
 
 	#endregion
 

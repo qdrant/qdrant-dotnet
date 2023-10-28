@@ -23,8 +23,8 @@ public class SnapshotTests : IAsyncLifetime
 	public async Task DeleteSnapshot()
 	{
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
-		var createSnapshotResponse = await _client.CreateSnapshotAsync("collection_1");
-		await _client.DeleteSnapshotAsync("collection_1", createSnapshotResponse.SnapshotDescription.Name);
+		var snapshotDescription = await _client.CreateSnapshotAsync("collection_1");
+		await _client.DeleteSnapshotAsync("collection_1", snapshotDescription.Name);
 	}
 
 	[Fact]
@@ -40,8 +40,8 @@ public class SnapshotTests : IAsyncLifetime
 		await _client.CreateSnapshotAsync("collection_1");
 		await _client.CreateSnapshotAsync("collection_1");
 
-		var listSnapshotsResponse = await _client.ListSnapshotsAsync("collection_1");
-		listSnapshotsResponse.SnapshotDescriptions.Should().HaveCount(2);
+		var snapshotDescriptions = await _client.ListSnapshotsAsync("collection_1");
+		snapshotDescriptions.Should().HaveCount(2);
 	}
 
 	[Fact]
@@ -57,8 +57,8 @@ public class SnapshotTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
 		await _client.CreateCollectionAsync("collection_2", new VectorParams { Size = 4, Distance = Distance.Cosine });
-		var createSnapshotResponse = await _client.CreateFullSnapshotAsync();
-		await _client.DeleteFullSnapshotAsync(createSnapshotResponse.SnapshotDescription.Name);
+		var snapshotDescription = await _client.CreateFullSnapshotAsync();
+		await _client.DeleteFullSnapshotAsync(snapshotDescription.Name);
 	}
 
 	[Fact]
@@ -73,28 +73,24 @@ public class SnapshotTests : IAsyncLifetime
 		await _client.CreateFullSnapshotAsync();
 		await _client.CreateFullSnapshotAsync();
 
-		var listSnapshotsResponse = await _client.ListFullSnapshotsAsync();
-		listSnapshotsResponse.SnapshotDescriptions.Should().HaveCount(2);
+		var snapshotDescriptions = await _client.ListFullSnapshotsAsync();
+		snapshotDescriptions.Should().HaveCount(2);
 	}
 
 	public async Task InitializeAsync()
 	{
 		foreach (var collection in await _client.ListCollectionsAsync())
 		{
-			var listSnapshotsResponse = await _client.ListSnapshotsAsync(collection);
-			foreach (var snapshot in listSnapshotsResponse.SnapshotDescriptions.Select(s => s.Name))
-			{
+			var snapshotDescriptions = await _client.ListSnapshotsAsync(collection);
+			foreach (var snapshot in snapshotDescriptions.Select(s => s.Name))
 				await _client.DeleteSnapshotAsync(collection, snapshot);
-			}
 
 			await _client.DeleteCollectionAsync(collection);
 		}
 
-		var listFullSnapshotsResponse = await _client.ListFullSnapshotsAsync();
-		foreach (var snapshot in listFullSnapshotsResponse.SnapshotDescriptions.Select(s => s.Name))
-		{
+		var fullSnapshotDescriptions = await _client.ListFullSnapshotsAsync();
+		foreach (var snapshot in fullSnapshotDescriptions.Select(s => s.Name))
 			await _client.DeleteFullSnapshotAsync(snapshot);
-		}
 	}
 
 	public Task DisposeAsync() => Task.CompletedTask;
