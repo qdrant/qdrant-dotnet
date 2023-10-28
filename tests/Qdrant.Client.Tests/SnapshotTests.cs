@@ -1,7 +1,9 @@
 using FluentAssertions;
 using Grpc.Core;
+using Polly;
 using Qdrant.Client.Grpc;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Qdrant.Client;
 
@@ -40,8 +42,15 @@ public class SnapshotTests : IAsyncLifetime
 		await _client.CreateSnapshotAsync("collection_1");
 		await _client.CreateSnapshotAsync("collection_1");
 
-		var snapshotDescriptions = await _client.ListSnapshotsAsync("collection_1");
-		snapshotDescriptions.Should().HaveCount(2);
+		// TODO: Workaround for https://github.com/qdrant/qdrant-dotnet/issues/19
+		await Policy
+			.Handle<XunitException>()
+			.WaitAndRetryAsync(5, _ => TimeSpan.FromMilliseconds(200))
+			.ExecuteAsync(async () =>
+			{
+				var snapshotDescriptions = await _client.ListSnapshotsAsync("collection_1");
+				snapshotDescriptions.Should().HaveCount(2);
+			});
 	}
 
 	[Fact]
@@ -73,8 +82,15 @@ public class SnapshotTests : IAsyncLifetime
 		await _client.CreateFullSnapshotAsync();
 		await _client.CreateFullSnapshotAsync();
 
-		var snapshotDescriptions = await _client.ListFullSnapshotsAsync();
-		snapshotDescriptions.Should().HaveCount(2);
+		// TODO: Workaround for https://github.com/qdrant/qdrant-dotnet/issues/19
+		await Policy
+			.Handle<XunitException>()
+			.WaitAndRetryAsync(5, _ => TimeSpan.FromMilliseconds(200))
+			.ExecuteAsync(async () =>
+			{
+				var snapshotDescriptions = await _client.ListFullSnapshotsAsync();
+				snapshotDescriptions.Should().HaveCount(2);
+			});
 	}
 
 	public async Task InitializeAsync()
