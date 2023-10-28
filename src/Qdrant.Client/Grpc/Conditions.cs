@@ -221,8 +221,7 @@ public static class Conditions
 	/// <summary>
 	/// Matches records where the given field has values inside the provided polygon. A polygon always has an exterior
 	/// ring and may optionally have interior rings, which represent independent areas or holes.
-	/// When defining a ring, you must pick either a clockwise or counterclockwise ordering for your points; it is
-	/// convention to orient the exterior ring clockwise, and interior rings counterclockwise.
+	/// When defining a ring, you must pick either a clockwise or counterclockwise ordering for your points.
 	/// The first and last point of the polygon must be the same.
 	/// </summary>
 	/// <param name="field">The name of the field</param>
