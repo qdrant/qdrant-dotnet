@@ -742,7 +742,7 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
-		var request = new ChangeAliases { Actions = { aliasOperations }};
+		var request = new ChangeAliases { Actions = { aliasOperations } };
 
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);

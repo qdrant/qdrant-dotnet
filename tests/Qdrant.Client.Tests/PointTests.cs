@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Qdrant.Client.Grpc;
 using Xunit;
+using static Qdrant.Client.Grpc.Conditions;
 
 namespace Qdrant.Client;
 
@@ -298,10 +299,8 @@ public class PointTests : IAsyncLifetime
 
 		var count = await _client.CountAsync(
 			"collection_1",
-			new Filter
-			{
-				Must = { new Condition { HasId = new HasIdCondition { HasId = { 9 } } } }
-			});
+			HasId(9) & MatchKeyword("foo", "goodbye")
+		);
 
 		Assert.Equal(1ul, count);
 	}
