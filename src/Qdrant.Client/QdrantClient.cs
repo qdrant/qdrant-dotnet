@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using Google.Protobuf.Collections;
-using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Qdrant.Client.Grpc;
@@ -8,6 +7,7 @@ using Qdrant.Client.Grpc;
 namespace Qdrant.Client;
 
 // ReSharper disable UnusedMethodReturnValue.Global
+// ReSharper disable UnusedMember.Global
 
 /// <summary>
 /// Client for the Qdrant vector database.
@@ -22,7 +22,7 @@ public class QdrantClient : IDisposable
 	private readonly Points.PointsClient _pointsClient;
 	private readonly Snapshots.SnapshotsClient _snapshotsClient;
 
-	private TimeSpan _grpcTimeout;
+	private readonly TimeSpan _grpcTimeout;
 	private readonly ILogger _logger;
 
 	/// <summary>Instantiates a new Qdrant client.</summary>
@@ -770,15 +770,15 @@ public class QdrantClient : IDisposable
 			{
 				switch (operation)
 				{
-					case { CreateAlias: CreateAlias createAlias }:
+					case { CreateAlias: { } createAlias }:
 						_logger.CreateAlias(createAlias.AliasName, createAlias.CollectionName);
 						break;
 
-					case { DeleteAlias: DeleteAlias deleteAlias }:
+					case { DeleteAlias: { } deleteAlias }:
 						_logger.DeleteAlias(deleteAlias.AliasName);
 						break;
 
-					case { RenameAlias: RenameAlias renameAlias }:
+					case { RenameAlias: { } renameAlias }:
 						_logger.RenameAlias(renameAlias.OldAliasName, renameAlias.NewAliasName);
 						break;
 
@@ -1943,7 +1943,7 @@ public class QdrantClient : IDisposable
 			request.Ordering = new() { Type = ordering.Value };
 		}
 
-		_logger.CreatePayloadIndex(collectionName);
+		_logger.DeletePayloadIndex(collectionName);
 
 		try
 		{
@@ -1957,7 +1957,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreatePayloadIndex), e);
+			_logger.OperationFailed(nameof(LoggingExtensions.DeletePayloadIndex), e);
 
 			throw;
 		}
