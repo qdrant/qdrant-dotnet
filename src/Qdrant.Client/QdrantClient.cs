@@ -20,6 +20,7 @@ public class QdrantClient : IDisposable
 
 	private readonly Collections.CollectionsClient _collectionsClient;
 	private readonly Points.PointsClient _pointsClient;
+	private readonly Snapshots.SnapshotsClient _snapshotsClient;
 
 	private TimeSpan _grpcTimeout;
 	private readonly ILogger _logger;
@@ -91,6 +92,7 @@ public class QdrantClient : IDisposable
 
 		_collectionsClient = grpcClient.Collections;
 		_pointsClient = grpcClient.Points;
+		_snapshotsClient = grpcClient.Snapshots;
 
 		_grpcTimeout = grpcTimeout;
 		_logger = loggerFactory?.CreateLogger("Qdrant.Client") ?? NullLogger.Instance;
@@ -2595,6 +2597,179 @@ public class QdrantClient : IDisposable
 	}
 
 	#endregion Point management
+
+	#region Snapshot management
+
+	/// <summary>
+	/// Create snapshot for a given collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<SnapshotDescription> CreateSnapshotAsync(string collectionName, CancellationToken cancellationToken = default)
+	{
+		_logger.CreateSnapshot(collectionName);
+
+		try
+		{
+			var response = await _snapshotsClient.CreateAsync(
+					new CreateSnapshotRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.SnapshotDescription;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.CreateSnapshot), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Get list of snapshots for a collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<SnapshotDescription>> ListSnapshotsAsync(string collectionName, CancellationToken cancellationToken = default)
+	{
+		_logger.ListSnapshots(collectionName);
+
+		try
+		{
+			var response = await _snapshotsClient.ListAsync(
+					new ListSnapshotsRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.SnapshotDescriptions;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.ListSnapshots), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Delete snapshot for a given collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="snapshotName">The name of the snapshot</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task DeleteSnapshotAsync(string collectionName, string snapshotName, CancellationToken cancellationToken = default)
+	{
+		_logger.DeleteSnapshot(collectionName, snapshotName);
+
+		try
+		{
+			await _snapshotsClient.DeleteAsync(
+					new DeleteSnapshotRequest { CollectionName = collectionName, SnapshotName = snapshotName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.DeleteSnapshot), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Create snapshot for a whole storage.
+	/// </summary>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<SnapshotDescription> CreateFullSnapshotAsync(CancellationToken cancellationToken = default)
+	{
+		_logger.CreateFullSnapshot();
+
+		try
+		{
+			var response = await _snapshotsClient.CreateFullAsync(
+					new CreateFullSnapshotRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.SnapshotDescription;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.CreateFullSnapshot), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// List all snapshots for a whole storage.
+	/// </summary>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<SnapshotDescription>> ListFullSnapshotsAsync(CancellationToken cancellationToken = default)
+	{
+		_logger.ListFullSnapshots();
+
+		try
+		{
+			var response = await _snapshotsClient.ListFullAsync(
+					new ListFullSnapshotsRequest(),
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.SnapshotDescriptions;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.ListFullSnapshots), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Delete snapshot for a whole storage.
+	/// </summary>
+	/// <param name="snapshotName">The name of the snapshot</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task DeleteFullSnapshotAsync(string snapshotName, CancellationToken cancellationToken = default)
+	{
+		_logger.DeleteFullSnapshot(snapshotName);
+
+		try
+		{
+			await _snapshotsClient.DeleteFullAsync(
+					new DeleteFullSnapshotRequest { SnapshotName = snapshotName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.DeleteFullSnapshot), e);
+
+			throw;
+		}
+	}
+
+	#endregion
 
 	private static void Populate(RepeatedField<float> repeatedField, ReadOnlyMemory<float> memory)
 	{
