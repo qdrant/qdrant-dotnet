@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Qdrant.Client.Grpc;
 using Xunit;
 
@@ -16,16 +17,13 @@ public class PointTests : IAsyncLifetime
 		await CreateAndSeedCollection("collection_1");
 
 		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
-
-		var point = Assert.Single(points);
-
-		Assert.Equal(9ul, point.Id.Num);
-
-		var payloadKeyValue = Assert.Single(point.Payload);
-		Assert.Equal("foo", payloadKeyValue.Key);
-		Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
-
-		Assert.Null(point.Vectors);
+		points.Should().HaveCount(1);
+		var point = points.Single();
+		point.Id.Should().Be((PointId)9ul);
+		point.Payload.Should().ContainKeys("foo", "bar");
+		point.Payload["foo"].Should().Be((Value)"goodbye");
+		point.Payload["bar"].Should().Be((Value)2);
+		point.Vectors.Should().BeNull();
 	}
 
 	[Fact]
@@ -101,7 +99,7 @@ public class PointTests : IAsyncLifetime
 
 		await _client.DeletePayloadAsync("collection_1", new[] { "foo" }, new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		var payloadKeyValue = Assert.Single(point.Payload);
@@ -116,7 +114,7 @@ public class PointTests : IAsyncLifetime
 
 		await _client.ClearPayloadAsync("collection_1", new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		Assert.Empty(point.Payload);
@@ -127,16 +125,28 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		var result = await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		result = await _client.CreatePayloadIndexAsync("collection_1", "bar", PayloadSchemaType.Integer);
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		var collectionInfo = await _client.GetCollectionInfoAsync("collection_1");
+		collectionInfo.PayloadSchema.Should().ContainKeys("foo", "bar");
+		collectionInfo.PayloadSchema["foo"].DataType.Should().Be(PayloadSchemaType.Keyword);
+		collectionInfo.PayloadSchema["bar"].DataType.Should().Be(PayloadSchemaType.Integer);
 	}
 
 	[Fact]
 	public async Task DeleteFieldIndex()
 	{
 		await CreateAndSeedCollection("collection_1");
-		await _client.CreatePayloadIndexAsync("collection_1", "foo");
 
-		await _client.DeletePayloadIndexAsync("collection_1", "foo");
+		var result = await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		result = await _client.DeletePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
 	}
 
 	[Fact]
@@ -147,14 +157,16 @@ public class PointTests : IAsyncLifetime
 		var points = await _client.SearchAsync(
 			"collection_1",
 			new[] { 10.4f, 11.4f },
+			payloadSelector: true,
 			limit: 1);
 
-		var point = Assert.Single(points);
-
-		Assert.Equal(9ul, point.Id);
-		var payloadKeyValue = Assert.Single(point.Payload);
-		Assert.Equal("foo", payloadKeyValue.Key);
-		Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
+		points.Should().HaveCount(1);
+		var point = points.Single();
+		point.Id.Should().Be((PointId)9ul);
+		point.Payload.Should().ContainKeys("foo", "bar");
+		point.Payload["foo"].Should().Be((Value)"goodbye");
+		point.Payload["bar"].Should().Be((Value)2);
+		point.Vectors.Should().BeNull();
 	}
 
 	[Fact]
@@ -305,21 +317,31 @@ public class PointTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync(collection, new VectorParams { Size = 2, Distance = Distance.Cosine });
 
-		await _client.UpsertAsync(collection, new[]
+		var updateResult = await _client.UpsertAsync(collection, new[]
 		{
 			new PointStruct
 			{
 				Id = 8,
 				Vectors = new[] { 3.5f, 4.5f },
-				Payload = { ["foo"] = "hello" }
+				Payload =
+				{
+					["foo"] = "hello",
+					["bar"] = 1
+				}
 			},
 			new PointStruct
 			{
 				Id = 9,
 				Vectors = new[] { 10.5f, 11.5f },
-				Payload = { ["foo"] = "goodbye" }
+				Payload =
+				{
+					["foo"] = "goodbye",
+					["bar"] = 2
+				}
 			}
 		});
+
+		updateResult.Status.Should().Be(UpdateStatus.Completed);
 	}
 
 	public async Task InitializeAsync()

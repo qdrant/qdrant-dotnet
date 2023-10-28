@@ -1882,8 +1882,6 @@ public class QdrantClient : IDisposable
 			}
 		};
 
-		request.FieldType = FieldType.Keyword;
-
 		if (indexParams is not null)
 		{
 			request.FieldIndexParams = indexParams;
@@ -1999,7 +1997,7 @@ public class QdrantClient : IDisposable
 			CollectionName = collectionName,
 			Limit = limit,
 			Offset = offset,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
+			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = false },
 			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
 		};
 
