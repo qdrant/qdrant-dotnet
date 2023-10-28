@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using Google.Protobuf.Collections;
-using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Qdrant.Client.Grpc;
@@ -8,6 +7,7 @@ using Qdrant.Client.Grpc;
 namespace Qdrant.Client;
 
 // ReSharper disable UnusedMethodReturnValue.Global
+// ReSharper disable UnusedMember.Global
 
 /// <summary>
 /// Client for the Qdrant vector database.
@@ -22,7 +22,7 @@ public class QdrantClient : IDisposable
 	private readonly Points.PointsClient _pointsClient;
 	private readonly Snapshots.SnapshotsClient _snapshotsClient;
 
-	private TimeSpan _grpcTimeout;
+	private readonly TimeSpan _grpcTimeout;
 	private readonly ILogger _logger;
 
 	/// <summary>Instantiates a new Qdrant client.</summary>
@@ -768,6 +768,7 @@ public class QdrantClient : IDisposable
 		{
 			foreach (var operation in aliasOperations)
 			{
+				// ReSharper disable ConvertTypeCheckPatternToNullCheck
 				switch (operation)
 				{
 					case { CreateAlias: CreateAlias createAlias }:
@@ -784,7 +785,9 @@ public class QdrantClient : IDisposable
 
 					default:
 						throw new ArgumentOutOfRangeException();
+
 				}
+				// ReSharper restore ConvertTypeCheckPatternToNullCheck
 			}
 		}
 
@@ -1882,8 +1885,6 @@ public class QdrantClient : IDisposable
 			}
 		};
 
-		request.FieldType = FieldType.Keyword;
-
 		if (indexParams is not null)
 		{
 			request.FieldIndexParams = indexParams;
@@ -1943,7 +1944,7 @@ public class QdrantClient : IDisposable
 			request.Ordering = new() { Type = ordering.Value };
 		}
 
-		_logger.CreatePayloadIndex(collectionName);
+		_logger.DeletePayloadIndex(collectionName);
 
 		try
 		{
@@ -1957,7 +1958,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreatePayloadIndex), e);
+			_logger.OperationFailed(nameof(LoggingExtensions.DeletePayloadIndex), e);
 
 			throw;
 		}

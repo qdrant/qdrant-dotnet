@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Qdrant.Client.Grpc;
 using Xunit;
 
@@ -15,17 +16,14 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
-
-		var point = Assert.Single(points);
-
-		Assert.Equal(9ul, point.Id.Num);
-
-		var payloadKeyValue = Assert.Single(point.Payload);
-		Assert.Equal("foo", payloadKeyValue.Key);
-		Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
-
-		Assert.Null(point.Vectors);
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
+		points.Should().HaveCount(1);
+		var point = points.Single();
+		point.Id.Should().Be((PointId)9ul);
+		point.Payload.Should().ContainKeys("foo", "bar");
+		point.Payload["foo"].Should().Be((Value)"goodbye");
+		point.Payload["bar"].Should().Be((Value)2);
+		point.Vectors.Should().BeNull();
 	}
 
 	[Fact]
@@ -35,7 +33,7 @@ public class PointTests : IAsyncLifetime
 
 		var points = await _client.RetrieveAsync(
 			"collection_1",
-			new[] { new PointId { Num = 8 } },
+			new PointId[] { 8 },
 			withPayload: false,
 			withVectors: true);
 
@@ -55,7 +53,7 @@ public class PointTests : IAsyncLifetime
 			new Dictionary<string, Value> { ["bar"] = "some bar" },
 			new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		Assert.Collection(
@@ -101,7 +99,7 @@ public class PointTests : IAsyncLifetime
 
 		await _client.DeletePayloadAsync("collection_1", new[] { "foo" }, new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		var payloadKeyValue = Assert.Single(point.Payload);
@@ -116,7 +114,7 @@ public class PointTests : IAsyncLifetime
 
 		await _client.ClearPayloadAsync("collection_1", new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		Assert.Empty(point.Payload);
@@ -127,16 +125,28 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		var result = await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		result = await _client.CreatePayloadIndexAsync("collection_1", "bar", PayloadSchemaType.Integer);
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		var collectionInfo = await _client.GetCollectionInfoAsync("collection_1");
+		collectionInfo.PayloadSchema.Should().ContainKeys("foo", "bar");
+		collectionInfo.PayloadSchema["foo"].DataType.Should().Be(PayloadSchemaType.Keyword);
+		collectionInfo.PayloadSchema["bar"].DataType.Should().Be(PayloadSchemaType.Integer);
 	}
 
 	[Fact]
 	public async Task DeleteFieldIndex()
 	{
 		await CreateAndSeedCollection("collection_1");
-		await _client.CreatePayloadIndexAsync("collection_1", "foo");
 
-		await _client.DeletePayloadIndexAsync("collection_1", "foo");
+		var result = await _client.CreatePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
+
+		result = await _client.DeletePayloadIndexAsync("collection_1", "foo");
+		result.Status.Should().Be(UpdateStatus.Completed);
 	}
 
 	[Fact]
@@ -149,12 +159,13 @@ public class PointTests : IAsyncLifetime
 			new[] { 10.4f, 11.4f },
 			limit: 1);
 
-		var point = Assert.Single(points);
-
-		Assert.Equal(9ul, point.Id);
-		var payloadKeyValue = Assert.Single(point.Payload);
-		Assert.Equal("foo", payloadKeyValue.Key);
-		Assert.Equal("goodbye", payloadKeyValue.Value.StringValue);
+		points.Should().HaveCount(1);
+		var point = points.Single();
+		point.Id.Should().Be((PointId)9ul);
+		point.Payload.Should().ContainKeys("foo", "bar");
+		point.Payload["foo"].Should().Be((Value)"goodbye");
+		point.Payload["bar"].Should().Be((Value)2);
+		point.Vectors.Should().BeNull();
 	}
 
 	[Fact]
@@ -186,7 +197,7 @@ public class PointTests : IAsyncLifetime
 			new PointStruct
 			{
 				Id = new PointId { Num = 10 },
-				Vectors = new() { Vector = new() { Data = { 30f, 31f }} },
+				Vectors = new[] { 30f, 31f },
 				Payload = { ["foo"] = "hello" }
 			}
 		});
@@ -262,8 +273,8 @@ public class PointTests : IAsyncLifetime
 		{
 			new PointStruct
 			{
-				Id = new PointId { Num = 10 },
-				Vectors = new() { Vector = new() { Data = { 30f, 31f }} },
+				Id = 10,
+				Vectors = new[] { 30f, 31f },
 				Payload = { ["foo"] = "hello" }
 			}
 		});
@@ -295,7 +306,7 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new Filter
 			{
-				Must = { new Condition { HasId = new HasIdCondition { HasId = { new PointId { Num = 9 } } } } }
+				Must = { new Condition { HasId = new HasIdCondition { HasId = { 9 } } } }
 			});
 
 		Assert.Equal(1ul, count);
@@ -305,21 +316,31 @@ public class PointTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync(collection, new VectorParams { Size = 2, Distance = Distance.Cosine });
 
-		await _client.UpsertAsync(collection, new[]
+		var updateResult = await _client.UpsertAsync(collection, new[]
 		{
 			new PointStruct
 			{
-				Id = new PointId { Num = 8 },
-				Vectors = new() { Vector = new() { Data = { 3.5f, 4.5f }} },
-				Payload = { ["foo"] = "hello" }
+				Id = 8,
+				Vectors = new[] { 3.5f, 4.5f },
+				Payload =
+				{
+					["foo"] = "hello",
+					["bar"] = 1
+				}
 			},
 			new PointStruct
 			{
-				Id = new PointId { Num = 9 },
-				Vectors = new() { Vector = new() { Data = { 10.5f, 11.5f } } },
-				Payload = { ["foo"] = "goodbye" }
+				Id = 9,
+				Vectors = new[] { 10.5f, 11.5f },
+				Payload =
+				{
+					["foo"] = "goodbye",
+					["bar"] = 2
+				}
 			}
 		});
+
+		updateResult.Status.Should().Be(UpdateStatus.Completed);
 	}
 
 	public async Task InitializeAsync()
