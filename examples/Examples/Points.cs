@@ -23,7 +23,7 @@ public class Points
 				new PointStruct
 				{
 					Id = 1,
-					Vectors = new Vectors { Vector = new []{ 1, 2, 3, 4 } },
+					Vectors = new []{ 1f, 2f, 3f, 4f },
 					Payload =
 					{
 						["color"] = "blue",
@@ -34,7 +34,7 @@ public class Points
 				new PointStruct
 				{
 					Id = 2,
-					Vectors = new Vectors { Vector = new[] { 2, 3, 4, 5 } },
+					Vectors = new[] { 2f, 3f, 4f, 5f },
 					Payload =
 					{
 						["color"] = "red",

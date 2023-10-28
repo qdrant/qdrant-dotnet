@@ -15,7 +15,7 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 
@@ -35,7 +35,7 @@ public class PointTests : IAsyncLifetime
 
 		var points = await _client.RetrieveAsync(
 			"collection_1",
-			new[] { new PointId { Num = 8 } },
+			new PointId[] { 8 },
 			withPayload: false,
 			withVectors: true);
 
@@ -55,7 +55,7 @@ public class PointTests : IAsyncLifetime
 			new Dictionary<string, Value> { ["bar"] = "some bar" },
 			new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
 
 		var point = Assert.Single(points);
 		Assert.Collection(
@@ -186,7 +186,7 @@ public class PointTests : IAsyncLifetime
 			new PointStruct
 			{
 				Id = new PointId { Num = 10 },
-				Vectors = new() { Vector = new() { Data = { 30f, 31f }} },
+				Vectors = new[] { 30f, 31f },
 				Payload = { ["foo"] = "hello" }
 			}
 		});
@@ -262,8 +262,8 @@ public class PointTests : IAsyncLifetime
 		{
 			new PointStruct
 			{
-				Id = new PointId { Num = 10 },
-				Vectors = new() { Vector = new() { Data = { 30f, 31f }} },
+				Id = 10,
+				Vectors = new[] { 30f, 31f },
 				Payload = { ["foo"] = "hello" }
 			}
 		});
@@ -295,7 +295,7 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			new Filter
 			{
-				Must = { new Condition { HasId = new HasIdCondition { HasId = { new PointId { Num = 9 } } } } }
+				Must = { new Condition { HasId = new HasIdCondition { HasId = { 9 } } } }
 			});
 
 		Assert.Equal(1ul, count);
@@ -309,14 +309,14 @@ public class PointTests : IAsyncLifetime
 		{
 			new PointStruct
 			{
-				Id = new PointId { Num = 8 },
-				Vectors = new() { Vector = new() { Data = { 3.5f, 4.5f }} },
+				Id = 8,
+				Vectors = new[] { 3.5f, 4.5f },
 				Payload = { ["foo"] = "hello" }
 			},
 			new PointStruct
 			{
-				Id = new PointId { Num = 9 },
-				Vectors = new() { Vector = new() { Data = { 10.5f, 11.5f } } },
+				Id = 9,
+				Vectors = new[] { 10.5f, 11.5f },
 				Payload = { ["foo"] = "goodbye" }
 			}
 		});
