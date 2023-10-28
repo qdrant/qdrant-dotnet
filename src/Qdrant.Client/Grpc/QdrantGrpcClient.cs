@@ -86,9 +86,7 @@ public partial class QdrantGrpcClient : IDisposable
 	public void Dispose()
 	{
 		if (_isDisposed)
-		{
 			return;
-		}
 
 		_ownedChannel?.Dispose();
 		_isDisposed = true;

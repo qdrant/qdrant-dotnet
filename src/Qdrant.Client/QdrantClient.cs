@@ -242,14 +242,10 @@ public class QdrantClient : IDisposable
 		};
 
 		if (timeout is not null)
-		{
 			request.Timeout = ConvertTimeout(timeout);
-		}
 
 		if (initFromCollection is not null)
-		{
 			request.InitFromCollection = initFromCollection;
-		}
 
 		_logger.CreateCollection(collectionName);
 
@@ -261,9 +257,7 @@ public class QdrantClient : IDisposable
 				.ConfigureAwait(false);
 
 			if (!response.Result)
-			{
 				throw new QdrantException($"Collection '{collectionName}' could not be created");
-			}
 		}
 		catch (Exception e)
 		{
@@ -467,9 +461,8 @@ public class QdrantClient : IDisposable
 
 			var names = new string[response.Collections.Count];
 			for (var i = 0; i < names.Length; i++)
-			{
 				names[i] = response.Collections[i].Name;
-			}
+
 			return names;
 		}
 		catch (Exception e)
@@ -501,9 +494,7 @@ public class QdrantClient : IDisposable
 				.ConfigureAwait(false);
 
 			if (!response.Result)
-			{
 				throw new QdrantException($"Collection '{collectionName}' could not be deleted");
-			}
 		}
 		catch (Exception e)
 		{
@@ -625,9 +616,7 @@ public class QdrantClient : IDisposable
 		};
 
 		if (timeout is not null)
-		{
 			request.Timeout = ConvertTimeout(timeout);
-		}
 
 		_logger.UpdateCollection(collectionName);
 
@@ -641,9 +630,7 @@ public class QdrantClient : IDisposable
 				.ConfigureAwait(false);
 
 			if (!response.Result)
-			{
 				throw new QdrantException($"Collection '{collectionName}' could not be updated");
-			}
 		}
 		catch (Exception e)
 		{
@@ -755,14 +742,10 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
-		var request = new ChangeAliases();
+		var request = new ChangeAliases { Actions = { aliasOperations }};
 
 		if (timeout is not null)
-		{
 			request.Timeout = ConvertTimeout(timeout);
-		}
-
-		request.Actions.AddRange(aliasOperations);
 
 		if (_logger.IsEnabled(LogLevel.Debug))
 		{
@@ -801,9 +784,7 @@ public class QdrantClient : IDisposable
 				.ConfigureAwait(false);
 
 			if (!response.Result)
-			{
 				throw new QdrantException("Alias update operation(s) could not be performed.");
-			}
 		}
 		catch (Exception e)
 		{
@@ -839,9 +820,8 @@ public class QdrantClient : IDisposable
 
 			var names = new string[response.Aliases.Count];
 			for (var i = 0; i < names.Length; i++)
-			{
 				names[i] = response.Aliases[i].AliasName;
-			}
+
 			return names;
 		}
 		catch (Exception e)
@@ -905,15 +885,12 @@ public class QdrantClient : IDisposable
 		var request = new UpsertPoints
 		{
 			CollectionName = collectionName,
+			Points = { points },
 			Wait = wait
 		};
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
-
-		request.Points.AddRange(points);
 
 		_logger.Upsert(collectionName, points.Count);
 
@@ -1014,9 +991,7 @@ public class QdrantClient : IDisposable
 		};
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.Delete(collectionName);
 
@@ -1086,16 +1061,13 @@ public class QdrantClient : IDisposable
 		var request = new GetPoints
 		{
 			CollectionName = collectionName,
+			Ids = { pointIds },
 			WithPayload = payloadSelector,
 			WithVectors = vectorSelector
 		};
 
-		request.Ids.AddRange(pointIds);
-
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.Retrieve(collectionName);
 
@@ -1137,15 +1109,12 @@ public class QdrantClient : IDisposable
 		var request = new UpdatePointVectors
 		{
 			CollectionName = collectionName,
+			Points = { points },
 			Wait = wait
 		};
 
-		request.Points.AddRange(points);
-
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.UpdateVectors(collectionName);
 
@@ -1256,15 +1225,12 @@ public class QdrantClient : IDisposable
 		{
 			CollectionName = collectionName,
 			PointsSelector = pointsSelector,
+			Vectors = new VectorsSelector { Names = { vectors } },
 			Wait = wait
 		};
 
-		request.Vectors.Names.AddRange(vectors);
-
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.DeleteVectors(collectionName);
 
@@ -1396,19 +1362,13 @@ public class QdrantClient : IDisposable
 		};
 
 		foreach (var kvp in payload)
-		{
 			request.Payload[kvp.Key] = kvp.Value;
-		}
 
 		if (pointsSelector is not null)
-		{
 			request.PointsSelector = pointsSelector;
-		}
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.Count(collectionName);
 
@@ -1540,19 +1500,13 @@ public class QdrantClient : IDisposable
 		};
 
 		foreach (var kvp in payload)
-		{
 			request.Payload[kvp.Key] = kvp.Value;
-		}
 
 		if (pointsSelector is not null)
-		{
 			request.PointsSelector = pointsSelector;
-		}
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.OverwritePayload(collectionName);
 
@@ -1680,20 +1634,15 @@ public class QdrantClient : IDisposable
 		var request = new DeletePayloadPoints
 		{
 			CollectionName = collectionName,
+			Keys = { keys },
 			Wait = wait
 		};
 
-		request.Keys.AddRange(keys);
-
 		if (pointsSelector is not null)
-		{
 			request.PointsSelector = pointsSelector;
-		}
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.DeletePayload(collectionName);
 
@@ -1815,14 +1764,10 @@ public class QdrantClient : IDisposable
 		};
 
 		if (pointsSelector is not null)
-		{
 			request.Points = pointsSelector;
-		}
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.ClearPayload(collectionName);
 
@@ -1886,14 +1831,10 @@ public class QdrantClient : IDisposable
 		};
 
 		if (indexParams is not null)
-		{
 			request.FieldIndexParams = indexParams;
-		}
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.CreatePayloadIndex(collectionName);
 
@@ -1940,9 +1881,7 @@ public class QdrantClient : IDisposable
 		};
 
 		if (ordering is not null)
-		{
 			request.Ordering = new() { Type = ordering.Value };
-		}
 
 		_logger.DeletePayloadIndex(collectionName);
 
@@ -2007,34 +1946,22 @@ public class QdrantClient : IDisposable
 		Populate(request.Vector, vector);
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (searchParams is not null)
-		{
 			request.Params = searchParams;
-		}
 
 		if (scoreThreshold is not null)
-		{
 			request.ScoreThreshold = scoreThreshold.Value;
-		}
 
 		if (vectorName is not null)
-		{
 			request.VectorName = vectorName;
-		}
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.Search(collectionName);
 
@@ -2078,16 +2005,12 @@ public class QdrantClient : IDisposable
 
 		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
 		foreach (var search in searches)
-		{
 			search.CollectionName = collectionName;
-		}
 
 		request.SearchPoints.AddRange(searches);
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.SearchBatch(collectionName);
 
@@ -2162,34 +2085,22 @@ public class QdrantClient : IDisposable
 		Populate(request.Vector, vector);
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (searchParams is not null)
-		{
 			request.Params = searchParams;
-		}
 
 		if (scoreThreshold is not null)
-		{
 			request.ScoreThreshold = scoreThreshold.Value;
-		}
 
 		if (vectorName is not null)
-		{
 			request.VectorName = vectorName;
-		}
 
 		if (withLookup is not null)
-		{
 			request.WithLookup = withLookup;
-		}
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.SearchGroups(collectionName);
 
@@ -2243,19 +2154,13 @@ public class QdrantClient : IDisposable
 		};
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (offset is not null)
-		{
 			request.Offset = offset;
-		}
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.Scroll(collectionName);
 
@@ -2322,46 +2227,31 @@ public class QdrantClient : IDisposable
 			CollectionName = collectionName,
 			Limit = limit,
 			Offset = offset,
+			Positive = { positive },
 			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
 			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
 		};
 
-		request.Positive.AddRange(positive);
-
 		if (negative is not null)
-		{
 			request.Negative.AddRange(negative);
-		}
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (searchParams is not null)
-		{
 			request.Params = searchParams;
-		}
 
 		if (scoreThreshold is not null)
-		{
 			request.ScoreThreshold = scoreThreshold.Value;
-		}
 
 		if (usingVector is not null)
-		{
 			request.Using = usingVector;
-		}
 
 		if (lookupFrom is not null)
-		{
 			request.LookupFrom = lookupFrom;
-		}
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.Recommend(collectionName);
 
@@ -2406,16 +2296,12 @@ public class QdrantClient : IDisposable
 
 		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
 		foreach (var search in recommendSearches)
-		{
 			search.CollectionName = collectionName;
-		}
 
 		request.RecommendPoints.AddRange(recommendSearches);
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.RecommendBatch(collectionName);
 
@@ -2488,46 +2374,31 @@ public class QdrantClient : IDisposable
 			GroupBy = groupBy,
 			Limit = limit,
 			GroupSize = groupSize,
+			Positive = { positive },
 			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
 			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
 		};
 
-		request.Positive.AddRange(positive);
-
 		if (negative is not null)
-		{
 			request.Negative.AddRange(negative);
-		}
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		if (searchParams is not null)
-		{
 			request.Params = searchParams;
-		}
 
 		if (scoreThreshold is not null)
-		{
 			request.ScoreThreshold = scoreThreshold.Value;
-		}
 
 		if (usingVector is not null)
-		{
 			request.Using = usingVector;
-		}
 
 		if (withLookup is not null)
-		{
 			request.WithLookup = withLookup;
-		}
 
 		if (readConsistency is not null)
-		{
 			request.ReadConsistency = readConsistency;
-		}
 
 		_logger.RecommendGroups(collectionName);
 
@@ -2573,9 +2444,7 @@ public class QdrantClient : IDisposable
 		};
 
 		if (filter is not null)
-		{
 			request.Filter = filter;
-		}
 
 		_logger.Count(collectionName);
 
@@ -2777,15 +2646,11 @@ public class QdrantClient : IDisposable
 		if (MemoryMarshal.TryGetArray(memory, out var segment) &&
 			segment.Offset == 0 &&
 			segment.Count == segment.Array!.Length)
-		{
 			repeatedField.Add(segment.Array);
-		}
 		else
 		{
 			foreach (var f in memory.Span)
-			{
 				repeatedField.Add(f);
-			}
 		}
 	}
 
@@ -2794,6 +2659,7 @@ public class QdrantClient : IDisposable
 		{
 			null => 0,
 
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			{ TotalSeconds: var seconds } => Math.Floor(seconds) == seconds
 				? (ulong)seconds
 				: throw new ArgumentException("Sub-second components in timeout are not supported")
@@ -2804,14 +2670,10 @@ public class QdrantClient : IDisposable
 	public void Dispose()
 	{
 		if (_isDisposed)
-		{
 			return;
-		}
 
 		if (_ownsGrpcClient)
-		{
 			_grpcClient.Dispose();
-		}
 
 		_isDisposed = true;
 	}

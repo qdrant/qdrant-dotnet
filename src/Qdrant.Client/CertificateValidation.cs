@@ -20,7 +20,7 @@ public static class CertificateValidation
 	public static Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool> Thumbprint(string thumbprint)
 	{
 		var normalizedThumbprint = NormalizeThumbprint(thumbprint);
-		return (message, certificate, chain, policyErrors) =>
+		return (_, certificate, chain, _) =>
 		{
 			if (chain is not null)
 			{
