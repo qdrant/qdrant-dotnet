@@ -768,23 +768,26 @@ public class QdrantClient : IDisposable
 		{
 			foreach (var operation in aliasOperations)
 			{
+				// ReSharper disable ConvertTypeCheckPatternToNullCheck
 				switch (operation)
 				{
-					case { CreateAlias: { } createAlias }:
+					case { CreateAlias: CreateAlias createAlias }:
 						_logger.CreateAlias(createAlias.AliasName, createAlias.CollectionName);
 						break;
 
-					case { DeleteAlias: { } deleteAlias }:
+					case { DeleteAlias: DeleteAlias deleteAlias }:
 						_logger.DeleteAlias(deleteAlias.AliasName);
 						break;
 
-					case { RenameAlias: { } renameAlias }:
+					case { RenameAlias: RenameAlias renameAlias }:
 						_logger.RenameAlias(renameAlias.OldAliasName, renameAlias.NewAliasName);
 						break;
 
 					default:
 						throw new ArgumentOutOfRangeException();
+
 				}
+				// ReSharper restore ConvertTypeCheckPatternToNullCheck
 			}
 		}
 
