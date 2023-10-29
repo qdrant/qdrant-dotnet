@@ -252,8 +252,7 @@ public static class Conditions
 	/// </summary>
 	/// <param name="filter">The filter to nest</param>
 	/// <returns>a new instance of <see cref="Condition"/></returns>
-	public static Condition Filter(Filter filter) =>
-		new() { Filter = filter };
+	public static Condition Filter(Filter filter) => new() { Filter = filter };
 }
 
 
