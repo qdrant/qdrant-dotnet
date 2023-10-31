@@ -16,7 +16,7 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
+		var points = await _client.RetrieveAsync("collection_1", 9);
 		points.Should().HaveCount(1);
 		var point = points.Single();
 		point.Id.Should().Be((PointId)9ul);
@@ -31,11 +31,7 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RetrieveAsync(
-			"collection_1",
-			new PointId[] { 8 },
-			withPayload: false,
-			withVectors: true);
+		var points = await _client.RetrieveAsync("collection_1", 8, withPayload: false, withVectors: true);
 
 		var point = Assert.Single(points);
 		Assert.Equal(8ul, point.Id.Num);
@@ -53,7 +49,7 @@ public class PointTests : IAsyncLifetime
 			new Dictionary<string, Value> { ["bar"] = "some bar" },
 			new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
+		var points = await _client.RetrieveAsync("collection_1", 9);
 
 		var point = Assert.Single(points);
 		Assert.Collection(
@@ -80,7 +76,7 @@ public class PointTests : IAsyncLifetime
 			new Dictionary<string, Value> { ["bar"] = "some bar" },
 			new[] { 9ul });
 
-		var points = await _client.RetrieveAsync("collection_1", new[] { new PointId { Num = 9 } });
+		var points = await _client.RetrieveAsync("collection_1", 9);
 
 		var point = Assert.Single(points);
 		var payloadKeyValue = Assert.Single(point.Payload);
@@ -97,9 +93,9 @@ public class PointTests : IAsyncLifetime
 			new Dictionary<string, Value> { ["bar"] = "some bar" },
 			new[] { 9ul });
 
-		await _client.DeletePayloadAsync("collection_1", new[] { "foo" }, new[] { 9ul });
+		await _client.DeletePayloadAsync("collection_1", new[] { "foo" }, 9);
 
-		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
+		var points = await _client.RetrieveAsync("collection_1", 9);
 
 		var point = Assert.Single(points);
 		var payloadKeyValue = Assert.Single(point.Payload);
@@ -112,9 +108,9 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		await _client.ClearPayloadAsync("collection_1", new[] { 9ul });
+		await _client.ClearPayloadAsync("collection_1", 9);
 
-		var points = await _client.RetrieveAsync("collection_1", new PointId[] { 9 });
+		var points = await _client.RetrieveAsync("collection_1", 9);
 
 		var point = Assert.Single(points);
 		Assert.Empty(point.Payload);
@@ -196,7 +192,7 @@ public class PointTests : IAsyncLifetime
 		{
 			new PointStruct
 			{
-				Id = new PointId { Num = 10 },
+				Id = 10,
 				Vectors = new[] { 30f, 31f },
 				Payload = { ["foo"] = "hello" }
 			}
@@ -218,9 +214,7 @@ public class PointTests : IAsyncLifetime
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var results = await _client.ScrollAsync(
-			"collection_1",
-			limit: 1);
+		var results = await _client.ScrollAsync("collection_1", limit: 1);
 
 		Assert.Single(results.Result);
 		Assert.NotNull(results.NextPageOffset);
