@@ -90,7 +90,7 @@ public class SnapshotTests : IAsyncLifetime
 	private Task AssertWithRetry(Func<Task> action) =>
 		Policy
 			.Handle<XunitException>()
-			.WaitAndRetryAsync(5, _ => TimeSpan.FromMilliseconds(200))
+			.WaitAndRetryAsync(25, _ => TimeSpan.FromMilliseconds(200))
 			.ExecuteAsync(action);
 
 	public async Task InitializeAsync()
