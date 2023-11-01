@@ -913,10 +913,32 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
+	/// Delete a point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="id">The IDs to delete.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> DeleteAsync(collectionName,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
 	/// Delete points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The numeric IDs to delete.</param>
+	/// <param name="ids">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
 	/// <param name="cancellationToken">
@@ -936,10 +958,32 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
+	/// Delete a point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="id">The IDs to delete.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> DeleteAsync(collectionName,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
 	/// Delete points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The GUID IDs to delete.</param>
+	/// <param name="ids">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
 	/// <param name="cancellationToken">
@@ -1014,10 +1058,10 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
-	/// Retrieve points.
+	/// Retrieve a point.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="pointIds">List of points to retrieve.</param>
+	/// <param name="id">The ID of a point to retrieve.</param>
 	/// <param name="withPayload">Whether to include the payload or not.</param>
 	/// <param name="withVectors">Whether to include the vectors or not.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
@@ -1026,14 +1070,40 @@ public class QdrantClient : IDisposable
 	/// </param>
 	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
-		IReadOnlyList<PointId> pointIds,
+		Guid id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
 		CancellationToken cancellationToken = default)
 		=> RetrieveAsync(
 			collectionName,
-			pointIds,
+			new[] { new PointId { Uuid = id.ToString() } },
+			new WithPayloadSelector { Enable = withPayload },
+			new WithVectorsSelector { Enable = withVectors },
+			readConsistency,
+			cancellationToken);
+
+	/// <summary>
+	/// Retrieve a point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="id">The ID of a point to retrieve.</param>
+	/// <param name="withPayload">Whether to include the payload or not.</param>
+	/// <param name="withVectors">Whether to include the vectors or not.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		ulong id,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+		=> RetrieveAsync(
+			collectionName,
+			new[] { new PointId { Num = id } },
 			new WithPayloadSelector { Enable = withPayload },
 			new WithVectorsSelector { Enable = withVectors },
 			readConsistency,
@@ -1043,7 +1113,33 @@ public class QdrantClient : IDisposable
 	/// Retrieve points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="pointIds">List of points to retrieve.</param>
+	/// <param name="ids">List of points to retrieve.</param>
+	/// <param name="withPayload">Whether to include the payload or not.</param>
+	/// <param name="withVectors">Whether to include the vectors or not.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		IReadOnlyList<PointId> ids,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+		=> RetrieveAsync(
+			collectionName,
+			ids,
+			new WithPayloadSelector { Enable = withPayload },
+			new WithVectorsSelector { Enable = withVectors },
+			readConsistency,
+			cancellationToken);
+
+	/// <summary>
+	/// Retrieve points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="ids">List of points to retrieve.</param>
 	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
 	/// <param name="vectorSelector">Options for specifying which vectors to include into response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
@@ -1052,7 +1148,7 @@ public class QdrantClient : IDisposable
 	/// </param>
 	public async Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
-		IReadOnlyList<PointId> pointIds,
+		IReadOnlyList<PointId> ids,
 		WithPayloadSelector payloadSelector,
 		WithVectorsSelector vectorSelector,
 		ReadConsistency? readConsistency = null,
@@ -1061,7 +1157,7 @@ public class QdrantClient : IDisposable
 		var request = new GetPoints
 		{
 			CollectionName = collectionName,
-			Ids = { pointIds },
+			Ids = { ids },
 			WithPayload = payloadSelector,
 			WithVectors = vectorSelector
 		};
@@ -1279,7 +1375,32 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="ids">The numeric IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> SetPayloadAsync(
+			collectionName, payload,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Sets the payload for the given points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="payload">New payload values.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1299,6 +1420,31 @@ public class QdrantClient : IDisposable
 		return SetPayloadAsync(
 			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken);
 	}
+
+	/// <summary>
+	/// Sets the payload for the given points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="payload">New payload values.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> SetPayloadAsync(
+			collectionName, payload,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
+			wait,
+			ordering,
+			cancellationToken);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -1417,7 +1563,32 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="ids">The numeric IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> OverwritePayloadAsync(
+			collectionName, payload,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Overwrites the payload for the given points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="payload">New payload values.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1443,7 +1614,32 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="ids">The GUID IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> OverwritePayloadAsync(
+			collectionName, payload,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Overwrites the payload for the given points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="payload">New payload values.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1533,7 +1729,7 @@ public class QdrantClient : IDisposable
 	#region DeletePayload
 
 	/// <summary>
-	/// Delete specified key payload for points.
+	/// Delete specified key payload for all points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
@@ -1555,7 +1751,32 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="ids">The numeric IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> DeletePayloadAsync(
+			collectionName, keys,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Delete specified key payload for points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="keys">List of keys to delete.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1581,7 +1802,32 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="ids">The GUID IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> DeletePayloadAsync(
+			collectionName, keys,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Delete specified key payload for points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="keys">List of keys to delete.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1669,7 +1915,7 @@ public class QdrantClient : IDisposable
 	#region ClearPayload
 
 	/// <summary>
-	/// Remove all payload for specified points.
+	/// Remove all payload for all points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
@@ -1688,7 +1934,29 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The numeric IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> ClearPayloadAsync(
+			collectionName, new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Remove all payload for specified points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1712,7 +1980,30 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The GUID IDs for which to set the payload.</param>
+	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> ClearPayloadAsync(
+			collectionName,
+			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
+			wait,
+			ordering,
+			cancellationToken);
+
+	/// <summary>
+	/// Remove all payload for specified points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -2206,6 +2497,116 @@ public class QdrantClient : IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
+		string collectionName,
+		IReadOnlyList<ulong> positive,
+		IReadOnlyList<ulong>? negative = null,
+		Filter? filter = null,
+		SearchParams? searchParams = null,
+		ulong limit = 10,
+		ulong offset = 0,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		float? scoreThreshold = null,
+		string? usingVector = null,
+		LookupLocation? lookupFrom = null,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+		=> RecommendAsync(
+			collectionName,
+			positive.Select(id => new PointId { Num = id }).ToList(),
+			negative?.Select(id => new PointId { Num = id }).ToList(),
+			filter,
+			searchParams,
+			limit,
+			offset,
+			payloadSelector,
+			vectorsSelector,
+			scoreThreshold,
+			usingVector,
+			lookupFrom,
+			readConsistency,
+			cancellationToken);
+
+		/// <summary>
+	/// Look for the points which are closer to stored positive examples and at the same time further to negative
+	/// examples.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
+	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="offset">Offset of the result.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
+	/// <param name="scoreThreshold">If provided - cut off results with worse scores.</param>
+	/// <param name="usingVector">
+	/// Define which vector to use for recommendation, if not specified - default vector.
+	/// </param>
+	/// <param name="lookupFrom">
+	/// Name of the collection to use for points lookup, if not specified - use current collection.
+	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
+		string collectionName,
+		IReadOnlyList<Guid> positive,
+		IReadOnlyList<Guid>? negative = null,
+		Filter? filter = null,
+		SearchParams? searchParams = null,
+		ulong limit = 10,
+		ulong offset = 0,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		float? scoreThreshold = null,
+		string? usingVector = null,
+		LookupLocation? lookupFrom = null,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+		=> RecommendAsync(
+			collectionName,
+			positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+			negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+			filter,
+			searchParams,
+			limit,
+			offset,
+			payloadSelector,
+			vectorsSelector,
+			scoreThreshold,
+			usingVector,
+			lookupFrom,
+			readConsistency,
+			cancellationToken);
+
+	/// <summary>
+	/// Look for the points which are closer to stored positive examples and at the same time further to negative
+	/// examples.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
+	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="offset">Offset of the result.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
+	/// <param name="scoreThreshold">If provided - cut off results with worse scores.</param>
+	/// <param name="usingVector">
+	/// Define which vector to use for recommendation, if not specified - default vector.
+	/// </param>
+	/// <param name="lookupFrom">
+	/// Name of the collection to use for points lookup, if not specified - use current collection.
+	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public async Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<PointId> positive,
@@ -2322,6 +2723,128 @@ public class QdrantClient : IDisposable
 			throw;
 		}
 	}
+
+	/// <summary>
+	/// Look for the points which are closer to stored positive examples and at the same time further to negative
+	/// examples, grouped by a given field
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="groupBy">
+	/// Payload field to group by, must be a string or number field. If there are multiple values for the field, all of
+	/// them will be used. One point can be in multiple groups.
+	/// </param>
+	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
+	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="groupSize">Maximum amount of points to return per group.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
+	/// <param name="scoreThreshold">If provided - cut off results with worse scores.</param>
+	/// <param name="usingVector">
+	/// Define which vector to use for recommendation, if not specified - default vector.
+	/// </param>
+	/// <param name="withLookup">
+	/// Options for specifying how to use the group id to lookup points in another collection.
+	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
+		string collectionName,
+		string groupBy,
+		IReadOnlyList<ulong> positive,
+		IReadOnlyList<ulong>? negative = null,
+		Filter? filter = null,
+		SearchParams? searchParams = null,
+		uint limit = 10,
+		uint groupSize = 1,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		float? scoreThreshold = null,
+		string? usingVector = null,
+		WithLookup? withLookup = null,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+	=> RecommendGroupsAsync(
+		collectionName,
+		groupBy,
+		positive.Select(id => new PointId { Num = id }).ToList(),
+		negative?.Select(id => new PointId { Num = id }).ToList(),
+		filter,
+		searchParams,
+		limit,
+		groupSize,
+		payloadSelector,
+		vectorsSelector,
+		scoreThreshold,
+		usingVector,
+		withLookup,
+		readConsistency,
+		cancellationToken);
+
+	/// <summary>
+	/// Look for the points which are closer to stored positive examples and at the same time further to negative
+	/// examples, grouped by a given field
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="groupBy">
+	/// Payload field to group by, must be a string or number field. If there are multiple values for the field, all of
+	/// them will be used. One point can be in multiple groups.
+	/// </param>
+	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
+	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="groupSize">Maximum amount of points to return per group.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
+	/// <param name="scoreThreshold">If provided - cut off results with worse scores.</param>
+	/// <param name="usingVector">
+	/// Define which vector to use for recommendation, if not specified - default vector.
+	/// </param>
+	/// <param name="withLookup">
+	/// Options for specifying how to use the group id to lookup points in another collection.
+	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
+		string collectionName,
+		string groupBy,
+		IReadOnlyList<Guid> positive,
+		IReadOnlyList<Guid>? negative = null,
+		Filter? filter = null,
+		SearchParams? searchParams = null,
+		uint limit = 10,
+		uint groupSize = 1,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		float? scoreThreshold = null,
+		string? usingVector = null,
+		WithLookup? withLookup = null,
+		ReadConsistency? readConsistency = null,
+		CancellationToken cancellationToken = default)
+	=> RecommendGroupsAsync(
+		collectionName,
+		groupBy,
+		positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+		negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+		filter,
+		searchParams,
+		limit,
+		groupSize,
+		payloadSelector,
+		vectorsSelector,
+		scoreThreshold,
+		usingVector,
+		withLookup,
+		readConsistency,
+		cancellationToken);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
