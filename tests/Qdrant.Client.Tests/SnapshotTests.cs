@@ -1,9 +1,7 @@
 using FluentAssertions;
 using Grpc.Core;
-using Polly;
 using Qdrant.Client.Grpc;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Qdrant.Client;
 
@@ -40,14 +38,12 @@ public class SnapshotTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
 		await _client.CreateSnapshotAsync("collection_1");
+		// snapshots are timestamped named to second precision. Wait more than 1 second to ensure we get 2 snapshots
+		await Task.Delay(TimeSpan.FromSeconds(2));
 		await _client.CreateSnapshotAsync("collection_1");
 
-		// TODO: Workaround for https://github.com/qdrant/qdrant-dotnet/issues/19
-		await AssertWithRetry(async () =>
-		{
-			var snapshotDescriptions = await _client.ListSnapshotsAsync("collection_1");
-			snapshotDescriptions.Should().HaveCount(2);
-		});
+		var snapshotDescriptions = await _client.ListSnapshotsAsync("collection_1");
+		snapshotDescriptions.Should().HaveCount(2);
 	}
 
 	[Fact]
@@ -77,21 +73,13 @@ public class SnapshotTests : IAsyncLifetime
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
 		await _client.CreateCollectionAsync("collection_2", new VectorParams { Size = 4, Distance = Distance.Cosine });
 		await _client.CreateFullSnapshotAsync();
+		// snapshots are timestamped named to second precision. Wait more than 1 second to ensure we get 2 snapshots
+		await Task.Delay(TimeSpan.FromSeconds(2));
 		await _client.CreateFullSnapshotAsync();
 
-		// TODO: Workaround for https://github.com/qdrant/qdrant-dotnet/issues/19
-		await AssertWithRetry(async () =>
-		{
-			var snapshotDescriptions = await _client.ListFullSnapshotsAsync();
-			snapshotDescriptions.Should().HaveCount(2);
-		});
+		var snapshotDescriptions = await _client.ListFullSnapshotsAsync();
+		snapshotDescriptions.Should().HaveCount(2);
 	}
-
-	private Task AssertWithRetry(Func<Task> action) =>
-		Policy
-			.Handle<XunitException>()
-			.WaitAndRetryAsync(25, _ => TimeSpan.FromMilliseconds(200))
-			.ExecuteAsync(action);
 
 	public async Task InitializeAsync()
 	{

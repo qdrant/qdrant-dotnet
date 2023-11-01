@@ -2528,7 +2528,7 @@ public class QdrantClient : IDisposable
 			readConsistency,
 			cancellationToken);
 
-		/// <summary>
+	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
 	/// examples.
 	/// </summary>
