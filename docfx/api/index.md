@@ -1,7 +1,0 @@
-# Examples
-
-
-
-## Qdrant.Client
-
-

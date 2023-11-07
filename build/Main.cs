@@ -9,10 +9,10 @@ using static BuildTargets;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
-const string envVarMissing = " environment variable is missing. Aborting.";
 const string packOutput = "nuget";
 const string protosDir = "protos";
-const string project = "Qdrant.Client.Grpc";
+const string project = "Qdrant.Client";
+const string grpcNamespace = "Qdrant.Client.Grpc";
 
 var doc = XDocument.Load("Directory.Build.props");
 var qdrantVersion = doc.Descendants(XName.Get("QdrantVersion", "http://schemas.microsoft.com/developer/msbuild/2003"))
@@ -64,7 +64,7 @@ cmd.SetHandler(async () =>
 		var protoFileRegex = new Regex(".*?lib/api/src/grpc/proto/.*?.proto");
 		var client = new HttpClient
 		{
-			DefaultRequestHeaders = { UserAgent = { new ProductInfoHeaderValue("QdrantNet", "1.0.0") } },
+			DefaultRequestHeaders = { UserAgent = { new ProductInfoHeaderValue("qdrant-dotnet", "1.0.0") } },
 		};
 
 		var response = await client.GetAsync(url);
@@ -88,18 +88,13 @@ cmd.SetHandler(async () =>
 			{
 				if (contents[i].StartsWith("package qdrant"))
 				{
-					contents.Insert(i + 1, $"option csharp_namespace = \"{project}\";");
+					contents.Insert(i + 1, $"option csharp_namespace = \"{grpcNamespace}\";");
 					break;
 				}
 			}
 
 			File.WriteAllLines(file, contents);
 		}
-	});
-
-	Target(Docs, () =>
-	{
-		Run("docfx", "docfx/docfx.json --serve");
 	});
 
 	Target(Format, DependsOn(Restore), () =>
@@ -132,8 +127,7 @@ cmd.SetHandler(async () =>
 
 	Target(Default, DependsOn(Test));
 
-	await RunTargetsAndExitAsync(targets, options,
-		messageOnly: ex => ex is SimpleExec.ExitCodeException || ex.Message.EndsWith(envVarMissing));
+	await RunTargetsAndExitAsync(targets, options, messageOnly: ex => ex is SimpleExec.ExitCodeException);
 });
 
 return await cmd.InvokeAsync(args);
@@ -149,5 +143,4 @@ internal static class BuildTargets
 	public const string Format = "format";
 	public const string Pack = "pack";
 	public const string DownloadProtos = "download-protos";
-	public const string Docs = "docs";
 }
