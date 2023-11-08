@@ -14,8 +14,6 @@
 
   <PropertyGroup>
     <SolutionRoot>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.bat))</SolutionRoot>
-    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
-    <MinVerIgnoreHeight>true</MinVerIgnoreHeight>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>False</IsPackable>
