@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{178B0A64-7
 		dotnet-tools.json = dotnet-tools.json
 		README.md = README.md
 		global.json = global.json
+		CONTRIBUTING.md = CONTRIBUTING.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{ADA61132-ABF9-4DC7-BB8E-B3DA4AA9AB3A}"
