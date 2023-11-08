@@ -39,13 +39,13 @@ var client = new QdrantClient(grpcClient);
 ```
 
 ---
-**IMPORTANT**
+**IMPORTANT NOTICE for .NET Framework**
 
 .NET Framework has limited supported for gRPC over HTTP/2, but it can be enabled by
 
 - Configuring qdrant to use TLS, and you **must** use HTTPS, so you will need to set up 
 server certificate validation
-- Referencing System.Net.Http.WinHttpHandler 6.0.1 or later, and configuring 
+- Referencing `System.Net.Http.WinHttpHandler` 6.0.1 or later, and configuring 
 `WinHttpHandler` as the inner handler for `GrpcChannelOptions`
 
 The following example configures a client for .NET Framework to use TLS, validating 
