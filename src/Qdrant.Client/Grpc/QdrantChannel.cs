@@ -1,3 +1,6 @@
+#if NETFRAMEWORK
+using System.Net.Http;
+#endif
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
