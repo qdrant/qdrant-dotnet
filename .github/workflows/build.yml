@@ -26,7 +26,7 @@ jobs:
       shell: bash
 
     - name: Test
-      run: dotnet test -c Release --no-build -f net6.0 --nologo
+      run: dotnet test -c Release --no-build -f net8.0 --nologo
       shell: bash
 
     - name: Pack
