@@ -1,11 +1,12 @@
-using Qdrant.Client.Grpc;
-using Qdrant.Client.Tests.Container;
-using Xunit;
-
 #if NETFRAMEWORK
+using System.Net.Http;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 #endif
+
+using Qdrant.Client.Grpc;
+using Qdrant.Client.Tests.Container;
+using Xunit;
 
 namespace Qdrant.Client;
 

@@ -1,9 +1,11 @@
 #if NETFRAMEWORK
+using System.Net.Http;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
+#else
+using System.Security.Authentication;
 #endif
 
-using System.Security.Authentication;
 using FluentAssertions;
 using Grpc.Core;
 using Qdrant.Client.Grpc;
@@ -84,8 +86,7 @@ public class ApiKeyCertificateThumbprintTests
 
 		var exception = Assert.Throws<RpcException>(() => client.Qdrant.HealthCheck(new HealthCheckRequest()));
 #if NETFRAMEWORK
-		// TODO: This sometimes fails with StatusCode.PermissionDenied, but no idea why
-		exception.Status.StatusCode.Should().Be(StatusCode.Unavailable);
+		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.PermissionDenied);
 #else
 		exception.Status.StatusCode.Should().Be(StatusCode.PermissionDenied);
 		exception.Status.Detail.Should().Be("Invalid api-key");

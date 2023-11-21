@@ -1,3 +1,6 @@
+#if NETFRAMEWORK
+using System.Net.Http;
+#endif
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
