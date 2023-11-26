@@ -26,8 +26,16 @@ jobs:
       shell: bash
 
     - name: Test
-      run: dotnet test -c Release --no-build -f net8.0 --nologo
+      run: dotnet test -c Release --logger:"junit;LogFilePath=$(pwd)/output/test-results/junit-{assembly}-{framework}-test-results.xml" --no-build -f net8.0 --nologo
       shell: bash
+      
+    - name: Test Results
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        fail_on_failure: true
+        require_tests: true
+        report_paths: '**/output/test-results/junit-*.xml'
 
     - name: Pack
       run: dotnet pack -c Release -o nuget --no-build --nologo
