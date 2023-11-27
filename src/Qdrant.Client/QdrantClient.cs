@@ -2239,9 +2239,6 @@ public class QdrantClient : IDisposable
 		if (filter is not null)
 			request.Filter = filter;
 
-		if (filter is not null)
-			request.Filter = filter;
-
 		if (searchParams is not null)
 			request.Params = searchParams;
 
