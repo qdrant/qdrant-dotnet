@@ -1563,7 +1563,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1588,7 +1588,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1614,7 +1614,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1639,7 +1639,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="payload">New payload values.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1751,7 +1751,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1776,7 +1776,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1802,7 +1802,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1827,7 +1827,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="keys">List of keys to delete.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1934,7 +1934,7 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1956,7 +1956,7 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -1980,7 +1980,7 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="id">The ID for which to set the payload.</param>
+	/// <param name="id">The ID for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -2003,7 +2003,7 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="ids">The IDs for which to set the payload.</param>
+	/// <param name="ids">The IDs for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -2027,7 +2027,7 @@ public class QdrantClient : IDisposable
 	/// Remove all payload for specified points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="filter">A filter selecting the points to be overwritten.</param>
+	/// <param name="filter">A filter selecting the points for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="cancellationToken">
@@ -2087,7 +2087,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="fieldName">Field name to index.</param>
-	/// <param name="schemaType">Field name to index.</param>
+	/// <param name="schemaType">The schema type of the field.</param>
 	/// <param name="indexParams">Payload index params.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
