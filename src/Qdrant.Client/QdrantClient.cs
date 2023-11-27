@@ -1516,7 +1516,7 @@ public class QdrantClient : IDisposable
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
 
-		_logger.Count(collectionName);
+		_logger.SetPayload(collectionName);
 
 		try
 		{
