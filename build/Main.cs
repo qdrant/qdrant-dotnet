@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.CommandLine;
 using System.IO.Compression;
 using System.Net.Http.Headers;
@@ -76,6 +77,19 @@ cmd.SetHandler(async () =>
 		{
 			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key) && !privateProtoFileRegex.IsMatch(reader.Entry.Key))
 				reader.WriteEntryToDirectory(protosTagDir);
+		}
+
+		{
+			var file = $"{protosTagDir}/qdrant.proto";
+			var contents = File.ReadAllLines(file).ToList();
+
+			for (var line = contents.Count() - 1; line >= 0; line--)
+			{
+				if (contents[line].StartsWith("import") && privateProtoFileRegex.IsMatch(contents[line]))
+					contents.RemoveAt(line);
+			}
+
+			File.WriteAllLines(file, contents);
 		}
 
 		// add csharp namespace to qdrant package proto files if they don't contain one
