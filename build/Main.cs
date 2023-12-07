@@ -61,7 +61,7 @@ cmd.SetHandler(async () =>
 
 		Directory.CreateDirectory(protosTagDir);
 		Console.WriteLine($"Downloading protos for tag {qdrantVersion} to {protosTagDir}");
-		var url = "https://api.github.com/repos/qdrant/qdrant/tarball/v1.7.0";
+		var url = $"https://api.github.com/repos/qdrant/qdrant/tarball/refs/tags/{qdrantVersion}";
 		var protoFileRegex = new Regex(".*?lib/api/src/grpc/proto/.*?.proto");
 		var privateProtoFileRegex = new Regex("(?:.*?internal.*?|raft_service|health_check).proto");
 		var client = new HttpClient
