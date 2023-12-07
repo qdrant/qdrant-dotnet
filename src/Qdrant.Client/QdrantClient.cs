@@ -134,11 +134,11 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task CreateCollectionAsync(
 		string collectionName,
 		VectorParams vectorsConfig,
@@ -152,13 +152,13 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, cancellationToken, shardingMethod, sparseVectorsConfig);
+			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
 
 	/// <summary>
 	/// Creates a new collection with the given parameters.
@@ -194,11 +194,11 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task CreateCollectionAsync(
 		string collectionName,
 		VectorParamsMap? vectorsConfig = null,
@@ -212,13 +212,13 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, cancellationToken, shardingMethod, sparseVectorsConfig);
+			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
 
 	private async Task CreateCollectionAsync(
 		string collectionName,
@@ -233,9 +233,9 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new CreateCollection
 		{
@@ -319,11 +319,11 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task RecreateCollectionAsync(
 		string collectionName,
 		VectorParams vectorsConfig,
@@ -337,13 +337,13 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, cancellationToken, shardingMethod, sparseVectorsConfig);
+			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
 
 	/// <summary>
 	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
@@ -379,11 +379,11 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task RecreateCollectionAsync(
 		string collectionName,
 		VectorParamsMap? vectorsConfig = null,
@@ -397,13 +397,13 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, cancellationToken, shardingMethod, sparseVectorsConfig);
+			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
 
 	private async Task RecreateCollectionAsync(
 		string collectionName,
@@ -418,16 +418,16 @@ public class QdrantClient : IDisposable
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
 		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 	{
-		await DeleteCollectionAsync(collectionName, cancellationToken).ConfigureAwait(false);
+		await DeleteCollectionAsync(collectionName, timeout, cancellationToken).ConfigureAwait(false);
 
 		await CreateCollectionAsync(
 				collectionName, vectorsConfig, shardNumber, replicationFactor,
 				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-				initFromCollection, timeout, cancellationToken, shardingMethod, sparseVectorsConfig)
+				initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken)
 			.ConfigureAwait(false);
 	}
 
@@ -501,14 +501,14 @@ public class QdrantClient : IDisposable
 	/// Drop a collection and all its associated data.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
 	public async Task DeleteCollectionAsync(
 		string collectionName,
-		CancellationToken cancellationToken = default,
-		TimeSpan? timeout = null)
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
 	{
 		_logger.DeleteCollection(collectionName);
 
@@ -555,10 +555,10 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task UpdateCollectionAsync(
 		string collectionName,
 		VectorParamsDiff vectorsConfig,
@@ -567,10 +567,10 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, timeout, cancellationToken, sparseVectorsConfig);
+			collectionParams, hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -589,10 +589,10 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task UpdateCollectionAsync(
 		string collectionName,
 		VectorParamsDiffMap vectorsConfig,
@@ -601,10 +601,10 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, timeout, cancellationToken, sparseVectorsConfig);
+			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -619,10 +619,10 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	public Task UpdateCollectionAsync(
 		string collectionName,
 		OptimizersConfigDiff? optimizersConfig = null,
@@ -630,10 +630,10 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, timeout, cancellationToken, sparseVectorsConfig);
+			hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
 
 	private async Task UpdateCollectionCoreAsync(
 		string collectionName,
@@ -643,8 +643,8 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default,
-		SparseVectorConfig? sparseVectorsConfig = null)
+		SparseVectorConfig? sparseVectorsConfig = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new UpdateCollection
 		{
@@ -694,12 +694,12 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <remarks>
 	/// Alias changes are atomic, meaning that no collection modifications can happen between alias operations.
 	/// </remarks>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public Task CreateAliasAsync(
 		string aliasName,
 		string collectionName,
@@ -722,12 +722,12 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <remarks>
 	/// Alias changes are atomic, meaning that no collection modifications can happen between alias operations.
 	/// </remarks>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public Task RenameAliasAsync(
 		string oldAliasName,
 		string newAliasName,
@@ -749,12 +749,12 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <remarks>
 	/// Alias changes are atomic, meaning that no collection modifications can happen between alias operations.
 	/// </remarks>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public Task DeleteAliasAsync(
 		string aliasName,
 		TimeSpan? timeout = null,
@@ -775,12 +775,12 @@ public class QdrantClient : IDisposable
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <remarks>
 	/// Alias changes are atomic, meaning that no collection modifications can happen between alias operations.
 	/// </remarks>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public async Task UpdateAliasesAsync(
 		IReadOnlyList<AliasOperations> aliasOperations,
 		TimeSpan? timeout = null,
@@ -916,17 +916,17 @@ public class QdrantClient : IDisposable
 	/// <param name="points">The points to be upserted.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<UpdateResult> UpsertAsync(
 		string collectionName,
 		IReadOnlyList<PointStruct> points,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new UpsertPoints
 		{
@@ -968,23 +968,23 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeleteAsync(collectionName,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Delete points.
@@ -993,22 +993,22 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
-		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1018,23 +1018,23 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeleteAsync(collectionName,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Delete points.
@@ -1043,22 +1043,22 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
-		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1068,26 +1068,26 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points to be deleted.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> DeleteAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> DeleteAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		PointsSelector pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new DeletePoints
 		{
@@ -1130,26 +1130,26 @@ public class QdrantClient : IDisposable
 	/// <param name="withPayload">Whether to include the payload or not.</param>
 	/// <param name="withVectors">Whether to include the vectors or not.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		Guid id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> RetrieveAsync(
 			collectionName,
 			new[] { new PointId { Uuid = id.ToString() } },
 			new WithPayloadSelector { Enable = withPayload },
 			new WithVectorsSelector { Enable = withVectors },
 			readConsistency,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Retrieve a point.
@@ -1159,26 +1159,26 @@ public class QdrantClient : IDisposable
 	/// <param name="withPayload">Whether to include the payload or not.</param>
 	/// <param name="withVectors">Whether to include the vectors or not.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		ulong id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> RetrieveAsync(
 			collectionName,
 			new[] { new PointId { Num = id } },
 			new WithPayloadSelector { Enable = withPayload },
 			new WithVectorsSelector { Enable = withVectors },
 			readConsistency,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Retrieve points.
@@ -1188,26 +1188,26 @@ public class QdrantClient : IDisposable
 	/// <param name="withPayload">Whether to include the payload or not.</param>
 	/// <param name="withVectors">Whether to include the vectors or not.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		IReadOnlyList<PointId> ids,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> RetrieveAsync(
 			collectionName,
 			ids,
 			new WithPayloadSelector { Enable = withPayload },
 			new WithVectorsSelector { Enable = withVectors },
 			readConsistency,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Retrieve points.
@@ -1217,18 +1217,18 @@ public class QdrantClient : IDisposable
 	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
 	/// <param name="vectorSelector">Options for specifying which vectors to include into response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		IReadOnlyList<PointId> ids,
 		WithPayloadSelector payloadSelector,
 		WithVectorsSelector vectorSelector,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new GetPoints
 		{
@@ -1271,17 +1271,17 @@ public class QdrantClient : IDisposable
 	/// <param name="points">The list of points and vectors to update.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<UpdateResult> UpdateVectorsAsync(
 		string collectionName,
 		IReadOnlyList<PointVectors> points,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new UpdatePointVectors
 		{
@@ -1326,25 +1326,25 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The numeric IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	private Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return DeleteVectorsAsync(
 			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
-			cancellationToken, shardKeySelector);
+			shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1355,25 +1355,25 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The GUID IDs to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	private Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return DeleteVectorsAsync(
 			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
-			cancellationToken, shardKeySelector);
+			shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1384,20 +1384,20 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points to be deleted.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	private Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeleteVectorsAsync(
-			collectionName, vectors, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, vectors, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
@@ -1405,8 +1405,8 @@ public class QdrantClient : IDisposable
 		PointsSelector pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new DeletePointVectors
 		{
@@ -1453,18 +1453,18 @@ public class QdrantClient : IDisposable
 	/// <param name="payload">New payload values.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> SetPayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> SetPayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -1474,25 +1474,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
 			collectionName, payload,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -1502,24 +1502,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1530,25 +1530,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
 			collectionName, payload,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -1558,24 +1558,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The GUID IDs for which to set the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1586,20 +1586,20 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points to be set.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
@@ -1607,8 +1607,8 @@ public class QdrantClient : IDisposable
 		PointsSelector? pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new SetPayloadPoints
 		{
@@ -1659,18 +1659,18 @@ public class QdrantClient : IDisposable
 	/// <param name="payload">New payload values.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> OverwritePayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> OverwritePayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -1680,25 +1680,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
 			collectionName, payload,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -1708,24 +1708,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1736,25 +1736,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
 			collectionName, payload,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -1764,24 +1764,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to overwrite the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1792,20 +1792,20 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points to be overwritten.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
@@ -1813,8 +1813,8 @@ public class QdrantClient : IDisposable
 		PointsSelector? pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new SetPayloadPoints
 		{
@@ -1865,18 +1865,18 @@ public class QdrantClient : IDisposable
 	/// <param name="keys">List of keys to delete.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> DeletePayloadAsync(collectionName, keys, pointsSelector: null, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> DeletePayloadAsync(collectionName, keys, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -1886,25 +1886,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeletePayloadAsync(
 			collectionName, keys,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -1914,24 +1914,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1942,25 +1942,25 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeletePayloadAsync(
 			collectionName, keys,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -1970,24 +1970,24 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to delete the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -1998,20 +1998,20 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points to be overwritten.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, keys, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
@@ -2019,8 +2019,8 @@ public class QdrantClient : IDisposable
 		PointsSelector? pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new DeletePayloadPoints
 		{
@@ -2068,17 +2068,17 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> ClearPayloadAsync(collectionName, pointsSelector: null, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> ClearPayloadAsync(collectionName, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2087,23 +2087,23 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> ClearPayloadAsync(
 			collectionName, new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2112,23 +2112,23 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return ClearPayloadAsync(
-			collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -2138,24 +2138,24 @@ public class QdrantClient : IDisposable
 	/// <param name="id">The ID for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> ClearPayloadAsync(
 			collectionName,
 			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
 			wait,
 			ordering,
-			cancellationToken,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2164,23 +2164,23 @@ public class QdrantClient : IDisposable
 	/// <param name="ids">The IDs for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return ClearPayloadAsync(
-			collectionName, new PointsSelector { Points = idsList }, wait, ordering, cancellationToken, shardKeySelector);
+			collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
 	}
 
 	/// <summary>
@@ -2190,26 +2190,26 @@ public class QdrantClient : IDisposable
 	/// <param name="filter">A filter selecting the points for which to remove the payload.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
-		=> ClearPayloadAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, cancellationToken, shardKeySelector);
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> ClearPayloadAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
 
 	private async Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		PointsSelector? pointsSelector,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new ClearPayloadPoints
 		{
@@ -2374,12 +2374,12 @@ public class QdrantClient : IDisposable
 	/// <param name="scoreThreshold">If provided - cut off results with worse scores.</param>
 	/// <param name="vectorName">Which vector to use for search, if not specified - use default vector.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="sparseIndices">Sparse vector indices. If set, vector argument will be used as sparse values list.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public async Task<IReadOnlyList<ScoredPoint>> SearchAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -2392,10 +2392,10 @@ public class QdrantClient : IDisposable
 		float? scoreThreshold = null,
 		string? vectorName = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
-		ReadOnlyMemory<uint>? sparseIndices = null)
+		ReadOnlyMemory<uint>? sparseIndices = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new SearchPoints
 		{
@@ -2462,16 +2462,16 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="searches">The searches to be performed in the batch.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	public async Task<IReadOnlyList<BatchResult>> SearchBatchAsync(
 		string collectionName,
 		IReadOnlyList<SearchPoints> searches,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		TimeSpan? timeout = null)
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new SearchBatchPoints
 		{
@@ -2531,12 +2531,12 @@ public class QdrantClient : IDisposable
 	/// Options for specifying how to use the group id to lookup points in another collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
 	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="sparseIndices">Sparse vector indices. If set, vector argument will be used as sparse values list.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public async Task<IReadOnlyList<PointGroup>> SearchGroupsAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -2551,10 +2551,10 @@ public class QdrantClient : IDisposable
 		string? vectorName = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
-		ReadOnlyMemory<uint>? sparseIndices = null)
+		ReadOnlyMemory<uint>? sparseIndices = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new SearchPointGroups
 		{
@@ -2629,10 +2629,10 @@ public class QdrantClient : IDisposable
 	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
 	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<ScrollResponse> ScrollAsync(
 		string collectionName,
 		Filter? filter = null,
@@ -2641,8 +2641,8 @@ public class QdrantClient : IDisposable
 		WithPayloadSelector? payloadSelector = null,
 		WithVectorsSelector? vectorsSelector = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new ScrollPoints
 		{
@@ -2705,11 +2705,11 @@ public class QdrantClient : IDisposable
 	/// Name of the collection to use for points lookup, if not specified - use current collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<ulong> positive,
@@ -2724,9 +2724,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> RecommendAsync(
 			collectionName,
 			positive.Select(id => new PointId { Num = id }).ToList(),
@@ -2741,9 +2741,9 @@ public class QdrantClient : IDisposable
 			usingVector,
 			lookupFrom,
 			readConsistency,
-			cancellationToken,
 			timeout,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -2766,11 +2766,11 @@ public class QdrantClient : IDisposable
 	/// Name of the collection to use for points lookup, if not specified - use current collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<Guid> positive,
@@ -2785,9 +2785,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 		=> RecommendAsync(
 			collectionName,
 			positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
@@ -2802,9 +2802,9 @@ public class QdrantClient : IDisposable
 			usingVector,
 			lookupFrom,
 			readConsistency,
-			cancellationToken,
 			timeout,
-			shardKeySelector);
+			shardKeySelector,
+			cancellationToken);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -2827,11 +2827,11 @@ public class QdrantClient : IDisposable
 	/// Name of the collection to use for points lookup, if not specified - use current collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<PointId> positive,
@@ -2846,9 +2846,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new RecommendPoints
 		{
@@ -2914,16 +2914,16 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="recommendSearches">The recommendation searches to be performed in the batch.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	public async Task<IReadOnlyList<BatchResult>> RecommendBatchAsync(
 		string collectionName,
 		IReadOnlyList<RecommendPoints> recommendSearches,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
-		TimeSpan? timeout = null)
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new RecommendBatchPoints
 		{
@@ -2987,11 +2987,11 @@ public class QdrantClient : IDisposable
 	/// Options for specifying how to use the group id to lookup points in another collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -3007,9 +3007,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	=> RecommendGroupsAsync(
 		collectionName,
 		groupBy,
@@ -3025,9 +3025,9 @@ public class QdrantClient : IDisposable
 		usingVector,
 		withLookup,
 		readConsistency,
-		cancellationToken,
 		timeout,
-		shardKeySelector);
+		shardKeySelector,
+		cancellationToken);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3054,11 +3054,11 @@ public class QdrantClient : IDisposable
 	/// Options for specifying how to use the group id to lookup points in another collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -3074,9 +3074,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	=> RecommendGroupsAsync(
 		collectionName,
 		groupBy,
@@ -3092,9 +3092,9 @@ public class QdrantClient : IDisposable
 		usingVector,
 		withLookup,
 		readConsistency,
-		cancellationToken,
 		timeout,
-		shardKeySelector);
+		shardKeySelector,
+		cancellationToken);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3121,11 +3121,11 @@ public class QdrantClient : IDisposable
 	/// Options for specifying how to use the group id to lookup points in another collection.
 	/// </param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -3141,9 +3141,9 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		CancellationToken cancellationToken = default,
 		TimeSpan? timeout = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new RecommendPointGroups
 		{
@@ -3211,18 +3211,18 @@ public class QdrantClient : IDisposable
 	/// <param name="exact">
 	/// If <c>true</c>, returns the exact count, if <c>false</c>, returns an approximate count. Defaults to <c>true</c>.
 	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	public async Task<ulong> CountAsync(
 		string collectionName,
 		Filter? filter = null,
 		bool exact = true,
-		CancellationToken cancellationToken = default,
 		ReadConsistency? readConsistency = null,
-		ShardKeySelector? shardKeySelector = null)
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
 	{
 		var request = new CountPoints
 		{
