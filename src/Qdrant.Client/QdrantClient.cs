@@ -510,17 +510,21 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
+		var request = new DeleteCollection
+		{
+			CollectionName = collectionName,
+		};
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
 		_logger.DeleteCollection(collectionName);
 
 		try
 		{
 			var response = await _collectionsClient
 				.DeleteAsync(
-					new DeleteCollection
-					{
-						CollectionName = collectionName,
-						Timeout = ConvertTimeout(timeout),
-					},
+					request,
 					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
 					cancellationToken: cancellationToken)
 				.ConfigureAwait(false);
