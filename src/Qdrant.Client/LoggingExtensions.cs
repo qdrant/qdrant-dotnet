@@ -124,6 +124,16 @@ internal static partial class LoggingExtensions
 
 	#endregion
 
+	#region Cluster management
+
+	[LoggerMessage(5006, LogLevel.Debug, "Create shard key '{key}':'{number}' for collection '{collection}'")]
+	public static partial void CreateShardKey(this ILogger logger, string key, ulong number, string collection);
+
+	[LoggerMessage(5007, LogLevel.Debug, "Delete shard key '{key}':'{number}' for collection '{collection}'")]
+	public static partial void DeleteShardKey(this ILogger logger, string key, ulong number, string collection);
+
+	#endregion
+
 	[LoggerMessage(99999, LogLevel.Error, "Operation failed: {operation}")]
 	public static partial void OperationFailed(this ILogger logger, string operation, Exception exception);
 }

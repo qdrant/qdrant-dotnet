@@ -257,10 +257,10 @@ public class QdrantClient : IDisposable
 
 		if (initFromCollection is not null)
 			request.InitFromCollection = initFromCollection;
-	
+
 		if (shardingMethod is not null)
 			request.ShardingMethod = (ShardingMethod)shardingMethod;
-		
+
 		_logger.CreateCollection(collectionName);
 
 		try
@@ -516,7 +516,8 @@ public class QdrantClient : IDisposable
 		{
 			var response = await _collectionsClient
 				.DeleteAsync(
-					new DeleteCollection {
+					new DeleteCollection
+					{
 						CollectionName = collectionName,
 						Timeout = ConvertTimeout(timeout),
 					},
@@ -936,7 +937,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1097,7 +1098,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1239,7 +1240,7 @@ public class QdrantClient : IDisposable
 
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1291,7 +1292,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1417,7 +1418,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1623,7 +1624,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -1829,7 +1830,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -2033,7 +2034,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -2221,7 +2222,7 @@ public class QdrantClient : IDisposable
 
 		if (ordering is not null)
 			request.Ordering = new() { Type = ordering.Value };
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -2421,13 +2422,13 @@ public class QdrantClient : IDisposable
 
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
-		
+
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
-		
+
 		if (sparseIndices is not null)
 		{
 			var sparseIndicesContainer = new SparseIndices();
@@ -2587,10 +2588,10 @@ public class QdrantClient : IDisposable
 
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
-		
+
 		if (sparseIndices is not null)
 		{
 			var sparseIndicesContainer = new SparseIndices();
@@ -2659,7 +2660,7 @@ public class QdrantClient : IDisposable
 
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -2882,7 +2883,7 @@ public class QdrantClient : IDisposable
 
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -2937,7 +2938,7 @@ public class QdrantClient : IDisposable
 
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
-	
+
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
 
@@ -3178,7 +3179,7 @@ public class QdrantClient : IDisposable
 
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -3231,10 +3232,10 @@ public class QdrantClient : IDisposable
 
 		if (filter is not null)
 			request.Filter = filter;
-		
+
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
-		
+
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
 
@@ -3432,6 +3433,100 @@ public class QdrantClient : IDisposable
 	}
 
 	#endregion
+
+	#region Cluster management
+
+	/// <summary>
+	/// Create shard key
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="createShardKey">Request to create shard key</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<CreateShardKeyResponse> CreateShardKeyAsync(
+		string collectionName,
+		CreateShardKey createShardKey,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new CreateShardKeyRequest
+		{
+			CollectionName = collectionName,
+			Request = createShardKey,
+		};
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.CreateShardKey(createShardKey.ShardKey.Keyword, createShardKey.ShardKey.Number, collectionName);
+
+		try
+		{
+			var response = await _collectionsClient
+				.CreateShardKeyAsync(
+					request: request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.CreateShardKey), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Delete shard key
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="deleteShardKey">Request to delete shard key</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<DeleteShardKeyResponse> DeleteShardKeyAsync(
+		string collectionName,
+		DeleteShardKey deleteShardKey,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new DeleteShardKeyRequest
+		{
+			CollectionName = collectionName,
+			Request = deleteShardKey,
+		};
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.DeleteShardKey(deleteShardKey.ShardKey.Keyword, deleteShardKey.ShardKey.Number, collectionName);
+
+		try
+		{
+			var response = await _collectionsClient
+				.DeleteShardKeyAsync(
+					request: request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.DeleteShardKey), e);
+
+			throw;
+		}
+	}
+
+	#endregion Cluster management
 
 	private static void Populate<T>(RepeatedField<T> repeatedField, ReadOnlyMemory<T> memory)
 	{
