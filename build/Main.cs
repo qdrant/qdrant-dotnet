@@ -62,6 +62,7 @@ cmd.SetHandler(async () =>
 		Console.WriteLine($"Downloading protos for tag {qdrantVersion} to {protosTagDir}");
 		var url = "https://api.github.com/repos/qdrant/qdrant/tarball/v1.7.0";
 		var protoFileRegex = new Regex(".*?lib/api/src/grpc/proto/.*?.proto");
+		var privateProtoFileRegex = new Regex("(?:.*?internal.*?|raft_service|health_check).proto");
 		var client = new HttpClient
 		{
 			DefaultRequestHeaders = { UserAgent = { new ProductInfoHeaderValue("qdrant-dotnet", "1.0.0") } },
@@ -73,7 +74,7 @@ cmd.SetHandler(async () =>
 		var reader = ReaderFactory.Open(gzip);
 		while (reader.MoveToNextEntry())
 		{
-			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key))
+			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key) && !privateProtoFileRegex.IsMatch(reader.Entry.Key))
 				reader.WriteEntryToDirectory(protosTagDir);
 		}
 
