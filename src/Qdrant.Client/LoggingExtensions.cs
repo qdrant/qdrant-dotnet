@@ -100,6 +100,12 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(3023, LogLevel.Debug, "Count points in '{collection}'")]
 	public static partial void Count(this ILogger logger, string collection);
 
+	[LoggerMessage(3024, LogLevel.Debug, "Discover on '{collection}'")]
+	public static partial void Discover(this ILogger logger, string collection);
+
+	[LoggerMessage(3025, LogLevel.Debug, "Discover batch on '{collection}'")]
+	public static partial void DiscoverBatch(this ILogger logger, string collection);
+
 	#endregion Point management
 
 	#region Snapshot management

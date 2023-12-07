@@ -3263,6 +3263,169 @@ public class QdrantClient : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Use context and a target to find the most similar points to the target, constrained by the context.
+	/// </summary>
+	/// 
+	/// <remarks>
+	/// When using only the context (without a target), a special search - called context search - is performed where
+	/// pairs of points are used to generate a loss that guides the search towards the zone where
+	/// most positive examples overlap. This means that the score minimizes the scenario of
+	/// finding a point closer to a negative than to a positive part of a pair.
+	///
+	/// Since the score of a context relates to loss, the maximum score a point can get is 0.0,
+	/// and it becomes normal that many points can have a score of 0.0.
+	///
+	/// When using target (with or without context), the score behaves a little different: The 
+	/// integer part of the score represents the rank with respect to the context, while the
+	/// decimal part of the score relates to the distance to the target. The context part of the score for 
+	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
+	/// and -1 otherwise.
+	/// </remarks>
+	/// 
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="target">Use this as the primary search objective.</param>
+	/// <param name="context">Search will be constrained by these pairs of examples.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="offset">Offset of the result.</param>
+	/// <param name="usingVector">
+	/// Define which vector to use for recommendation, if not specified - default vector.
+	/// </param>
+	/// <param name="lookupFrom">
+	/// Name of the collection to use for points lookup, if not specified - use current collection.
+	/// </param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
+		string collectionName,
+		TargetVector target,
+		IReadOnlyList<ContextExamplePair> context,
+		Filter? filter = null,
+		uint limit = 10,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		SearchParams? searchParams = null,
+		ulong offset = 0,
+		string? usingVector = null,
+		LookupLocation? lookupFrom = null,
+		ReadConsistency? readConsistency = null,
+		TimeSpan? timeout = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new DiscoverPoints
+		{
+			CollectionName = collectionName,
+			Target = target,
+			Context = { context },
+			Limit = limit,
+			Offset = offset,
+		};
+
+		if (filter is not null)
+			request.Filter = filter;
+
+		if (payloadSelector is not null)
+			request.WithPayload = payloadSelector;
+
+		if (vectorsSelector is not null)
+			request.WithVectors = vectorsSelector;
+
+		if (searchParams is not null)
+			request.Params = searchParams;
+
+		if (usingVector is not null)
+			request.Using = usingVector;
+
+		if (lookupFrom is not null)
+			request.LookupFrom = lookupFrom;
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		if (shardKeySelector is not null)
+			request.ShardKeySelector = shardKeySelector;
+
+		_logger.Discover(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.DiscoverAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.Discover), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Batch request points based on { positive, negative } pairs of examples, and/or a target
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="discoverPoints">Batched request.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<BatchResult>> DiscoverBatchAsync(
+		string collectionName,
+		IReadOnlyList<DiscoverPoints> discoverPoints,
+		ReadConsistency? readConsistency = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new DiscoverBatchPoints
+		{
+			CollectionName = collectionName,
+			DiscoverPoints = { discoverPoints },
+		};
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.DiscoverBatch(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.DiscoverBatchAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.DiscoverBatch), e);
+
+			throw;
+		}
+	}
+
 	#endregion Point management
 
 	#region Snapshot management
