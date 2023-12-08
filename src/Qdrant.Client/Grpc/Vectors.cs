@@ -43,18 +43,15 @@ public partial class Vectors
 		return new Vectors { Vectors_ = namedVectors };
 	}
 
-	/// <summary>
-	/// Implicitly converts an array of tuples of <see cref="string"/> and <see cref="Vector"/> to a new instance
+    /// <summary>
+	/// Implicitly converts a tuple of <see cref="string"/> and <see cref="Vector"/> to a new instance
 	/// of <see cref="Vectors"/>
 	/// </summary>
-	/// <param name="values">an array of tuples of string and vectors</param>
+	/// <param name="value">a tuple of string and vectors</param>
 	/// <returns>a new instance of <see cref="Vectors"/></returns>
-	public static implicit operator Vectors((string, Vector)[] values)
+	public static implicit operator Vectors((string, Vector) value)
 	{
-		var namedVectors = new NamedVectors();
-		foreach (var value in values)
-			namedVectors.Vectors.Add(value.Item1, value.Item2);
-
+		var namedVectors = new NamedVectors { Vectors = { [value.Item1] = value.Item2 }};
 		return new Vectors { Vectors_ = namedVectors };
 	}
 }
