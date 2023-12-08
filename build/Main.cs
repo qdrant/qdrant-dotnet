@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.CommandLine;
 using System.IO.Compression;
 using System.Net.Http.Headers;
@@ -62,6 +63,7 @@ cmd.SetHandler(async () =>
 		Console.WriteLine($"Downloading protos for tag {qdrantVersion} to {protosTagDir}");
 		var url = $"https://api.github.com/repos/qdrant/qdrant/tarball/refs/tags/{qdrantVersion}";
 		var protoFileRegex = new Regex(".*?lib/api/src/grpc/proto/.*?.proto");
+		var privateProtoFileRegex = new Regex("(?:.*?internal.*?|raft_service|health_check|shard_snapshots_service).proto");
 		var client = new HttpClient
 		{
 			DefaultRequestHeaders = { UserAgent = { new ProductInfoHeaderValue("qdrant-dotnet", "1.0.0") } },
@@ -73,8 +75,21 @@ cmd.SetHandler(async () =>
 		var reader = ReaderFactory.Open(gzip);
 		while (reader.MoveToNextEntry())
 		{
-			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key))
+			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key) && !privateProtoFileRegex.IsMatch(reader.Entry.Key))
 				reader.WriteEntryToDirectory(protosTagDir);
+		}
+
+		{
+			// remove references to private proto files from qdrant.proto, to allow protogen to work
+			var file = $"{protosTagDir}/qdrant.proto";
+			var contents = File.ReadAllLines(file).ToList();
+			for (var i = contents.Count - 1; i >= 0; i--)
+			{
+				var line = contents[i];
+				if (line.StartsWith("import") && privateProtoFileRegex.IsMatch(line))
+					contents.RemoveAt(i);
+			}
+			File.WriteAllLines(file, contents);
 		}
 
 		// add csharp namespace to qdrant package proto files if they don't contain one

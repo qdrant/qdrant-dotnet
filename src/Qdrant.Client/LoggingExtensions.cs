@@ -100,6 +100,12 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(3023, LogLevel.Debug, "Count points in '{collection}'")]
 	public static partial void Count(this ILogger logger, string collection);
 
+	[LoggerMessage(3024, LogLevel.Debug, "Discover on '{collection}'")]
+	public static partial void Discover(this ILogger logger, string collection);
+
+	[LoggerMessage(3025, LogLevel.Debug, "Discover batch on '{collection}'")]
+	public static partial void DiscoverBatch(this ILogger logger, string collection);
+
 	#endregion Point management
 
 	#region Snapshot management
@@ -121,6 +127,16 @@ internal static partial class LoggingExtensions
 
 	[LoggerMessage(4005, LogLevel.Debug, "Delete snapshot '{snapshot}' for a whole storage")]
 	public static partial void DeleteFullSnapshot(this ILogger logger, string snapshot);
+
+	#endregion
+
+	#region Cluster management
+
+	[LoggerMessage(5000, LogLevel.Debug, "Create shard key '{key}' for collection '{collection}'")]
+	public static partial void CreateShardKey(this ILogger logger, string key, string collection);
+
+	[LoggerMessage(5001, LogLevel.Debug, "Delete shard key '{key}' for collection '{collection}'")]
+	public static partial void DeleteShardKey(this ILogger logger, string key, string collection);
 
 	#endregion
 
