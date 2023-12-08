@@ -3627,7 +3627,14 @@ public class QdrantClient : IDisposable
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
 
-		_logger.CreateShardKey(createShardKey.ShardKey.Keyword, createShardKey.ShardKey.Number, collectionName);
+		if (createShardKey.ShardKey.HasKeyword)
+		{
+			_logger.CreateShardKey(createShardKey.ShardKey.Keyword, collectionName);
+		}
+		else
+		{
+			_logger.CreateShardKey(createShardKey.ShardKey.Number.ToString(), collectionName);
+		}
 
 		try
 		{
@@ -3672,7 +3679,14 @@ public class QdrantClient : IDisposable
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
 
-		_logger.DeleteShardKey(deleteShardKey.ShardKey.Keyword, deleteShardKey.ShardKey.Number, collectionName);
+		if (deleteShardKey.ShardKey.HasKeyword)
+		{
+			_logger.DeleteShardKey(deleteShardKey.ShardKey.Keyword, collectionName);
+		}
+		else
+		{
+			_logger.DeleteShardKey(deleteShardKey.ShardKey.Number.ToString(), collectionName);
+		}
 
 		try
 		{
