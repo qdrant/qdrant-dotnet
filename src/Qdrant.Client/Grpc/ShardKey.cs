@@ -13,7 +13,7 @@ public partial class ShardKey
 	public static implicit operator ShardKey(ulong key) => new() { Number = key };
 
 	/// <summary>
-	/// Implicitly converts a ulong to a new instance of <see cref="ShardKey"/>
+	/// Implicitly converts a string to a new instance of <see cref="ShardKey"/>
 	/// </summary>
 	/// <param name="key">key</param>
 	/// <returns>a new instance of <see cref="ShardKey"/></returns>
