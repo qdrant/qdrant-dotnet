@@ -15,7 +15,7 @@ public partial class SparseVectorConfig
 		Map = { configs }
 	};
 
-/// <summary>
+	/// <summary>
 	/// Implicitly converts a tuple of <see cref="string"/> and <see cref="SparseVectorParams"/> to a new instance
 	/// </summary>
 	/// <param name="config">tuple of key and config</param>

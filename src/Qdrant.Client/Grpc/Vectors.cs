@@ -43,7 +43,7 @@ public partial class Vectors
 		return new Vectors { Vectors_ = namedVectors };
 	}
 
-    /// <summary>
+	/// <summary>
 	/// Implicitly converts a tuple of <see cref="string"/> and <see cref="Vector"/> to a new instance
 	/// of <see cref="Vectors"/>
 	/// </summary>
@@ -51,7 +51,7 @@ public partial class Vectors
 	/// <returns>a new instance of <see cref="Vectors"/></returns>
 	public static implicit operator Vectors((string, Vector) value)
 	{
-		var namedVectors = new NamedVectors { Vectors = { [value.Item1] = value.Item2 }};
+		var namedVectors = new NamedVectors { Vectors = { [value.Item1] = value.Item2 } };
 		return new Vectors { Vectors_ = namedVectors };
 	}
 }

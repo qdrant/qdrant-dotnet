@@ -42,7 +42,7 @@ public class SparseVectorTests : IAsyncLifetime
 			new PointStruct
 			{
 				Id = 10,
-				Vectors = new[] { ("sparse-name", new Vector(new[]{ (30f, 0u), (31f, 1u) })) },
+				Vectors = ("sparse-name", new Vector(new[]{ (30f, 0u), (31f, 1u) })),
 				Payload = { ["foo"] = "hello" }
 			}
 		});
@@ -64,14 +64,14 @@ public class SparseVectorTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync(
 			collectionName: collection,
-			sparseVectorsConfig: new SparseVectorConfig(("sparse-name", new SparseVectorParams { }));
+			sparseVectorsConfig: new SparseVectorConfig(("sparse-name", new SparseVectorParams { })));
 
 		var updateResult = await _client.UpsertAsync(collection, new[]
 		{
 			new PointStruct
 			{
 				Id = 8,
-				Vectors = new[] { ("sparse-name", new Vector(new[]{ (3.5f, 0u), (4.5f, 1u) })) },
+				Vectors = ("sparse-name", new Vector(new[]{ (3.5f, 0u), (4.5f, 1u) })),
 				Payload =
 				{
 					["foo"] = "hello",
@@ -81,7 +81,7 @@ public class SparseVectorTests : IAsyncLifetime
 			new PointStruct
 			{
 				Id = 9,
-				Vectors = new[] { ("sparse-name", new Vector(new[]{ (10.5f, 0u), (11.5f, 1u) })) },
+				Vectors = ("sparse-name", new Vector(new[]{ (10.5f, 0u), (11.5f, 1u) })),
 				Payload =
 				{
 					["foo"] = "goodbye",
