@@ -135,7 +135,7 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(5000, LogLevel.Debug, "Create shard key '{key}' for collection '{collection}'")]
 	public static partial void CreateShardKey(this ILogger logger, string key, string collection);
 
-	[LoggerMessage(5007, LogLevel.Debug, "Delete shard key '{key}' for collection '{collection}'")]
+	[LoggerMessage(5001, LogLevel.Debug, "Delete shard key '{key}' for collection '{collection}'")]
 	public static partial void DeleteShardKey(this ILogger logger, string key, string collection);
 
 	#endregion
