@@ -64,9 +64,7 @@ public class SparseVectorTests : IAsyncLifetime
 	{
 		await _client.CreateCollectionAsync(
 			collectionName: collection,
-			sparseVectorsConfig: new SparseVectorConfig(new[] {
-				("sparse-name", new SparseVectorParams { })
-			}));
+			sparseVectorsConfig: new SparseVectorConfig(("sparse-name", new SparseVectorParams { }));
 
 		var updateResult = await _client.UpsertAsync(collection, new[]
 		{
