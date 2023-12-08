@@ -80,15 +80,15 @@ cmd.SetHandler(async () =>
 		}
 
 		{
+			// remove references to private proto files from qdrant.proto, to allow protogen to work
 			var file = $"{protosTagDir}/qdrant.proto";
 			var contents = File.ReadAllLines(file).ToList();
-
-			for (var line = contents.Count() - 1; line >= 0; line--)
+			for (var i = contents.Count - 1; i >= 0; i--)
 			{
-				if (contents[line].StartsWith("import") && privateProtoFileRegex.IsMatch(contents[line]))
-					contents.RemoveAt(line);
+				var line = contents[i];
+				if (line.StartsWith("import") && privateProtoFileRegex.IsMatch(line))
+					contents.RemoveAt(i);
 			}
-
 			File.WriteAllLines(file, contents);
 		}
 
