@@ -27,4 +27,34 @@ public partial class Vectors
 
 		return new Vectors { Vectors_ = namedVectors };
 	}
+
+	/// <summary>
+	/// Implicitly converts a dictionary of <see cref="string"/> and <see cref="Vector"/> to a new instance
+	/// of <see cref="Vectors"/>
+	/// </summary>
+	/// <param name="values">a dictionary of string and vectors</param>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors(Dictionary<string, Vector> values)
+	{
+		var namedVectors = new NamedVectors();
+		foreach (var value in values)
+			namedVectors.Vectors.Add(value.Key, value.Value);
+
+		return new Vectors { Vectors_ = namedVectors };
+	}
+
+	/// <summary>
+	/// Implicitly converts an array of tuples of <see cref="string"/> and <see cref="Vector"/> to a new instance
+	/// of <see cref="Vectors"/>
+	/// </summary>
+	/// <param name="values">an array of tuples of string and vectors</param>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors((string, Vector)[] values)
+	{
+		var namedVectors = new NamedVectors();
+		foreach (var value in values)
+			namedVectors.Vectors.Add(value.Item1, value.Item2);
+
+		return new Vectors { Vectors_ = namedVectors };
+	}
 }
