@@ -151,14 +151,14 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Creates a new collection with the given parameters.
@@ -211,14 +211,14 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
 
 	private async Task CreateCollectionAsync(
 		string collectionName,
@@ -232,9 +232,9 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new CreateCollection
@@ -336,14 +336,14 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
@@ -396,14 +396,14 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
 
 	private async Task RecreateCollectionAsync(
 		string collectionName,
@@ -417,9 +417,9 @@ public class QdrantClient : IDisposable
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
 		string? initFromCollection = null,
-		TimeSpan? timeout = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		await DeleteCollectionAsync(collectionName, timeout, cancellationToken).ConfigureAwait(false);
@@ -427,7 +427,7 @@ public class QdrantClient : IDisposable
 		await CreateCollectionAsync(
 				collectionName, vectorsConfig, shardNumber, replicationFactor,
 				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-				initFromCollection, timeout, shardingMethod, sparseVectorsConfig, cancellationToken)
+				initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken)
 			.ConfigureAwait(false);
 	}
 
@@ -570,11 +570,11 @@ public class QdrantClient : IDisposable
 		CollectionParamsDiff? collectionParams = null,
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
-		TimeSpan? timeout = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
+			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -604,11 +604,11 @@ public class QdrantClient : IDisposable
 		CollectionParamsDiff? collectionParams = null,
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
-		TimeSpan? timeout = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
+			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -633,11 +633,11 @@ public class QdrantClient : IDisposable
 		CollectionParamsDiff? collectionParams = null,
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
-		TimeSpan? timeout = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, timeout, sparseVectorsConfig, cancellationToken);
+			hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
 
 	private async Task UpdateCollectionCoreAsync(
 		string collectionName,
@@ -646,8 +646,8 @@ public class QdrantClient : IDisposable
 		CollectionParamsDiff? collectionParams = null,
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
-		TimeSpan? timeout = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new UpdateCollection
@@ -2396,9 +2396,9 @@ public class QdrantClient : IDisposable
 		float? scoreThreshold = null,
 		string? vectorName = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
 		ReadOnlyMemory<uint>? sparseIndices = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new SearchPoints
@@ -2555,9 +2555,9 @@ public class QdrantClient : IDisposable
 		string? vectorName = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
 		ReadOnlyMemory<uint>? sparseIndices = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new SearchPointGroups
@@ -2728,8 +2728,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecommendAsync(
 			collectionName,
@@ -2745,8 +2745,8 @@ public class QdrantClient : IDisposable
 			usingVector,
 			lookupFrom,
 			readConsistency,
-			timeout,
 			shardKeySelector,
+			timeout,
 			cancellationToken);
 
 	/// <summary>
@@ -2789,8 +2789,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecommendAsync(
 			collectionName,
@@ -2806,8 +2806,8 @@ public class QdrantClient : IDisposable
 			usingVector,
 			lookupFrom,
 			readConsistency,
-			timeout,
 			shardKeySelector,
+			timeout,
 			cancellationToken);
 
 	/// <summary>
@@ -2850,8 +2850,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new RecommendPoints
@@ -3011,8 +3011,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	=> RecommendGroupsAsync(
 		collectionName,
@@ -3029,8 +3029,8 @@ public class QdrantClient : IDisposable
 		usingVector,
 		withLookup,
 		readConsistency,
-		timeout,
 		shardKeySelector,
+		timeout,
 		cancellationToken);
 
 	/// <summary>
@@ -3078,8 +3078,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	=> RecommendGroupsAsync(
 		collectionName,
@@ -3096,8 +3096,8 @@ public class QdrantClient : IDisposable
 		usingVector,
 		withLookup,
 		readConsistency,
-		timeout,
 		shardKeySelector,
+		timeout,
 		cancellationToken);
 
 	/// <summary>
@@ -3145,8 +3145,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		WithLookup? withLookup = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new RecommendPointGroups
@@ -3317,8 +3317,8 @@ public class QdrantClient : IDisposable
 		string? usingVector = null,
 		LookupLocation? lookupFrom = null,
 		ReadConsistency? readConsistency = null,
-		TimeSpan? timeout = null,
 		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new DiscoverPoints
