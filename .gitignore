@@ -10,3 +10,4 @@ nuget
 protos
 
 *.sln.DotSettings.user
+output
