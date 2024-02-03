@@ -86,7 +86,7 @@ Insert vectors into a collection
 var random = new Random();
 var points = Enumerable.Range(1, 100).Select(i => new PointStruct
 {
-  Id = i,
+  Id = (ulong)i,
   Vectors = Enumerable.Range(1, 100).Select(_ => (float)random.NextDouble()).ToArray(),
   Payload = 
   { 
