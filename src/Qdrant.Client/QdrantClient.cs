@@ -3266,7 +3266,7 @@ public class QdrantClient : IDisposable
 	/// <summary>
 	/// Use context and a target to find the most similar points to the target, constrained by the context.
 	/// </summary>
-	/// 
+	///
 	/// <remarks>
 	/// When using only the context (without a target), a special search - called context search - is performed where
 	/// pairs of points are used to generate a loss that guides the search towards the zone where
@@ -3276,16 +3276,16 @@ public class QdrantClient : IDisposable
 	/// Since the score of a context relates to loss, the maximum score a point can get is 0.0,
 	/// and it becomes normal that many points can have a score of 0.0.
 	///
-	/// When using target (with or without context), the score behaves a little different: The 
+	/// When using target (with or without context), the score behaves a little different: The
 	/// integer part of the score represents the rank with respect to the context, while the
-	/// decimal part of the score relates to the distance to the target. The context part of the score for 
-	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
+	/// decimal part of the score relates to the distance to the target. The context part of the score for
+	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
 	/// and -1 otherwise.
 	/// </remarks>
-	/// 
+	///
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="target">Use this as the primary search objective.</param>
 	/// <param name="context">Search will be constrained by these pairs of examples.</param>
+	/// <param name="target">Use this as the primary search objective.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="limit">Max number of results.</param>
 	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
@@ -3306,8 +3306,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
-		TargetVector target,
 		IReadOnlyList<ContextExamplePair> context,
+		TargetVector? target = null,
 		Filter? filter = null,
 		uint limit = 10,
 		WithPayloadSelector? payloadSelector = null,
@@ -3324,11 +3324,13 @@ public class QdrantClient : IDisposable
 		var request = new DiscoverPoints
 		{
 			CollectionName = collectionName,
-			Target = target,
 			Context = { context },
 			Limit = limit,
 			Offset = offset,
 		};
+
+		if (target is not null)
+			request.Target = target;
 
 		if (filter is not null)
 			request.Filter = filter;
