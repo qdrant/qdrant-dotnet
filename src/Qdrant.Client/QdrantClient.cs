@@ -1334,7 +1334,7 @@ public class QdrantClient : IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	private Task<UpdateResult> DeleteVectorsAsync(
+	public Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<ulong> ids,
@@ -1363,7 +1363,7 @@ public class QdrantClient : IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	private Task<UpdateResult> DeleteVectorsAsync(
+	public Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<Guid> ids,
@@ -1392,7 +1392,7 @@ public class QdrantClient : IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	private Task<UpdateResult> DeleteVectorsAsync(
+	public Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		Filter filter,
@@ -2695,6 +2695,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2718,6 +2720,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<ulong> positive,
 		IReadOnlyList<ulong>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2735,6 +2739,8 @@ public class QdrantClient : IDisposable
 			collectionName,
 			positive.Select(id => new PointId { Num = id }).ToList(),
 			negative?.Select(id => new PointId { Num = id }).ToList(),
+			positive_vectors,
+			negative_vectors,
 			filter,
 			searchParams,
 			limit,
@@ -2756,6 +2762,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2779,6 +2787,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<Guid> positive,
 		IReadOnlyList<Guid>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2796,6 +2806,8 @@ public class QdrantClient : IDisposable
 			collectionName,
 			positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 			negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+			positive_vectors,
+			negative_vectors,
 			filter,
 			searchParams,
 			limit,
@@ -2817,6 +2829,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2840,6 +2854,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<PointId> positive,
 		IReadOnlyList<PointId>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2866,6 +2882,16 @@ public class QdrantClient : IDisposable
 
 		if (negative is not null)
 			request.Negative.AddRange(negative);
+
+		if (positive_vectors is not null)
+		{
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positive_vectors);
+		}
+
+		if (negative_vectors is not null)
+		{
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negative_vectors);
+		}
 
 		if (filter is not null)
 			request.Filter = filter;
@@ -2977,6 +3003,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3001,6 +3029,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<ulong> positive,
 		IReadOnlyList<ulong>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3019,6 +3049,8 @@ public class QdrantClient : IDisposable
 		groupBy,
 		positive.Select(id => new PointId { Num = id }).ToList(),
 		negative?.Select(id => new PointId { Num = id }).ToList(),
+		positive_vectors,
+		negative_vectors,
 		filter,
 		searchParams,
 		limit,
@@ -3044,6 +3076,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3068,6 +3102,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<Guid> positive,
 		IReadOnlyList<Guid>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3086,6 +3122,8 @@ public class QdrantClient : IDisposable
 		groupBy,
 		positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 		negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
+		positive_vectors,
+		negative_vectors,
 		filter,
 		searchParams,
 		limit,
@@ -3111,6 +3149,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
+	/// <param name="positive_vectors">Look for vectors closest to these.</param>
+	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3135,6 +3175,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<PointId> positive,
 		IReadOnlyList<PointId>? negative = null,
+		ReadOnlyMemory<Vector>? positive_vectors = null,
+		ReadOnlyMemory<Vector>? negative_vectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3162,6 +3204,16 @@ public class QdrantClient : IDisposable
 
 		if (negative is not null)
 			request.Negative.AddRange(negative);
+
+		if (positive_vectors is not null)
+		{
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positive_vectors);
+		}
+
+		if (negative_vectors is not null)
+		{
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negative_vectors);
+		}
 
 		if (filter is not null)
 			request.Filter = filter;
@@ -3202,6 +3254,54 @@ public class QdrantClient : IDisposable
 		catch (Exception e)
 		{
 			_logger.OperationFailed(nameof(LoggingExtensions.RecommendGroups), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Performs a batch of operations on a collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="operations">The operations to be performed in the batch.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<UpdateResult>> UpdateBatchAsync(
+		string collectionName,
+		IReadOnlyList<PointsUpdateOperation> operations,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new UpdateBatchPoints
+		{
+			CollectionName = collectionName,
+			Wait = wait
+		};
+
+		request.Operations.AddRange(operations);
+
+		if (ordering is not null)
+			request.Ordering = new() { Type = ordering.Value };
+
+		_logger.UpdateBatch(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.UpdateBatchAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.UpdateBatch), e);
 
 			throw;
 		}
@@ -3266,7 +3366,7 @@ public class QdrantClient : IDisposable
 	/// <summary>
 	/// Use context and a target to find the most similar points to the target, constrained by the context.
 	/// </summary>
-	/// 
+	///
 	/// <remarks>
 	/// When using only the context (without a target), a special search - called context search - is performed where
 	/// pairs of points are used to generate a loss that guides the search towards the zone where
@@ -3276,13 +3376,13 @@ public class QdrantClient : IDisposable
 	/// Since the score of a context relates to loss, the maximum score a point can get is 0.0,
 	/// and it becomes normal that many points can have a score of 0.0.
 	///
-	/// When using target (with or without context), the score behaves a little different: The 
+	/// When using target (with or without context), the score behaves a little different: The
 	/// integer part of the score represents the rank with respect to the context, while the
-	/// decimal part of the score relates to the distance to the target. The context part of the score for 
-	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair, 
+	/// decimal part of the score relates to the distance to the target. The context part of the score for
+	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
 	/// and -1 otherwise.
 	/// </remarks>
-	/// 
+	///
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="target">Use this as the primary search objective.</param>
 	/// <param name="context">Search will be constrained by these pairs of examples.</param>
