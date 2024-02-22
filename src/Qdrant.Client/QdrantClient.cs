@@ -2695,8 +2695,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2720,8 +2720,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<ulong> positive,
 		IReadOnlyList<ulong>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2739,8 +2739,8 @@ public class QdrantClient : IDisposable
 			collectionName,
 			positive.Select(id => new PointId { Num = id }).ToList(),
 			negative?.Select(id => new PointId { Num = id }).ToList(),
-			positive_vectors,
-			negative_vectors,
+			positiveVectors,
+			negativeVectors,
 			filter,
 			searchParams,
 			limit,
@@ -2762,8 +2762,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2787,8 +2787,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<Guid> positive,
 		IReadOnlyList<Guid>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2806,8 +2806,8 @@ public class QdrantClient : IDisposable
 			collectionName,
 			positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 			negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-			positive_vectors,
-			negative_vectors,
+			positiveVectors,
+			negativeVectors,
 			filter,
 			searchParams,
 			limit,
@@ -2829,8 +2829,8 @@ public class QdrantClient : IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2854,8 +2854,8 @@ public class QdrantClient : IDisposable
 		string collectionName,
 		IReadOnlyList<PointId> positive,
 		IReadOnlyList<PointId>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2883,14 +2883,14 @@ public class QdrantClient : IDisposable
 		if (negative is not null)
 			request.Negative.AddRange(negative);
 
-		if (positive_vectors is not null)
+		if (positiveVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positive_vectors);
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positiveVectors);
 		}
 
-		if (negative_vectors is not null)
+		if (negativeVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negative_vectors);
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negativeVectors);
 		}
 
 		if (filter is not null)
@@ -3003,8 +3003,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3029,8 +3029,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<ulong> positive,
 		IReadOnlyList<ulong>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3049,8 +3049,8 @@ public class QdrantClient : IDisposable
 		groupBy,
 		positive.Select(id => new PointId { Num = id }).ToList(),
 		negative?.Select(id => new PointId { Num = id }).ToList(),
-		positive_vectors,
-		negative_vectors,
+		positiveVectors,
+		negativeVectors,
 		filter,
 		searchParams,
 		limit,
@@ -3076,8 +3076,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3102,8 +3102,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<Guid> positive,
 		IReadOnlyList<Guid>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3122,8 +3122,8 @@ public class QdrantClient : IDisposable
 		groupBy,
 		positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 		negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-		positive_vectors,
-		negative_vectors,
+		positiveVectors,
+		negativeVectors,
 		filter,
 		searchParams,
 		limit,
@@ -3149,8 +3149,8 @@ public class QdrantClient : IDisposable
 	/// </param>
 	/// <param name="positive">Look for vectors closest to the vectors from these points.</param>
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
-	/// <param name="positive_vectors">Look for vectors closest to these.</param>
-	/// <param name="negative_vectors">Try to avoid vectors like these.</param>
+	/// <param name="positiveVectors">Look for vectors closest to these.</param>
+	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3175,8 +3175,8 @@ public class QdrantClient : IDisposable
 		string groupBy,
 		IReadOnlyList<PointId> positive,
 		IReadOnlyList<PointId>? negative = null,
-		ReadOnlyMemory<Vector>? positive_vectors = null,
-		ReadOnlyMemory<Vector>? negative_vectors = null,
+		ReadOnlyMemory<Vector>? positiveVectors = null,
+		ReadOnlyMemory<Vector>? negativeVectors = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3205,14 +3205,14 @@ public class QdrantClient : IDisposable
 		if (negative is not null)
 			request.Negative.AddRange(negative);
 
-		if (positive_vectors is not null)
+		if (positiveVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positive_vectors);
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positiveVectors);
 		}
 
-		if (negative_vectors is not null)
+		if (negativeVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negative_vectors);
+			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negativeVectors);
 		}
 
 		if (filter is not null)

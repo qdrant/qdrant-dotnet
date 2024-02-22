@@ -353,7 +353,7 @@ public class PointTests : IAsyncLifetime
 		var points = await _client.RecommendAsync(
 			"collection_1",
 			positive: new PointId[] { 8 },
-			positive_vectors: new Vector[] {
+			positiveVectors: new Vector[] {
 				new float[] { 3.5f, 4.5f }
 			},
 			limit: 1
