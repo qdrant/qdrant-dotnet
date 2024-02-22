@@ -2890,7 +2890,7 @@ public class QdrantClient : IDisposable
 
 		if (negativeVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negativeVectors);
+			Populate(request.NegativeVectors, (ReadOnlyMemory<Vector>)negativeVectors);
 		}
 
 		if (filter is not null)
@@ -3212,7 +3212,7 @@ public class QdrantClient : IDisposable
 
 		if (negativeVectors is not null)
 		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)negativeVectors);
+			Populate(request.NegativeVectors, (ReadOnlyMemory<Vector>)negativeVectors);
 		}
 
 		if (filter is not null)
