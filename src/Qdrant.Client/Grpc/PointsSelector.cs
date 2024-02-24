@@ -19,11 +19,11 @@ public partial class PointsSelector
 	/// Implicitly converts an array of <see cref="ulong" /> ID to a new instance of <see cref="PointsSelector"/>
 	/// </summary>
 	public static implicit operator PointsSelector(ulong[] ids) =>
-		new() { Points = new PointsIdsList { Ids = { ids.Select(id => (PointId)id).ToArray() } } };
+		new() { Points = new PointsIdsList { Ids = { ids.Select(id => (PointId)id) } } };
 
 	/// <summary>
 	/// Implicitly converts an array of <see cref="Guid" /> ID to a new instance of <see cref="PointsSelector"/>
 	/// </summary>
 	public static implicit operator PointsSelector(Guid[] ids) =>
-		new() { Points = new PointsIdsList { Ids = { ids.Select(id => (PointId)id).ToArray() } } };
+		new() { Points = new PointsIdsList { Ids = { ids.Select(id => (PointId)id) } } };
 }

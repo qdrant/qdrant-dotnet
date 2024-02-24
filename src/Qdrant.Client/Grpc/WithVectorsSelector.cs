@@ -15,7 +15,7 @@ public partial class WithVectorsSelector
 	/// <summary>
 	/// Implicitly converts an array <see cref="string"/> to a new instance of <see cref="WithPayloadSelector"/>
 	/// </summary>
-	/// <param name="vectors">List of vector names to return.</param>
+	/// <param name="vectors">List of vector names to include in the response.</param>
 	/// <returns>a new instance of <see cref="WithPayloadSelector"/></returns>
 	public static implicit operator WithVectorsSelector(string[] vectors) =>
 		new() { Include = new() { Names = { vectors } } };
