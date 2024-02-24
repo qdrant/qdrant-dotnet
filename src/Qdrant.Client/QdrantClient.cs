@@ -2884,14 +2884,10 @@ public class QdrantClient : IDisposable
 			request.Negative.AddRange(negative);
 
 		if (positiveVectors is not null)
-		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positiveVectors);
-		}
+			Populate(request.PositiveVectors, positiveVectors.Value);
 
 		if (negativeVectors is not null)
-		{
-			Populate(request.NegativeVectors, (ReadOnlyMemory<Vector>)negativeVectors);
-		}
+			Populate(request.NegativeVectors, negativeVectors.Value);
 
 		if (filter is not null)
 			request.Filter = filter;
@@ -3206,14 +3202,10 @@ public class QdrantClient : IDisposable
 			request.Negative.AddRange(negative);
 
 		if (positiveVectors is not null)
-		{
-			Populate(request.PositiveVectors, (ReadOnlyMemory<Vector>)positiveVectors);
-		}
+			Populate(request.PositiveVectors, positiveVectors.Value);
 
 		if (negativeVectors is not null)
-		{
-			Populate(request.NegativeVectors, (ReadOnlyMemory<Vector>)negativeVectors);
-		}
+			Populate(request.NegativeVectors, negativeVectors.Value);
 
 		if (filter is not null)
 			request.Filter = filter;
