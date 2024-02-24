@@ -42,6 +42,15 @@ public class CollectionTests : IAsyncLifetime
 	}
 
 	[Fact]
+	public async Task RecreateCollection_with_no_existing_collection()
+	{
+		await _client.RecreateCollectionAsync(
+			"collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+		Assert.Contains(await _client.ListCollectionsAsync(), c => c == "collection_1");
+	}
+
+	[Fact]
 	public async Task ListCollections()
 	{
 		Assert.Empty(await _client.ListCollectionsAsync());
