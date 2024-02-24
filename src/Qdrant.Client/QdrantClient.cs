@@ -3273,7 +3273,6 @@ public class QdrantClient : IDisposable
 	/// <summary>
 	/// Use context and a target to find the most similar points to the target, constrained by the context.
 	/// </summary>
-	///
 	/// <remarks>
 	/// When using only the context (without a target), a special search - called context search - is performed where
 	/// pairs of points are used to generate a loss that guides the search towards the zone where
@@ -3289,7 +3288,6 @@ public class QdrantClient : IDisposable
 	/// each pair is calculated +1 if the point is closer to a positive than to a negative part of a pair,
 	/// and -1 otherwise.
 	/// </remarks>
-	///
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="target">Use this as the primary search objective.</param>
 	/// <param name="context">Search will be constrained by these pairs of examples.</param>
