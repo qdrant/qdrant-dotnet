@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
 
     - name: Build
       run: ./build.sh build
@@ -45,7 +45,7 @@ jobs:
       shell: bash
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: QdrantNupkg
           path: nuget
