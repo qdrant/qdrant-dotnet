@@ -285,6 +285,24 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
+	public async Task Recommend_with_vector()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.RecommendAsync(
+			"collection_1",
+			positive: new PointId[] { 8 },
+			positiveVectors: new Vector[] {
+				new float[] { 3.5f, 4.5f }
+			},
+			limit: 1
+		);
+
+		var point = Assert.Single(points);
+		Assert.Equal(9ul, point.Id);
+	}
+
+	[Fact]
 	public async Task Count()
 	{
 		await CreateAndSeedCollection("collection_1");
@@ -343,24 +361,6 @@ public class PointTests : IAsyncLifetime
 		var response = await _client.UpdateBatchAsync("collection_1", operations);
 
 		Assert.All(response, r => r.Status.Should().Be(UpdateStatus.Completed));
-	}
-
-	[Fact]
-	public async Task Recommend_with_vector()
-	{
-		await CreateAndSeedCollection("collection_1");
-
-		var points = await _client.RecommendAsync(
-			"collection_1",
-			positive: new PointId[] { 8 },
-			positiveVectors: new Vector[] {
-				new float[] { 3.5f, 4.5f }
-			},
-			limit: 1
-		);
-
-		var point = Assert.Single(points);
-		Assert.Equal(9ul, point.Id);
 	}
 
 	private async Task CreateAndSeedCollection(string collection)
