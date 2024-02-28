@@ -17,8 +17,7 @@ public sealed class QdrantFixture : IAsyncLifetime
 {
 	private readonly QdrantContainer _container;
 
-	public QdrantFixture()
-	{
+	public QdrantFixture() =>
 #if NETFRAMEWORK
 		// .NET Framework must use TLS with HTTPS
 		_container = new QdrantBuilder()
@@ -31,7 +30,7 @@ public sealed class QdrantFixture : IAsyncLifetime
 #else
 		_container = new QdrantBuilder().Build();
 #endif
-	}
+
 
 	public string Host => _container.Hostname;
 
