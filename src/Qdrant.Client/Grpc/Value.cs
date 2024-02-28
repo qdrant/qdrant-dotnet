@@ -40,4 +40,11 @@ public partial class Value
 		var listValues = values.Select(s => new Value { StringValue = s });
 		return new Value { ListValue = new ListValue { Values = { listValues } } };
 	}
+
+	/// <summary>
+	/// Implicitly converts an array of <see cref="Value"/> to a new instance of <see cref="Value"/> with <see cref="ListValue"/>
+	/// </summary>
+	/// <param name="values">the array of <see cref="Value"/></param>
+	/// <returns>a new instance of <see cref="Value"/></returns>
+	public static implicit operator Value(Value[] values) => new Value { ListValue = new ListValue { Values = { values.AsEnumerable() } } };
 }
