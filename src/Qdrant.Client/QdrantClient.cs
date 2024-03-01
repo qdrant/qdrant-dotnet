@@ -3383,8 +3383,8 @@ public class QdrantClient : IDisposable
 	/// </remarks>
 	///
 	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="context">Search will be constrained by these pairs of examples.</param>
 	/// <param name="target">Use this as the primary search objective.</param>
+	/// <param name="context">Search will be constrained by these pairs of examples.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="limit">Max number of results.</param>
 	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
