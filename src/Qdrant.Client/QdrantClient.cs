@@ -2709,7 +2709,7 @@ public class QdrantClient : IDisposable
 	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
-	/// <param name="orderBy">Order the records by a paylaod field.</param>
+	/// <param name="orderBy">Order the records by a payload field.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
