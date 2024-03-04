@@ -4,6 +4,8 @@ namespace Qdrant.Client;
 
 internal static partial class LoggingExtensions
 {
+	#region Collection management
+
 	[LoggerMessage(1000, LogLevel.Debug, "Create collection '{collection}'")]
 	public static partial void CreateCollection(this ILogger logger, string collection);
 
@@ -18,6 +20,11 @@ internal static partial class LoggingExtensions
 
 	[LoggerMessage(1005, LogLevel.Debug, "Update collection '{collection}'")]
 	public static partial void UpdateCollection(this ILogger logger, string collection);
+
+	[LoggerMessage(1006, LogLevel.Debug, "Collection exists '{collection}'")]
+	public static partial void CollectionExists(this ILogger logger, string collection);
+
+	#endregion Collection management
 
 	#region Alias management
 

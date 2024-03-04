@@ -115,6 +115,18 @@ public class CollectionTests : IAsyncLifetime
 	}
 
 	[Fact]
+	public async Task CollectionExists()
+	{
+		Assert.False(await _client.CollectionExistsAsync("collection_1"));
+
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+		Assert.True(await _client.CollectionExistsAsync("collection_1"));
+
+		await _client.DeleteCollectionAsync("collection_1");
+		Assert.False(await _client.CollectionExistsAsync("collection_1"));
+	}
+
+	[Fact]
 	public async Task CreateAlias()
 	{
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });

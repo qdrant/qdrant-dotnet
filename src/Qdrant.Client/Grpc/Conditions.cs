@@ -1,3 +1,5 @@
+using Google.Protobuf.WellKnownTypes;
+
 namespace Qdrant.Client.Grpc;
 
 /// <summary>
@@ -253,6 +255,35 @@ public static class Conditions
 	/// <param name="filter">The filter to nest</param>
 	/// <returns>a new instance of <see cref="Condition"/></returns>
 	public static Condition Filter(Filter filter) => new() { Filter = filter };
+
+	/// <summary>
+	/// Matches records where the given field has values inside the provided DateTime range.
+	/// </summary>
+	/// <param name="field">The name of the field</param>
+	/// <param name="lt">Match time lower than the specified <see cref="DateTime"/> (Upper bound)</param>
+	/// <param name="gt">Match time higher than the specified <see cref="DateTime"/> (Lower bound)</param>
+	/// <param name="gte">Match time higher or equal to the specified <see cref="DateTime"/> (Lower bound)</param>
+	/// <param name="lte">Match time lower or equal to the the specified <see cref="DateTime"/> (Upper bound)</param>
+	/// <returns>A new instance of <see cref="Condition"/></returns>
+	public static Condition DatetimeRange(string field, DateTime? lt = null, DateTime? gt = null, DateTime? gte = null, DateTime? lte = null)
+	{
+		var datetimeRange = new DatetimeRange();
+
+		if (lt is not null)
+			datetimeRange.Lt = Timestamp.FromDateTime(lt.Value);
+
+		if (gt is not null)
+			datetimeRange.Gt = Timestamp.FromDateTime(gt.Value);
+
+		if (gte is not null)
+			datetimeRange.Gte = Timestamp.FromDateTime(gte.Value);
+
+		if (lte is not null)
+			datetimeRange.Lte = Timestamp.FromDateTime(lte.Value);
+
+		return new Condition { Field = new FieldCondition { Key = field, DatetimeRange = datetimeRange } };
+	}
+
 }
 
 
