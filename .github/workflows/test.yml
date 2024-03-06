@@ -1,0 +1,41 @@
+name: Test
+
+on:
+    pull_request:
+      types:
+        - opened
+        - edited
+        - synchronize
+        - reopened
+    
+permissions:
+  checks: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
+    - name: Build
+      run: ./build.sh build
+      shell: bash
+
+    - name: Test
+      run: dotnet test -c Release --logger:"junit;LogFilePath=$(pwd)/output/test-results/junit-{assembly}-{framework}-test-results.xml" --no-build -f net8.0 --nologo
+      shell: bash
+      
+    - name: Test Results
+      uses: mikepenz/action-junit-report@v4
+      if: always()
+      with:
+        fail_on_failure: true
+        require_tests: true
+        report_paths: '**/output/test-results/junit-*.xml'
