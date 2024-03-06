@@ -422,14 +422,9 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
-		try
-		{
+
+		if (await CollectionExistsAsync(collectionName, cancellationToken).ConfigureAwait(false))
 			await DeleteCollectionAsync(collectionName, timeout, cancellationToken).ConfigureAwait(false);
-		}
-		catch (QdrantException)
-		{
-			// swallow this exception as it indicates the collection did not exist
-		}
 
 		await CreateCollectionAsync(
 				collectionName, vectorsConfig, shardNumber, replicationFactor,
@@ -542,6 +537,43 @@ public class QdrantClient : IDisposable
 		catch (Exception e)
 		{
 			_logger.OperationFailed(nameof(LoggingExtensions.DeleteCollection), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Check if a collection exists.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<bool> CollectionExistsAsync(
+		string collectionName,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new CollectionExistsRequest
+		{
+			CollectionName = collectionName,
+		};
+
+		_logger.CollectionExists(collectionName);
+
+		try
+		{
+
+			var response = await _collectionsClient
+				.CollectionExistsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken).ConfigureAwait(false);
+
+			return response.Result.Exists;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.CollectionExists), e);
 
 			throw;
 		}
@@ -1465,6 +1497,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1474,8 +1507,9 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
-		=> SetPayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
+		=> SetPayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, key, cancellationToken);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -1486,6 +1520,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1496,6 +1531,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
 			collectionName, payload,
@@ -1503,6 +1539,7 @@ public class QdrantClient : IDisposable
 			wait,
 			ordering,
 			shardKeySelector,
+			key,
 			cancellationToken);
 
 	/// <summary>
@@ -1514,6 +1551,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1524,13 +1562,14 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
 	}
 
 	/// <summary>
@@ -1542,6 +1581,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1552,6 +1592,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
 			collectionName, payload,
@@ -1559,6 +1600,7 @@ public class QdrantClient : IDisposable
 			wait,
 			ordering,
 			shardKeySelector,
+			key,
 			cancellationToken);
 
 	/// <summary>
@@ -1570,6 +1612,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1580,13 +1623,14 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
 	}
 
 	/// <summary>
@@ -1598,6 +1642,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to set the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1608,9 +1653,10 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, key, cancellationToken);
 
 	private async Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
@@ -1619,6 +1665,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new SetPayloadPoints
@@ -1638,6 +1685,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (key is not null)
+			request.Key = key;
 
 		_logger.SetPayload(collectionName);
 
@@ -1671,6 +1721,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1680,8 +1731,9 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
-		=> OverwritePayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
+		=> OverwritePayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, key, cancellationToken);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -1692,6 +1744,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1702,6 +1755,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
 			collectionName, payload,
@@ -1709,6 +1763,7 @@ public class QdrantClient : IDisposable
 			wait,
 			ordering,
 			shardKeySelector,
+			key,
 			cancellationToken);
 
 	/// <summary>
@@ -1720,6 +1775,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1730,13 +1786,14 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
 
 		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
 	}
 
 	/// <summary>
@@ -1748,6 +1805,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1758,6 +1816,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
 			collectionName, payload,
@@ -1765,6 +1824,7 @@ public class QdrantClient : IDisposable
 			wait,
 			ordering,
 			shardKeySelector,
+			key,
 			cancellationToken);
 
 	/// <summary>
@@ -1776,6 +1836,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1786,13 +1847,14 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var idsList = new PointsIdsList();
 		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
 
 		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
 	}
 
 	/// <summary>
@@ -1804,6 +1866,7 @@ public class QdrantClient : IDisposable
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="key">Optional key for which to overwrite the payload if nested.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -1814,9 +1877,10 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 		=> OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
+			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, key, cancellationToken);
 
 	private async Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
@@ -1825,6 +1889,7 @@ public class QdrantClient : IDisposable
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new SetPayloadPoints
@@ -1844,6 +1909,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (key is not null)
+			request.Key = key;
 
 		_logger.OverwritePayload(collectionName);
 
@@ -2641,6 +2709,7 @@ public class QdrantClient : IDisposable
 	/// <param name="vectorsSelector">Options for specifying which vectors to include in the response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="orderBy">Order the records by a payload field.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -2653,6 +2722,7 @@ public class QdrantClient : IDisposable
 		WithVectorsSelector? vectorsSelector = null,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
+		OrderBy? orderBy = null,
 		CancellationToken cancellationToken = default)
 	{
 		var request = new ScrollPoints
@@ -2674,6 +2744,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (orderBy is not null)
+			request.OrderBy = orderBy;
 
 		_logger.Scroll(collectionName);
 
