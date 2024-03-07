@@ -1,10 +1,6 @@
-name: Build
+name: Release
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   release:
     types: [ "published" ]  
     
@@ -28,20 +24,14 @@ jobs:
       run: ./build.sh build
       shell: bash
 
-    - name: Test
-      run: dotnet test -c Release --logger:"junit;LogFilePath=$(pwd)/output/test-results/junit-{assembly}-{framework}-test-results.xml" --no-build -f net8.0 --nologo
-      shell: bash
-      
-    - name: Test Results
-      uses: mikepenz/action-junit-report@v4
-      if: always()
-      with:
-        fail_on_failure: true
-        require_tests: true
-        report_paths: '**/output/test-results/junit-*.xml'
-
     - name: Pack
       run: dotnet pack -c Release -o nuget --no-build --nologo
+      shell: bash
+
+    - name: Publish NuGet package
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      run: dotnet nuget push nuget/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
       shell: bash
 
     - name: Upload artifacts
