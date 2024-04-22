@@ -85,13 +85,12 @@ public class ApiKeyCertificateThumbprintTests
 		var client = new QdrantGrpcClient(callInvoker);
 
 		var exception = Assert.Throws<RpcException>(() => client.Qdrant.HealthCheck(new HealthCheckRequest()));
-		// FIXME: This assertion fails because the server returns UNAUTHENTICATED instead of PERMISSION_DENIED
-		// #if NETFRAMEWORK
-		// 		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.PermissionDenied);
-		// #else
-		// 		exception.Status.StatusCode.Should().Be(StatusCode.PermissionDenied);
-		// 		exception.Status.Detail.Should().Be("Invalid api-key");
-		// #endif
+#if NETFRAMEWORK
+		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.Unauthenticated);
+#else
+				exception.Status.StatusCode.Should().Be(StatusCode.Unauthenticated);
+				exception.Status.Detail.Should().Be("Must provide an API key or an Authorization bearer token");
+#endif
 	}
 
 	[Fact]
