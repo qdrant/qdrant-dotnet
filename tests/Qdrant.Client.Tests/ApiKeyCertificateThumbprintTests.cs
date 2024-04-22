@@ -86,10 +86,10 @@ public class ApiKeyCertificateThumbprintTests
 
 		var exception = Assert.Throws<RpcException>(() => client.Qdrant.HealthCheck(new HealthCheckRequest()));
 #if NETFRAMEWORK
-		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.PermissionDenied);
+		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.Unauthenticated);
 #else
-		exception.Status.StatusCode.Should().Be(StatusCode.PermissionDenied);
-		exception.Status.Detail.Should().Be("Invalid api-key");
+				exception.Status.StatusCode.Should().Be(StatusCode.Unauthenticated);
+				exception.Status.Detail.Should().Be("Must provide an API key or an Authorization bearer token");
 #endif
 	}
 
