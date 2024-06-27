@@ -2777,6 +2777,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2802,6 +2805,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<ulong>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2821,6 +2825,7 @@ public class QdrantClient : IDisposable
 			negative?.Select(id => new PointId { Num = id }).ToList(),
 			positiveVectors,
 			negativeVectors,
+			strategy,
 			filter,
 			searchParams,
 			limit,
@@ -2844,6 +2849,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2869,6 +2877,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<Guid>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2888,6 +2897,7 @@ public class QdrantClient : IDisposable
 			negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 			positiveVectors,
 			negativeVectors,
+			strategy,
 			filter,
 			searchParams,
 			limit,
@@ -2911,6 +2921,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -2936,6 +2949,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<PointId>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		ulong limit = 10,
@@ -2968,6 +2982,9 @@ public class QdrantClient : IDisposable
 
 		if (negativeVectors is not null)
 			Populate(request.NegativeVectors, negativeVectors.Value);
+
+		if (strategy is not null)
+			request.Strategy = strategy.Value;
 
 		if (filter is not null)
 			request.Filter = filter;
@@ -3081,6 +3098,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3107,6 +3127,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<ulong>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3127,6 +3148,7 @@ public class QdrantClient : IDisposable
 		negative?.Select(id => new PointId { Num = id }).ToList(),
 		positiveVectors,
 		negativeVectors,
+		strategy,
 		filter,
 		searchParams,
 		limit,
@@ -3154,6 +3176,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3180,6 +3205,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<Guid>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3200,6 +3226,7 @@ public class QdrantClient : IDisposable
 		negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
 		positiveVectors,
 		negativeVectors,
+		strategy,
 		filter,
 		searchParams,
 		limit,
@@ -3227,6 +3254,9 @@ public class QdrantClient : IDisposable
 	/// <param name="negative">Try to avoid vectors like the vector from these points.</param>
 	/// <param name="positiveVectors">Look for vectors closest to these.</param>
 	/// <param name="negativeVectors">Try to avoid vectors like these.</param>
+	/// <param name="strategy">
+	/// Strategy to use for recommendation. Strategy defines how to combine multiple examples into a recommendation query.
+	/// </param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="searchParams">Search config.</param>
 	/// <param name="limit">Max number of results.</param>
@@ -3253,6 +3283,7 @@ public class QdrantClient : IDisposable
 		IReadOnlyList<PointId>? negative = null,
 		ReadOnlyMemory<Vector>? positiveVectors = null,
 		ReadOnlyMemory<Vector>? negativeVectors = null,
+		RecommendStrategy? strategy = null,
 		Filter? filter = null,
 		SearchParams? searchParams = null,
 		uint limit = 10,
@@ -3286,6 +3317,9 @@ public class QdrantClient : IDisposable
 
 		if (negativeVectors is not null)
 			Populate(request.NegativeVectors, negativeVectors.Value);
+
+		if (strategy is not null)
+			request.Strategy = strategy.Value;
 
 		if (filter is not null)
 			request.Filter = filter;
