@@ -34,4 +34,23 @@ public partial class Vector
 		Data = { sparseValues.Select(v => v.Item1) },
 		Indices = new SparseIndices { Data = { sparseValues.Select(v => v.Item2) } }
 	};
+
+	/// <summary>
+	/// Implicitly converts a nested array of <see cref="float"/> representing a multi-vector
+	/// to a new instance of <see cref="Vector"/>
+	/// </summary>
+	/// <param name="values">the array of floats</param>
+	/// <returns>a new instance of <see cref="Vector"/></returns>
+	public static implicit operator Vector(float[][] values)
+	{
+		var vectorsCount = (uint)values.Length;
+		var flatVector = values.SelectMany(v => v).ToArray();
+
+		return new Vector
+		{
+			Data = { flatVector },
+			VectorsCount = vectorsCount,
+		};
+
+	}
 }

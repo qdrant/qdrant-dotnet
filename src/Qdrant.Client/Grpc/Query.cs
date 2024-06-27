@@ -1,0 +1,111 @@
+namespace Qdrant.Client.Grpc;
+
+/// <summary>
+/// A query to perform.
+/// </summary>
+public partial class Query
+{
+	/// <summary>
+	/// Implicitly converts a <see cref="RecommendInput"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="input">An instance of <see cref="RecommendInput"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(RecommendInput input) => new() { Recommend = input };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="DiscoverInput"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="input">An instance of <see cref="DiscoverInput"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(DiscoverInput input) => new() { Discover = input };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="ContextInput"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="input">An instance of <see cref="ContextInput"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(ContextInput input) => new() { Context = input };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="Fusion"/>  to a new instance of <see cref="Query"/> to combine pre-fetch results.
+	/// </summary>
+	/// <param name="input">A <see cref="Fusion"/> value</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Fusion input) => new() { Fusion = input };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="OrderBy"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="orderBy">An instance of <see cref="OrderBy"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(OrderBy orderBy) => new() { OrderBy = orderBy };
+
+	/// <summary>
+	/// Explicitly creates a <see cref="Query"/> to order points by a payload field.
+	/// </summary>
+	/// <param name="key">Name of the payload field to order by</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static explicit operator Query(string key) => new() { OrderBy = new() { Key = key } };
+
+	#region Nearest
+
+	/// <summary>
+	/// Implicitly converts a <see cref="VectorInput"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="input">An instance of <see cref="VectorInput"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(VectorInput input) => new() { Nearest = input };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="PointId"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="id">An instance of <see cref="VectorInput"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(PointId id) => new() { Nearest = (VectorInput)id };
+
+	/// <summary>
+	/// Implicitly converts a ulong to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="id">the id</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(ulong id) => new() { Nearest = (VectorInput)id };
+
+	/// <summary>
+	/// Implicitly converts a <see cref="Guid"/> to a new instance of <see cref="PointId"/>
+	/// </summary>
+	/// <param name="id">the id</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Guid id) => new() { Nearest = (VectorInput)id };
+
+	/// <summary>
+	/// Implicitly converts an array of <see cref="float"/> to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="values">the array of floats</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(float[] values) => (VectorInput)values;
+
+	/// <summary>
+	/// Implicitly converts a tuple of sparse values array of <see cref="float"/>
+	/// and sparse indices array of <see cref="uint"/> to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="sparseValues">a tuple of arrays of values and indices</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query((float[], uint[]) sparseValues) => (VectorInput)sparseValues;
+
+	/// <summary>
+	/// Implicitly converts an array of sparse value index tuples to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="sparseValues">the array of value-index pairs</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query((float, uint)[] sparseValues) => (VectorInput)sparseValues;
+
+	/// <summary>
+	/// Implicitly converts a nested array of <see cref="float"/> representing a multi-vector
+	/// to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="values">the array of floats</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(float[][] values) => (VectorInput)values;
+
+	#endregion
+}
