@@ -113,6 +113,12 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(3025, LogLevel.Debug, "Discover batch on '{collection}'")]
 	public static partial void DiscoverBatch(this ILogger logger, string collection);
 
+	[LoggerMessage(3026, LogLevel.Debug, "Query on '{collection}'")]
+	public static partial void Query(this ILogger logger, string collection);
+
+	[LoggerMessage(3027, LogLevel.Debug, "Query batch on '{collection}'")]
+	public static partial void QueryBatch(this ILogger logger, string collection);
+
 	#endregion Point management
 
 	#region Snapshot management

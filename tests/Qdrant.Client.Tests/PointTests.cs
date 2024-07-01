@@ -402,5 +402,115 @@ public class PointTests : IAsyncLifetime
 		}
 	}
 
+	[Fact]
+	public async Task Query()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync("collection_1");
+
+		Assert.Equal(2, points.Count);
+		Assert.Equal(8ul, points[0].Id);
+		Assert.Equal(9ul, points[1].Id);
+
+		points = await _client.QueryAsync("collection_1", limit: 1);
+
+		var point = Assert.Single(points);
+		Assert.Equal(8ul, point.Id);
+	}
+
+	[Fact]
+	public async Task QueryWithFilter()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync("collection_1", filter: MatchKeyword("foo", "hello"));
+
+		var point = Assert.Single(points);
+		Assert.Equal(8ul, point.Id);
+	}
+
+	[Fact]
+	public async Task QueryWithNearestId()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync("collection_1", query: 9ul);
+
+		var point = Assert.Single(points);
+		Assert.Equal(8ul, point.Id);
+	}
+
+	[Fact]
+	public async Task QueryWithVector()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync("collection_1");
+
+		Assert.Equal(2, points.Count);
+		Assert.Equal(8ul, points[0].Id);
+		Assert.Equal(9ul, points[1].Id);
+
+		points = await _client.QueryAsync("collection_1", query: new float[] { 10.5f, 11.5f });
+
+		Assert.Equal(2, points.Count);
+		Assert.Equal(9ul, points[0].Id);
+	}
+
+	[Fact]
+	public async Task QueryOrderBy()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var status = await _client.CreatePayloadIndexAsync(
+			collectionName: "collection_1",
+			fieldName: "bar",
+			schemaType: PayloadSchemaType.Integer,
+			indexParams: new PayloadIndexParams
+			{
+				IntegerIndexParams = new() { Lookup = false, Range = true }
+			}
+		);
+		Assert.Equal(UpdateStatus.Completed, status.Status);
+
+		var points = await _client.QueryAsync("collection_1", query: (OrderBy)"bar", limit: 1);
+
+		var point = Assert.Single(points);
+		Assert.Equal(8ul, point.Id);
+	}
+
+	[Fact]
+	public async Task QueryWithPrefetchLimit()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: new float[] { 10.5f, 11.5f },
+			prefetch: new List<PrefetchQuery> { new() { Limit = 1 } }
+		);
+
+		Assert.Equal(1, points.Count);
+	}
+
+	[Fact]
+	public async Task QueryWithPrefetchAndFusion()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: Fusion.Rrf,
+			prefetch: new List<PrefetchQuery>
+			{
+				new() { Query = new float[] { 10.5f, 11.5f } },
+				new() { Query = new float[] { 3.5f, 4.5f } }
+			}
+		);
+
+		Assert.Equal(2, points.Count);
+	}
+
 	public Task DisposeAsync() => Task.CompletedTask;
 }
