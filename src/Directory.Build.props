@@ -18,9 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(SolutionRoot)README.md" Pack="true" PackagePath="." />
-    <None Include="$(SolutionRoot)LICENSE" Pack="true" PackagePath="." />
-    <None Include="$(SolutionRoot)nuget-icon.png" Pack="true" PackagePath="." />
+    <None Include="$(SolutionRoot)README.md" Pack="true" PackagePath="." Visible="false" />
+    <None Include="$(SolutionRoot)LICENSE" Pack="true" PackagePath="." Visible="false" />
+    <None Include="$(SolutionRoot)nuget-icon.png" Pack="true" PackagePath="." Visible="false" />
   </ItemGroup>
 
   <!-- suppress warnings for netstandard2.0 xml docs -->
