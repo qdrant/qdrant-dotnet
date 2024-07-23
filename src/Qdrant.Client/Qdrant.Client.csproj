@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="Grpc\protos\$(QdrantVersion)\*.proto" />
+    <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="Grpc\protos\$(QdrantVersion)\*.proto" Visible="false" />
   </ItemGroup>
 
 
