@@ -46,7 +46,6 @@ public class ApiKeyCertificateThumbprintTests
 			metadata.Add("api-key", ApiKey);
 			return metadata;
 		});
-
 #else
 		var callInvoker = QdrantChannel.ForAddress(_address,
 			new ClientConfiguration
@@ -88,8 +87,8 @@ public class ApiKeyCertificateThumbprintTests
 #if NETFRAMEWORK
 		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.Unauthenticated);
 #else
-				exception.Status.StatusCode.Should().Be(StatusCode.Unauthenticated);
-				exception.Status.Detail.Should().Be("Must provide an API key or an Authorization bearer token");
+		exception.Status.StatusCode.Should().Be(StatusCode.Unauthenticated);
+		exception.Status.Detail.Should().Be("Must provide an API key or an Authorization bearer token");
 #endif
 	}
 

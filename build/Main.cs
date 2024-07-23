@@ -114,7 +114,7 @@ cmd.SetHandler(async () =>
 
 	Target(Format, DependsOn(Restore), () =>
 	{
-		Run("dotnet", "dotnet-format");
+		Run("dotnet", "format");
 	});
 
 	Target(Build, DependsOn(DownloadProtos, CleanBuildOutput, Format), () =>
