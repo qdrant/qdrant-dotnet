@@ -3930,6 +3930,108 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
+	/// Universally query points.
+	/// Covers all capabilities of search, recommend, discover, filters.
+	/// Grouped by a payload field.
+	/// 
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="groupBy">Payload field to group by, must be a string or number field.</param>
+	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
+	/// <param name="prefetch">Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.</param>
+	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used..</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="scoreThreshold">Return points with scores better than this threshold.</param>
+	/// <param name="searchParams">Search config.</param>
+	/// <param name="limit">Max number of results.</param>
+	/// <param name="groupSize">Maximum amount of points to return per group.</param>
+	/// <param name="payloadSelector">Options for specifying which payload to include or not.</param>
+	/// <param name="vectorsSelector">Options for specifying which vectors to include into the response.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Specify in which shards to look for the points, if not specified - look in all shards.</param>
+	/// <param name="lookupFrom">The location to use for IDs lookup, if not specified - use the current collection and the 'usingVector' vector</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
+	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.</param>
+	public async Task<IReadOnlyList<PointGroup>> QueryGroupsAsync(
+		string collectionName,
+		string groupBy,
+		Query? query = null,
+		IReadOnlyList<PrefetchQuery>? prefetch = null,
+		string? usingVector = null,
+		Filter? filter = null,
+		float? scoreThreshold = null,
+		SearchParams? searchParams = null,
+		ulong limit = 10,
+		ulong groupSize = 1,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		LookupLocation? lookupFrom = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new QueryPointGroups
+		{
+			CollectionName = collectionName,
+			GroupBy = groupBy,
+			Limit = limit,
+			GroupSize = groupSize,
+			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
+			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
+		};
+
+		if (query is not null)
+			request.Query = query;
+
+		if (prefetch is not null)
+			request.Prefetch.AddRange(prefetch);
+
+		if (usingVector is not null)
+			request.Using = usingVector;
+
+		if (filter is not null)
+			request.Filter = filter;
+
+		if (scoreThreshold is not null)
+			request.ScoreThreshold = scoreThreshold.Value;
+
+		if (searchParams is not null)
+			request.Params = searchParams;
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (shardKeySelector is not null)
+			request.ShardKeySelector = shardKeySelector;
+
+		if (lookupFrom is not null)
+			request.LookupFrom = lookupFrom;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.QueryGroups(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.QueryGroupsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result.Groups;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.QueryGroups), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
 	/// Get list of snapshots for a collection.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
