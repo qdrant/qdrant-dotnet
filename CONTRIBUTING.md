@@ -144,5 +144,5 @@ Git tags. To create a new release
    git push --tags
    ```
    
-2. Create a new release on GitHub from the tag
-3. Upload the nuget package artifact from the GitHub action workflow run triggered by creating the release.
+2. Create a new release on GitHub from the tag.
+3. The CI uploads a NuGet package artifact after the release.

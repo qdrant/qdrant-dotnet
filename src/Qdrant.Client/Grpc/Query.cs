@@ -41,6 +41,13 @@ public partial class Query
 	public static implicit operator Query(OrderBy orderBy) => new() { OrderBy = orderBy };
 
 	/// <summary>
+	/// Implicitly converts a <see cref="Sample"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="sample">An instance of <see cref="Sample"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Sample sample) => new() { Sample = sample };
+
+	/// <summary>
 	/// Explicitly creates a <see cref="Query"/> to order points by a payload field.
 	/// </summary>
 	/// <param name="key">Name of the payload field to order by</param>
