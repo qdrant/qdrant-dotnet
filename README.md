@@ -5,13 +5,15 @@
 
 .NET SDK for [Qdrant vector database](https://qdrant.tech/).
 
-## Getting started
-
 ### Installing
 
 ```sh
 dotnet add package Qdrant.Client
 ```
+
+### Documentation
+
+Usage examples are available throughout the [Qdrant documentation](https://qdrant.tech/documentation/quick-start/).
 
 ### Creating a client
 
