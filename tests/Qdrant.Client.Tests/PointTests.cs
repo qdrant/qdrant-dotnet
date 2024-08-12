@@ -512,5 +512,49 @@ public class PointTests : IAsyncLifetime
 		Assert.Equal(2, points.Count);
 	}
 
+	[Fact]
+	public async Task QueryWithSampling()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: Sample.Random,
+			limit: 2
+		);
+
+		Assert.Equal(2, points.Count);
+	}
+
+	[Fact]
+	public async Task QueryGroups()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		await _client.UpsertAsync("collection_1", new[]
+		{
+			new PointStruct
+			{
+				Id = 10,
+				Vectors = new[] { 30f, 31f },
+				Payload = { ["foo"] = "hello" }
+			}
+		});
+
+		// 3 points in total, 2 with "foo" = "hello" and 1 with "foo" = "goodbye"
+
+		var groups = await _client.QueryGroupsAsync(
+			"collection_1",
+			"foo",
+			new[] { 10.4f, 11.4f },
+			groupSize: 2);
+
+		Assert.Equal(2, groups.Count);
+		// A group 2 hits because of 2 points with "foo" = "hello"
+		Assert.Single(groups, g => g.Hits.Count == 2);
+		// A group with 1 hit because of 1 point with "foo" = "goodbye"
+		Assert.Single(groups, g => g.Hits.Count == 1);
+	}
+
 	public Task DisposeAsync() => Task.CompletedTask;
 }

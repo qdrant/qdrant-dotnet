@@ -1,17 +1,19 @@
-# .NET SDK for Qdrant vector database
+# Qdrant .NET SDK
 
 [![NuGet Release][Qdrant-image]][Qdrant-nuget-url]
 [![Build](https://github.com/qdrant/qdrant-dotnet/actions/workflows/test.yml/badge.svg)](https://github.com/qdrant/qdrant-dotnet/actions/workflows/test.yml)
 
-.NET SDK for [Qdrant vector database](https://qdrant.tech/).
-
-## Getting started
-
-### Installing
+## 📥 Installation
 
 ```sh
 dotnet add package Qdrant.Client
 ```
+
+## 📖 Documentation
+
+Usage examples are available throughout the [Qdrant documentation](https://qdrant.tech/documentation/quick-start/).
+
+## 🔌 Getting started
 
 ### Creating a client
 
