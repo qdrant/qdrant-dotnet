@@ -2361,6 +2361,8 @@ public class QdrantClient : IDisposable
 				PayloadSchemaType.Bool => FieldType.Bool,
 				PayloadSchemaType.Geo => FieldType.Geo,
 				PayloadSchemaType.Text => FieldType.Text,
+				PayloadSchemaType.Datetime => FieldType.Datetime,
+				PayloadSchemaType.Uuid => FieldType.Uuid,
 
 				_ => throw new ArgumentException("Invalid PayloadSchemaType: " + schemaType, nameof(schemaType))
 			}
@@ -3949,6 +3951,7 @@ public class QdrantClient : IDisposable
 	/// <param name="vectorsSelector">Options for specifying which vectors to include into the response.</param>
 	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
 	/// <param name="shardKeySelector">Specify in which shards to look for the points, if not specified - look in all shards.</param>
+	/// <param name="withLookup">Options for specifying how to use the group id to lookup points in another collection.</param>
 	/// <param name="lookupFrom">The location to use for IDs lookup, if not specified - use the current collection and the 'usingVector' vector</param>
 	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.</param>
@@ -3967,6 +3970,7 @@ public class QdrantClient : IDisposable
 		WithVectorsSelector? vectorsSelector = null,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
+		WithLookup? withLookup = null,
 		LookupLocation? lookupFrom = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
@@ -4004,6 +4008,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (withLookup is not null)
+			request.WithLookup = withLookup;
 
 		if (lookupFrom is not null)
 			request.LookupFrom = lookupFrom;
