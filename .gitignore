@@ -11,3 +11,4 @@ protos
 
 *.sln.DotSettings.user
 output
+.vs

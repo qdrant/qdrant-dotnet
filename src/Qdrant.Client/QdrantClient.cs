@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Google.Protobuf.Collections;
+using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Qdrant.Client.Grpc;
@@ -93,7 +94,6 @@ public class QdrantClient : IDisposable
 		_collectionsClient = grpcClient.Collections;
 		_pointsClient = grpcClient.Points;
 		_snapshotsClient = grpcClient.Snapshots;
-
 		_grpcTimeout = grpcTimeout;
 		_logger = loggerFactory?.CreateLogger("Qdrant.Client") ?? NullLogger.Instance;
 	}
@@ -4287,6 +4287,21 @@ public class QdrantClient : IDisposable
 	}
 
 	#endregion Cluster management
+
+	/// <summary>
+	/// Asynchronously checks the health of the Qdrant service.
+	/// </summary>
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// <returns>
+	/// A task that represents the asynchronous operation. The task result contains
+	/// a <see cref="HealthCheckReply"/> indicating the health status of the Qdrant service.
+	/// </returns>
+	/// <exception cref="RpcException">occurs when server is unavailable</exception>
+	public async Task<HealthCheckReply> HealthAsync(CancellationToken cancellationToken = default) =>
+		await _grpcClient.Qdrant.HealthCheckAsync(
+			new HealthCheckRequest(),
+			deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+			cancellationToken: cancellationToken).ConfigureAwait(false);
 
 	private static void Populate<T>(RepeatedField<T> repeatedField, ReadOnlyMemory<T> memory)
 	{
