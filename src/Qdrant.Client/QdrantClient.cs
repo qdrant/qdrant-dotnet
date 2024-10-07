@@ -3761,7 +3761,7 @@ public class QdrantClient : IDisposable
 	/// </param>
 	public async Task<FacetResponse> FacetAsync(
 		string collectionName,
-	    string key,
+		string key,
 		Filter? filter = null,
 		ulong limit = 10,
 		bool exact = false, // If true, return exact counts, slower but useful for debugging purposes. Default is false.
@@ -3942,7 +3942,7 @@ public class QdrantClient : IDisposable
 
 			throw;
 		}
-	}	
+	}
 
 	#endregion Point management
 
