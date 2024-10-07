@@ -584,7 +584,7 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			filter: MatchKeyword("bar", "hello"),
 			sample: 3,
-    		limit: 2
+			limit: 2
 		);
 
 		await _client.SearchMatrixOffsetsAsync(
