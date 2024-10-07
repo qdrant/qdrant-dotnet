@@ -571,7 +571,7 @@ public class PointTests : IAsyncLifetime
 			"collection_1",
 			filter: MatchKeyword("bar", "hello"),
 			key: "foo",
-    		limit: 2
+			limit: 2
 		);
 	}
 
