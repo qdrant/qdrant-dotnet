@@ -556,5 +556,44 @@ public class PointTests : IAsyncLifetime
 		Assert.Single(groups, g => g.Hits.Count == 1);
 	}
 
+	[Fact]
+	public async Task Facet()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		await _client.CreatePayloadIndexAsync(
+			"collection_1",
+			fieldName: "foo",
+			schemaType: PayloadSchemaType.Keyword
+		);
+
+		await _client.FacetAsync(
+			"collection_1",
+			filter: MatchKeyword("bar", "hello"),
+			key: "foo",
+			limit: 2
+		);
+	}
+
+	[Fact]
+	public async Task SearchMatrix()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		await _client.SearchMatrixPairsAsync(
+			"collection_1",
+			filter: MatchKeyword("bar", "hello"),
+			sample: 3,
+			limit: 2
+		);
+
+		await _client.SearchMatrixOffsetsAsync(
+			"collection_1",
+			filter: MatchKeyword("bar", "hello"),
+			sample: 3,
+			limit: 2
+		);
+	}
+
 	public Task DisposeAsync() => Task.CompletedTask;
 }

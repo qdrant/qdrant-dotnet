@@ -3745,6 +3745,205 @@ public class QdrantClient : IDisposable
 		}
 	}
 
+	/// <summary>
+	/// Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="key">Payload key of the facet.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="limit">Max number of facets.</param>
+	/// <param name="exact">If true, return exact counts, slower but useful for debugging purposes.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">TSpecify in which shards to look for the points, if not specified - look in all shards.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request. Unit is seconds.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<FacetResponse> FacetAsync(
+		string collectionName,
+		string key,
+		Filter? filter = null,
+		ulong limit = 10,
+		bool exact = false, // If true, return exact counts, slower but useful for debugging purposes. Default is false.
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new FacetCounts
+		{
+			CollectionName = collectionName,
+			Key = key,
+			Limit = limit,
+			Exact = exact
+		};
+
+		if (filter is not null)
+			request.Filter = filter;
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		if (shardKeySelector is not null)
+			request.ShardKeySelector = shardKeySelector;
+
+		_logger.Facet(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.FacetAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.Facet), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Compute distance matrix for sampled points with a pair based output format.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="sample">How many points to select and search within.</param>
+	/// <param name="limit">How many neighbours per sample to find.</param>
+	/// <param name="usingVector">Define which vector to use for querying. If missing, the default vector is is used.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">TSpecify in which shards to look for the points, if not specified - look in all shards.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request. Unit is seconds.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<SearchMatrixPairs> SearchMatrixPairsAsync(
+		string collectionName,
+		Filter? filter = null,
+		ulong sample = 10,
+		ulong limit = 3,
+		string? usingVector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new SearchMatrixPoints
+		{
+			CollectionName = collectionName,
+			Sample = sample,
+			Limit = limit
+		};
+
+		if (usingVector is not null)
+			request.Using = usingVector;
+
+		if (filter is not null)
+			request.Filter = filter;
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		if (shardKeySelector is not null)
+			request.ShardKeySelector = shardKeySelector;
+
+		_logger.SearchMatrixPairs(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.SearchMatrixPairsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.SearchMatrixPairs), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Compute distance matrix for sampled points with an offset based output format.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
+	/// <param name="sample">How many points to select and search within.</param>
+	/// <param name="limit">How many neighbours per sample to find.</param>
+	/// <param name="usingVector">Define which vector to use for querying. If missing, the default vector is is used.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">TSpecify in which shards to look for the points, if not specified - look in all shards.</param>
+	/// <param name="timeout">If set, overrides global timeout setting for this request. Unit is seconds.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<SearchMatrixOffsets> SearchMatrixOffsetsAsync(
+		string collectionName,
+		Filter? filter = null,
+		ulong sample = 10,
+		ulong limit = 3,
+		string? usingVector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new SearchMatrixPoints
+		{
+			CollectionName = collectionName,
+			Sample = sample,
+			Limit = limit
+		};
+
+		if (usingVector is not null)
+			request.Using = usingVector;
+
+		if (filter is not null)
+			request.Filter = filter;
+
+		if (readConsistency is not null)
+			request.ReadConsistency = readConsistency;
+
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		if (shardKeySelector is not null)
+			request.ShardKeySelector = shardKeySelector;
+
+		_logger.SearchMatrixOffsets(collectionName);
+
+		try
+		{
+			var response = await _pointsClient.SearchMatrixOffsetsAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.SearchMatrixOffsets), e);
+
+			throw;
+		}
+	}
+
 	#endregion Point management
 
 	#region Snapshot management

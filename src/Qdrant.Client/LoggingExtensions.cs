@@ -122,6 +122,15 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(3028, LogLevel.Debug, "Query groups on '{collection}'")]
 	public static partial void QueryGroups(this ILogger logger, string collection);
 
+	[LoggerMessage(3029, LogLevel.Debug, "Facet on '{collection}'")]
+	public static partial void Facet(this ILogger logger, string collection);
+
+	[LoggerMessage(3030, LogLevel.Debug, "Search matrix pairs on '{collection}'")]
+	public static partial void SearchMatrixPairs(this ILogger logger, string collection);
+
+	[LoggerMessage(3031, LogLevel.Debug, "Search matrix offsets on '{collection}'")]
+	public static partial void SearchMatrixOffsets(this ILogger logger, string collection);
+
 	#endregion Point management
 
 	#region Snapshot management
