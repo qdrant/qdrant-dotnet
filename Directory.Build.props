@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="4.3.0" PrivateAssets="all"/>
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all"/>
   </ItemGroup>
 
 </Project>

@@ -31,7 +31,7 @@ public sealed class QdrantBuilder : ContainerBuilder<QdrantBuilder, QdrantContai
 	public override QdrantContainer Build()
 	{
 		Validate();
-		return new QdrantContainer(DockerResourceConfiguration, TestcontainersSettings.Logger);
+		return new QdrantContainer(DockerResourceConfiguration);
 	}
 
 	protected override QdrantBuilder Init() =>
