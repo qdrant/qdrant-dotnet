@@ -280,7 +280,7 @@ public class PointTests : IAsyncLifetime
 			positive: new PointId[] { 9 },
 			groupSize: 2);
 
-		Assert.Equal(1, groups.Count);
+		Assert.Single(groups);
 		Assert.Single(groups, g => g.Hits.Count == 2);
 	}
 
@@ -491,7 +491,7 @@ public class PointTests : IAsyncLifetime
 			prefetch: new List<PrefetchQuery> { new() { Limit = 1 } }
 		);
 
-		Assert.Equal(1, points.Count);
+		Assert.Single(points);
 	}
 
 	[Fact]

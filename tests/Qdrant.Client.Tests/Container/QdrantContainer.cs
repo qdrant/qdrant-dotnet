@@ -5,7 +5,7 @@ namespace Qdrant.Client.Tests.Container;
 
 public class QdrantContainer : DockerContainer
 {
-	public QdrantContainer(QdrantConfiguration configuration, ILogger logger) : base(configuration, logger)
+	public QdrantContainer(QdrantConfiguration configuration) : base(configuration)
 	{
 	}
 }

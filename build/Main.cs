@@ -75,7 +75,8 @@ cmd.SetHandler(async () =>
 		var reader = ReaderFactory.Open(gzip);
 		while (reader.MoveToNextEntry())
 		{
-			if (!reader.Entry.IsDirectory && protoFileRegex.IsMatch(reader.Entry.Key) && !privateProtoFileRegex.IsMatch(reader.Entry.Key))
+			var entry = reader.Entry;
+			if (!entry.IsDirectory && protoFileRegex.IsMatch(entry.Key!) && !privateProtoFileRegex.IsMatch(entry.Key!))
 				reader.WriteEntryToDirectory(protosTagDir);
 		}
 
