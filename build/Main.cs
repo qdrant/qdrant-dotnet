@@ -1,5 +1,5 @@
-using System.Collections.Generic;
 using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -19,6 +19,12 @@ var doc = XDocument.Load("Directory.Build.props");
 var qdrantVersion = doc.Descendants(XName.Get("QdrantVersion", "http://schemas.microsoft.com/developer/msbuild/2003"))
 	.First().Value;
 
+var overwriteProtosOption = new Option<bool>(
+	["--overwrite-protos", "-o"],
+	() => false,
+	"Overwrite already downloaded Proto files."
+);
+
 var cmd = new RootCommand
 {
 	new Argument<string[]>("targets")
@@ -26,16 +32,18 @@ var cmd = new RootCommand
 		Description =
 			"A list of targets to run or list. If not specified, the \"default\" target will be run, or all targets will be listed.",
 	},
+	overwriteProtosOption
 };
 
 foreach (var (aliases, description) in Options.Definitions)
 	cmd.Add(new Option<bool>(aliases.ToArray(), description));
 
-cmd.SetHandler(async () =>
+cmd.SetHandler(async (InvocationContext context) =>
 {
 	// translate from System.CommandLine to Bullseye
 	var cmdLine = cmd.Parse(args);
 	var targets = cmdLine.CommandResult.Tokens.Select(token => token.Value);
+	var overwriteProtos = context.ParseResult.GetValueForOption(overwriteProtosOption);
 	var options = new Options(Options.Definitions.Select(d => (d.Aliases[0],
 		cmdLine.GetValueForOption(cmd.Options.OfType<Option<bool>>().Single(o => o.HasAlias(d.Aliases[0]))))));
 
@@ -55,8 +63,16 @@ cmd.SetHandler(async () =>
 		var protosTagDir = Path.Combine(protosDir, qdrantVersion);
 		if (Directory.Exists(protosTagDir) && Directory.EnumerateFileSystemEntries(protosTagDir).Any())
 		{
-			Console.WriteLine($"Already downloaded protos for {qdrantVersion}");
-			return;
+			if (!overwriteProtos)
+			{
+				Console.WriteLine($"Already downloaded protos for {qdrantVersion}");
+				return;
+			}
+			else
+			{
+				Console.WriteLine($"Overwriting existing protos for {qdrantVersion}");
+				Directory.Delete(protosTagDir, true);
+			}
 		}
 
 		Directory.CreateDirectory(protosTagDir);

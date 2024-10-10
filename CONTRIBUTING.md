@@ -83,13 +83,13 @@ Ensure the following are installed and available in the `PATH`.
 For Windows
 
 ```bash
-.\build.bat build
+.\build.bat build --overwrite-protos
 ```
 
 For OSX/Linux
 
 ```bash
-./build.sh build
+./build.sh build --overwrite-protos
 ```
 
 This will
