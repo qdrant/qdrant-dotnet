@@ -71,7 +71,7 @@ and emitted into the `src/Qdrant.Client/obj/Release`, and included in compilatio
 
 Ensure the following are installed and available in the `PATH`.
 
-- [Dotnet 6.0.x](https://dotnet.microsoft.com/download/dotnet/6.0)
+- [Dotnet 8.0.x](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Docker](https://docs.docker.com/engine/install/) for tests
 
 ### Steps
