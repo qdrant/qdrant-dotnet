@@ -595,10 +595,11 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -610,10 +611,11 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
+			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -629,10 +631,11 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -644,10 +647,11 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
+			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -659,10 +663,11 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -673,10 +678,11 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, sparseVectorsConfig, timeout, cancellationToken);
+			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	private async Task UpdateCollectionCoreAsync(
 		string collectionName,
@@ -686,6 +692,7 @@ public class QdrantClient : IDisposable
 		HnswConfigDiff? hnswConfig = null,
 		QuantizationConfigDiff? quantizationConfig = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -698,6 +705,7 @@ public class QdrantClient : IDisposable
 			HnswConfig = hnswConfig,
 			QuantizationConfig = quantizationConfig,
 			SparseVectorsConfig = sparseVectorsConfig,
+			StrictModeConfig = strictModeConfig
 		};
 
 		if (timeout is not null)
