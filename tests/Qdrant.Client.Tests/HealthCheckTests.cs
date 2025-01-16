@@ -4,7 +4,8 @@ using Xunit;
 
 namespace Qdrant.Client
 {
-	public class HealthCheckTests : IClassFixture<QdrantFixture>
+	[Collection("Qdrant")]
+	public class HealthCheckTests
 	{
 		private readonly QdrantClient _client;
 
