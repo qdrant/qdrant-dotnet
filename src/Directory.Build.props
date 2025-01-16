@@ -31,6 +31,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1" PrivateAssets="All" />
-    <PackageReference Include="SauceControl.InheritDoc" Version="2.0.1" PrivateAssets="All" />
+    <PackageReference Include="SauceControl.InheritDoc" Version="2.0.2" PrivateAssets="All" />
   </ItemGroup>
 </Project>
