@@ -131,11 +131,12 @@ public class QdrantClient : IDisposable
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
 	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -153,12 +154,13 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Creates a new collection with the given parameters.
@@ -191,11 +193,12 @@ public class QdrantClient : IDisposable
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
 	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -213,12 +216,13 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> CreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	private async Task CreateCollectionAsync(
 		string collectionName,
@@ -234,6 +238,7 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -250,6 +255,7 @@ public class QdrantClient : IDisposable
 			WalConfig = walConfig,
 			QuantizationConfig = quantizationConfig,
 			SparseVectorsConfig = sparseVectorsConfig,
+			StrictModeConfig = strictModeConfig
 		};
 
 		if (timeout is not null)
@@ -316,11 +322,12 @@ public class QdrantClient : IDisposable
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
 	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -338,12 +345,13 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	/// <summary>
 	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
@@ -376,11 +384,12 @@ public class QdrantClient : IDisposable
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
 	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
 	/// <param name="timeout">
 	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
 	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
@@ -398,12 +407,13 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> RecreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken);
+			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
 
 	private async Task RecreateCollectionAsync(
 		string collectionName,
@@ -419,6 +429,7 @@ public class QdrantClient : IDisposable
 		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -429,7 +440,7 @@ public class QdrantClient : IDisposable
 		await CreateCollectionAsync(
 				collectionName, vectorsConfig, shardNumber, replicationFactor,
 				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-				initFromCollection, shardingMethod, sparseVectorsConfig, timeout, cancellationToken)
+				initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken)
 			.ConfigureAwait(false);
 	}
 
