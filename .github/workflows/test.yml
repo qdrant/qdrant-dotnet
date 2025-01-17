@@ -23,6 +23,10 @@ jobs:
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: | 
+          6.x
+          8.x
 
     - name: Build
       run: ./build.sh build

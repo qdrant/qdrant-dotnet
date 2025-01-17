@@ -284,6 +284,19 @@ public static class Conditions
 		return new Condition { Field = new FieldCondition { Key = field, DatetimeRange = datetimeRange } };
 	}
 
+	/// <summary>
+	/// Match all records which contain the specified vector.
+	/// </summary>
+	/// <param name="vector">The ids to match</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition HasVector(string vector) => new Condition
+	{
+		HasVector = new HasVectorCondition
+		{
+			HasVector = vector
+		}
+	};
+
 }
 
 
