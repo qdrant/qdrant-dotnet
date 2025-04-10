@@ -35,7 +35,7 @@ namespace Qdrant.Client.Grpc
         /// <summary>
         /// Converts a date-time constant string into an <see cref="Expression"/>.
         /// </summary>
-        public static Expression WithDateTimeConstant(string dateTime) =>
+        public static Expression WithDateTime(string dateTime) =>
             new() { Datetime = dateTime };
 
         /// <summary>
