@@ -47,4 +47,16 @@ public partial class Value
 	/// <param name="values">the array of <see cref="Value"/></param>
 	/// <returns>a new instance of <see cref="Value"/></returns>
 	public static implicit operator Value(Value[] values) => new Value { ListValue = new ListValue { Values = { values.AsEnumerable() } } };
+
+	/// <summary>
+	/// Implicitly converts a dictionary of string to <see cref="Value"/> into a nested struct <see cref="Value"/>
+	/// </summary>
+	public static implicit operator Value(Dictionary<string, Value> map) =>
+		new Value
+		{
+			StructValue = new Struct
+			{
+				Fields = { map }
+			}
+		};
 }
