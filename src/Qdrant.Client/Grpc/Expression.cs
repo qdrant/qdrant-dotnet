@@ -6,59 +6,59 @@ namespace Qdrant.Client.Grpc
     public partial class Expression
     {
         /// <summary>
-        /// Implicitly converts a float constant into an <see cref="Expression"/>.
+        /// Implicitly converts a float constant to a new instance of <see cref="Expression"/>.
         /// </summary>
         public static implicit operator Expression(float constant) =>
             new() { Constant = constant };
 
         /// <summary>
-        /// Implicitly converts a variable name (string) into an <see cref="Expression"/>.
+        /// Implicitly converts a variable name (string) to a new instance of <see cref="Expression"/>.
         /// Used to reference a payload key or a score variable.
         /// </summary>
         public static implicit operator Expression(string variable) =>
             new() { Variable = variable };
 
         /// <summary>
-        /// Implicitly converts a <see cref="Condition"/> into an <see cref="Expression"/>.
+        /// Implicitly converts a <see cref="Condition"/> to a new instance of <see cref="Expression"/>.
         /// Evaluates to 1.0 if true, 0.0 if false.
         /// </summary>
         public static implicit operator Expression(Condition condition) =>
             new() { Condition = condition };
 
         /// <summary>
-        /// Implicitly converts a <see cref="GeoDistance"/> into an <see cref="Expression"/>.
+        /// Implicitly converts a <see cref="GeoDistance"/> to a new instance of <see cref="Expression"/>.
         /// Represents a geographic distance in meters.
         /// </summary>
         public static implicit operator Expression(GeoDistance geoDistance) =>
             new() { GeoDistance = geoDistance };
 
         /// <summary>
-        /// Converts a date-time constant string into an <see cref="Expression"/>.
+        /// Converts a date-time constant string to a new instance of <see cref="Expression"/>.
         /// </summary>
-        public static Expression WithDateTime(string dateTime) =>
+        public static Expression FromDateTime(string dateTime) =>
             new() { Datetime = dateTime };
 
         /// <summary>
-        /// Converts a date-time key string into an <see cref="Expression"/>.
+        /// Converts a date-time key string to a new instance of <see cref="Expression"/>.
         /// Used to reference a payload key with date-time values.
         /// </summary>
-        public static Expression WithDateTimeKey(string dateTimeKey) =>
+        public static Expression FromDateTimeKey(string dateTimeKey) =>
             new() { DatetimeKey = dateTimeKey };
 
         /// <summary>
-        /// Converts a <see cref="MultExpression"/> into an <see cref="Expression"/>.
+        /// Converts a <see cref="MultExpression"/> to a new instance of <see cref="Expression"/>.
         /// </summary>
         public static implicit operator Expression(MultExpression mult) =>
             new() { Mult = mult };
 
         /// <summary>
-        /// Implicitly converts a <see cref="SumExpression"/> into an <see cref="Expression"/>.
+        /// Implicitly converts a <see cref="SumExpression"/> to a new instance of <see cref="Expression"/>.
         /// </summary>
         public static implicit operator Expression(SumExpression sum) =>
             new() { Sum = sum };
 
         /// <summary>
-        /// Implicitly converts a <see cref="DivExpression"/> into an <see cref="Expression"/>.
+        /// Implicitly converts a <see cref="DivExpression"/> to a new instance of <see cref="Expression"/>.
         /// </summary>
         public static implicit operator Expression(DivExpression div) =>
             new() { Div = div };
@@ -66,19 +66,19 @@ namespace Qdrant.Client.Grpc
         /// <summary>
         /// Converts an <see cref="Expression"/> to a negated expression.
         /// </summary>
-        public static Expression WithNeg(Expression expr) =>
+        public static Expression FromNeg(Expression expr) =>
             new() { Neg = expr };
 
         /// <summary>
         /// Converts an <see cref="Expression"/> to its absolute value.
         /// </summary>
-        public static Expression WithAbs(Expression expr) =>
+        public static Expression FromAbs(Expression expr) =>
             new() { Abs = expr };
 
         /// <summary>
         /// Converts an <see cref="Expression"/> to its square root.
         /// </summary>
-        public static Expression WithSqrt(Expression expr) =>
+        public static Expression FromSqrt(Expression expr) =>
             new() { Sqrt = expr };
 
         /// <summary>
@@ -90,37 +90,37 @@ namespace Qdrant.Client.Grpc
         /// <summary>
         /// Converts an <see cref="Expression"/> to an exponential.
         /// </summary>
-        public static Expression WithExp(Expression expr) =>
+        public static Expression FromExp(Expression expr) =>
             new() { Exp = expr };
 
         /// <summary>
         /// Converts an <see cref="Expression"/> to a base-10 logarithm.
         /// </summary>
-        public static Expression WithLog10(Expression expr) =>
+        public static Expression FromLog10(Expression expr) =>
             new() { Log10 = expr };
 
         /// <summary>
         /// Converts an <see cref="Expression"/> to a natural logarithm.
         /// </summary>
-        public static Expression WithLn(Expression expr) =>
+        public static Expression FromLn(Expression expr) =>
             new() { Ln = expr };
 
         /// <summary>
-        /// Converts an exponential decay parameter into an <see cref="Expression"/>.
+        /// Converts an exponential decay parameter to a new instance of <see cref="Expression"/>.
         /// </summary>
-        public static Expression WithExpDecay(DecayParamsExpression decay) =>
+        public static Expression FromExpDecay(DecayParamsExpression decay) =>
             new() { ExpDecay = decay };
 
         /// <summary>
-        /// Converts a Gaussian decay parameter into an <see cref="Expression"/>.
+        /// Converts a Gaussian decay parameter to a new instance of <see cref="Expression"/>.
         /// </summary>
-        public static Expression WithGaussDecay(DecayParamsExpression decay) =>
+        public static Expression FromGaussDecay(DecayParamsExpression decay) =>
             new() { GaussDecay = decay };
 
         /// <summary>
-        /// Converts a linear decay parameter into an <see cref="Expression"/>.
+        /// Converts a linear decay parameter to a new instance of <see cref="Expression"/>.
         /// </summary>
-        public static Expression WithLinDecay(DecayParamsExpression decay) =>
+        public static Expression FromLinDecay(DecayParamsExpression decay) =>
             new() { LinDecay = decay };
     }
 }
