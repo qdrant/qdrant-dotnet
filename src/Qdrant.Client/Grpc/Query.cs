@@ -48,6 +48,13 @@ public partial class Query
 	public static implicit operator Query(Sample sample) => new() { Sample = sample };
 
 	/// <summary>
+	/// Implicitly converts a <see cref="Formula"/>  to a new instance of <see cref="Query"/>
+	/// </summary>
+	/// <param name="formula">An instance of <see cref="Formula"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Formula formula) => new() { Formula = formula };
+
+	/// <summary>
 	/// Explicitly creates a <see cref="Query"/> to order points by a payload field.
 	/// </summary>
 	/// <param name="key">Name of the payload field to order by</param>
