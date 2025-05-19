@@ -4,8 +4,9 @@ using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 #endif
 
+using System.Text;
 using Qdrant.Client.Grpc;
-using Qdrant.Client.Tests.Container;
+using Testcontainers.Qdrant;
 using Xunit;
 
 namespace Qdrant.Client;
@@ -21,14 +22,19 @@ public sealed class QdrantFixture : IAsyncLifetime
 #if NETFRAMEWORK
 		// .NET Framework must use TLS with HTTPS
 		_container = new QdrantBuilder()
-			.WithConfigFile(Path.Combine(SolutionPaths.Root, "tests/config.yaml"))
+			.WithImage("qdrant/qdrant:" + QdrantGrpcClient.QdrantVersion)
+			.WithBindMount(
+				Path.Combine(SolutionPaths.Root, "tests/config.yaml"),
+				"/qdrant/config/custom_config.yaml")
 			.WithCertificate(
-				Path.Combine(SolutionPaths.Root, "tests/cert.pem"),
-				Path.Combine(SolutionPaths.Root, "tests/key.pem"))
+				File.ReadAllText(Path.Combine(SolutionPaths.Root, "tests/cert.pem"), Encoding.UTF8),
+				File.ReadAllText(Path.Combine(SolutionPaths.Root, "tests/key.pem"), Encoding.UTF8))
 			.WithCommand("./entrypoint.sh", "--config-path", "config/custom_config.yaml")
 			.Build();
 #else
-		_container = new QdrantBuilder().Build();
+		_container = new QdrantBuilder()
+			.WithImage("qdrant/qdrant:" + QdrantGrpcClient.QdrantVersion)
+			.Build();
 #endif
 
 

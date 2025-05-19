@@ -1,7 +1,4 @@
 using FluentAssertions;
-using Qdrant.Client;
-using Qdrant.Client.Grpc;
-using Qdrant.Client.Tests;
 using Xunit;
 
 namespace Qdrant.Client.Grpc;
