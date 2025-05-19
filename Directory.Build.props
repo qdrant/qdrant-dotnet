@@ -21,6 +21,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <MinVerMinimumMajorMinor>1.0</MinVerMinimumMajorMinor>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AssemblyOriginatorKeyFile>$(SolutionRoot)build\keys\keypair.snk</AssemblyOriginatorKeyFile>
+    <PublicKey>0024000004800000940000000602000000240000525341310004000001000100ed1d190ea5406d996c0f5b1a8acbf865fab69e948e50f3621ee36a586566357356ccb63d2bddbc967bef647c2ea7e2871c479c4aaf9dc4d4570022e0dd23d2126e60a69600d6d446b64c4413dcd07d92ee208a59f3531afc6a2afd512e8cbbdf8576887a7eaf72933f041e7134f78b358ee97fc66e80c4604c6bad7a5124fcca</PublicKey>
   </PropertyGroup>
 
   <ItemGroup>
