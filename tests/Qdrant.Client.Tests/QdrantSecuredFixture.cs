@@ -1,4 +1,6 @@
-using Qdrant.Client.Tests.Container;
+using System.Text;
+using Qdrant.Client.Grpc;
+using Testcontainers.Qdrant;
 using Xunit;
 
 namespace Qdrant.Client;
@@ -9,10 +11,13 @@ public sealed class QdrantSecuredCollection : ICollectionFixture<QdrantSecuredFi
 public sealed class QdrantSecuredFixture : IAsyncLifetime
 {
 	private readonly QdrantContainer _container = new QdrantBuilder()
-		.WithConfigFile(Path.Combine(SolutionPaths.Root, "tests/config.yaml"))
+		.WithImage("qdrant/qdrant:" + QdrantGrpcClient.QdrantVersion)
+		.WithBindMount(
+			Path.Combine(SolutionPaths.Root, "tests/config.yaml"),
+			"/qdrant/config/custom_config.yaml")
 		.WithCertificate(
-			Path.Combine(SolutionPaths.Root, "tests/cert.pem"),
-			Path.Combine(SolutionPaths.Root, "tests/key.pem"))
+			File.ReadAllText(Path.Combine(SolutionPaths.Root, "tests/cert.pem"), Encoding.UTF8),
+			File.ReadAllText(Path.Combine(SolutionPaths.Root, "tests/key.pem"), Encoding.UTF8))
 		.WithCommand("./entrypoint.sh", "--config-path", "config/custom_config.yaml")
 		.Build();
 
