@@ -53,7 +53,7 @@ cmd.SetHandler(async (InvocationContext context) =>
 		Run("dotnet", "tool restore");
 	});
 
-	Target(CleanBuildOutput, DependsOn(Restore), () =>
+	Target(CleanBuildOutput, [Restore], () =>
 	{
 		Run("dotnet", "clean -c Release -v m --nologo");
 	});
@@ -129,17 +129,17 @@ cmd.SetHandler(async (InvocationContext context) =>
 		}
 	});
 
-	Target(Format, DependsOn(Restore), () =>
+	Target(Format, [Restore], () =>
 	{
 		Run("dotnet", "format");
 	});
 
-	Target(Build, DependsOn(DownloadProtos, CleanBuildOutput, Format), () =>
+	Target(Build, [DownloadProtos, CleanBuildOutput, Format], () =>
 	{
 		Run("dotnet", "build -c Release --nologo");
 	});
 
-	Target(Test, DependsOn(Build), () =>
+	Target(Test, [Build], () =>
 	{
 		Run("dotnet", "test -c Release --no-build");
 	});
@@ -150,14 +150,14 @@ cmd.SetHandler(async (InvocationContext context) =>
 			Directory.Delete(packOutput, true);
 	});
 
-	Target(Pack, DependsOn(Build, CleanPackOutput), () =>
+	Target(Pack, [Build, CleanPackOutput], () =>
 	{
 		var outputDir = Directory.CreateDirectory(packOutput);
 		Run("dotnet",
 			$"pack src/{project}/{project}.csproj -c Release -o \"{outputDir.FullName}\" --no-build --nologo");
 	});
 
-	Target(Default, DependsOn(Test));
+	Target(Default, [Test]);
 
 	await RunTargetsAndExitAsync(targets, options, messageOnly: ex => ex is SimpleExec.ExitCodeException);
 });
