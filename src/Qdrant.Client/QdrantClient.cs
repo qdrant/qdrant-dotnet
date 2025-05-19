@@ -2372,19 +2372,7 @@ public class QdrantClient : IDisposable
 			CollectionName = collectionName,
 			FieldName = fieldName,
 			Wait = wait,
-			FieldType = schemaType switch
-			{
-				PayloadSchemaType.Keyword => FieldType.Keyword,
-				PayloadSchemaType.Integer => FieldType.Integer,
-				PayloadSchemaType.Float => FieldType.Float,
-				PayloadSchemaType.Bool => FieldType.Bool,
-				PayloadSchemaType.Geo => FieldType.Geo,
-				PayloadSchemaType.Text => FieldType.Text,
-				PayloadSchemaType.Datetime => FieldType.Datetime,
-				PayloadSchemaType.Uuid => FieldType.Uuid,
-
-				_ => throw new ArgumentException("Invalid PayloadSchemaType: " + schemaType, nameof(schemaType))
-			}
+			FieldType = FieldTypeFromPayloadSchemaType(schemaType)
 		};
 
 		if (indexParams is not null)
@@ -4000,7 +3988,7 @@ public class QdrantClient : IDisposable
 	/// Universally query points.
 	/// Covers all capabilities of search, recommend, discover, filters.
 	/// Also enables hybrid and multi-stage queries.
-	/// 
+	///
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
@@ -4100,7 +4088,7 @@ public class QdrantClient : IDisposable
 	/// Universally query points in batch.
 	/// Covers all capabilities of search, recommend, discover, filters.
 	/// Also enables hybrid and multi-stage queries.
-	/// 
+	///
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="queries">The queries to be performed in the batch.</param>
@@ -4153,7 +4141,7 @@ public class QdrantClient : IDisposable
 	/// Universally query points.
 	/// Covers all capabilities of search, recommend, discover, filters.
 	/// Grouped by a payload field.
-	/// 
+	///
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="groupBy">Payload field to group by, must be a string or number field.</param>
@@ -4520,6 +4508,21 @@ public class QdrantClient : IDisposable
 			new HealthCheckRequest(),
 			deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
 			cancellationToken: cancellationToken).ConfigureAwait(false);
+
+	internal static FieldType FieldTypeFromPayloadSchemaType(PayloadSchemaType schemaType) =>
+		schemaType switch
+		{
+			PayloadSchemaType.Keyword => FieldType.Keyword,
+			PayloadSchemaType.Integer => FieldType.Integer,
+			PayloadSchemaType.Float => FieldType.Float,
+			PayloadSchemaType.Bool => FieldType.Bool,
+			PayloadSchemaType.Geo => FieldType.Geo,
+			PayloadSchemaType.Text => FieldType.Text,
+			PayloadSchemaType.Datetime => FieldType.Datetime,
+			PayloadSchemaType.Uuid => FieldType.Uuid,
+
+			_ => throw new ArgumentException("Invalid PayloadSchemaType: " + schemaType, nameof(schemaType))
+		};
 
 	private static void Populate<T>(RepeatedField<T> repeatedField, ReadOnlyMemory<T> memory)
 	{

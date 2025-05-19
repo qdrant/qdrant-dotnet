@@ -20,7 +20,10 @@
     <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="Grpc\protos\$(QdrantVersion)\*.proto" Visible="false" />
   </ItemGroup>
 
-
+  <ItemGroup>
+    <InternalsVisibleTo Include="$(AssemblyName).Tests" Key="$(PublicKey)" />
+  </ItemGroup>
+  
   <PropertyGroup>
     <GeneratedText><![CDATA[
 namespace Qdrant.Client.Grpc%3B
