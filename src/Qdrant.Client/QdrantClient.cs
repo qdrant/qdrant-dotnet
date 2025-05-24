@@ -1198,6 +1198,35 @@ public class QdrantClient : IDisposable
 	/// </param>
 	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
+		PointId id,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> RetrieveAsync(
+			collectionName,
+			new[] { id },
+			new WithPayloadSelector { Enable = withPayload },
+			new WithVectorsSelector { Enable = withVectors },
+			readConsistency,
+			shardKeySelector,
+			cancellationToken);
+
+	/// <summary>
+	/// Retrieve a point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="id">The ID of a point to retrieve.</param>
+	/// <param name="withPayload">Whether to include the payload or not.</param>
+	/// <param name="withVectors">Whether to include the vectors or not.</param>
+	/// <param name="readConsistency">Options for specifying read consistency guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
 		Guid id,
 		bool withPayload = true,
 		bool withVectors = false,

@@ -6,7 +6,7 @@ namespace Qdrant.Client.Grpc;
 public partial class PointId
 {
 	/// <summary>
-	/// Implicitly converts a ulong to a new instance of <see cref="PointId"/>
+	/// Implicitly converts an <see cref="UInt64"/> to a new instance of <see cref="PointId"/>
 	/// </summary>
 	/// <param name="id">the id</param>
 	/// <returns>a new instance of <see cref="PointId"/></returns>
