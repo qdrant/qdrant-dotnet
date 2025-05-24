@@ -1124,6 +1124,56 @@ public class QdrantClient : IDisposable
 	}
 
 	/// <summary>
+	/// Delete a point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="id">The IDs to delete.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		PointId id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> DeleteAsync(collectionName,
+			new PointsSelector { Points = new PointsIdsList { Ids = { id } } },
+			wait,
+			ordering,
+			shardKeySelector,
+			cancellationToken);
+
+	/// <summary>
+	/// Delete points.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="ids">The IDs to delete.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees. Defaults to <c>Weak</c>.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		IReadOnlyList<PointId> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+	{
+		var idsList = new PointsIdsList();
+		idsList.Ids.AddRange(ids);
+
+		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
+	}
+
+	/// <summary>
 	/// Delete points.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
