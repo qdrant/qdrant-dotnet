@@ -4631,12 +4631,23 @@ public class QdrantClient : IDisposable
 	/// <inheritdoc />
 	public void Dispose()
 	{
-		if (_isDisposed)
-			return;
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
 
-		if (_ownsGrpcClient)
-			_grpcClient.Dispose();
+	/// <summary>
+	/// Releases the resources used by the current instance of <see cref="QdrantClient"/>.
+	/// </summary>
+	/// <param name="disposing">Indicates whether the method is called from <see cref="Dispose()"/>
+	/// or a finalizer.</param>
+	protected virtual void Dispose(bool disposing)
+	{
+		if (!_isDisposed)
+		{
+			_isDisposed = true;
 
-		_isDisposed = true;
+			if (disposing && _ownsGrpcClient)
+				_grpcClient.Dispose();
+		}
 	}
 }
