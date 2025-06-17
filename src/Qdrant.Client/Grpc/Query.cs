@@ -121,5 +121,25 @@ public partial class Query
 	/// <returns>a new instance of <see cref="Query"/></returns>
 	public static implicit operator Query(float[][] values) => (VectorInput)values;
 
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Document"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="document">An instance of <see cref="Document"/> to query against</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Document document) => (VectorInput)document;
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Image"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="image">An instance of <see cref="Image"/> to query against</param>
+	public static implicit operator Query(Image image) => (VectorInput)image;
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="InferenceObject"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="inferenceObject">An instance of <see cref="InferenceObject"/> to query against</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(InferenceObject inferenceObject) => (VectorInput)inferenceObject;
+
 	#endregion
 }
