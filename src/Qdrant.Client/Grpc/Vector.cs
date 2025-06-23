@@ -53,4 +53,35 @@ public partial class Vector
 		};
 
 	}
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Document"/> to a new instance of <see cref="Vector"/> for cloud inference.
+	/// </summary>
+	/// <param name="document">An instance of <see cref="Document"/> to vectorize</param>
+	/// <returns>a new instance of <see cref="Vector"/></returns>
+	public static implicit operator Vector(Document document) => new()
+	{
+		Document = document,
+	};
+
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Image"/> to a new instance of <see cref="Vector"/> for cloud inference.
+	/// </summary>
+	/// <param name="image">An instance of <see cref="Image"/> to vectorize</param>
+	/// <returns>a new instance of <see cref="Vector"/></returns>
+	public static implicit operator Vector(Image image) => new()
+	{
+		Image = image,
+	};
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="InferenceObject"/> to a new instance of <see cref="Vector"/> for cloud inference.
+	/// </summary>
+	/// <param name="inferenceObject">An instance of <see cref="InferenceObject"/> to vectorize</param>
+	/// <returns>a new instance of <see cref="Vector"/></returns>
+	public static implicit operator Vector(InferenceObject inferenceObject) => new()
+	{
+		Object = inferenceObject,
+	};
 }

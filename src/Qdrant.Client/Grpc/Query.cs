@@ -96,7 +96,7 @@ public partial class Query
 	/// </summary>
 	/// <param name="values">the array of floats</param>
 	/// <returns>a new instance of <see cref="Query"/></returns>
-	public static implicit operator Query(float[] values) => (VectorInput)values;
+	public static implicit operator Query(float[] values) => new() { Nearest = (VectorInput)values };
 
 	/// <summary>
 	/// Implicitly converts a tuple of sparse values array of <see cref="float"/>
@@ -104,14 +104,14 @@ public partial class Query
 	/// </summary>
 	/// <param name="sparseValues">a tuple of arrays of values and indices</param>
 	/// <returns>a new instance of <see cref="Query"/></returns>
-	public static implicit operator Query((float[], uint[]) sparseValues) => (VectorInput)sparseValues;
+	public static implicit operator Query((float[], uint[]) sparseValues) => new() { Nearest = (VectorInput)sparseValues };
 
 	/// <summary>
 	/// Implicitly converts an array of sparse value index tuples to a new instance of <see cref="Query"/>
 	/// </summary>
 	/// <param name="sparseValues">the array of value-index pairs</param>
 	/// <returns>a new instance of <see cref="Query"/></returns>
-	public static implicit operator Query((float, uint)[] sparseValues) => (VectorInput)sparseValues;
+	public static implicit operator Query((float, uint)[] sparseValues) => new() { Nearest = (VectorInput)sparseValues };
 
 	/// <summary>
 	/// Implicitly converts a nested array of <see cref="float"/> representing a multi-vector
@@ -119,7 +119,27 @@ public partial class Query
 	/// </summary>
 	/// <param name="values">the array of floats</param>
 	/// <returns>a new instance of <see cref="Query"/></returns>
-	public static implicit operator Query(float[][] values) => (VectorInput)values;
+	public static implicit operator Query(float[][] values) => new() { Nearest = (VectorInput)values };
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Document"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="document">An instance of <see cref="Document"/> to query against</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Document document) => new() { Nearest = (VectorInput)document };
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Image"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="image">An instance of <see cref="Image"/> to query against</param>
+	public static implicit operator Query(Image image) => new() { Nearest = (VectorInput)image };
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="InferenceObject"/> to a new instance of <see cref="Query"/> for cloud inference.
+	/// </summary>
+	/// <param name="inferenceObject">An instance of <see cref="InferenceObject"/> to query against</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(InferenceObject inferenceObject) => new() { Nearest = (VectorInput)inferenceObject };
 
 	#endregion
 }

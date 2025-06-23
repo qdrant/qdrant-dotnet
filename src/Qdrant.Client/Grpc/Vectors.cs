@@ -54,4 +54,35 @@ public partial class Vectors
 		var namedVectors = new NamedVectors { Vectors = { [value.Item1] = value.Item2 } };
 		return new Vectors { Vectors_ = namedVectors };
 	}
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Document"/> to a new instance of <see cref="Vectors"/> for cloud inference.
+	/// </summary>
+	/// <param name="document">An instance of <see cref="Document"/> to vectorize</param>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors(Document document) => new()
+	{
+		Vector = document,
+	};
+
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="Image"/> to a new instance of <see cref="Vectors"/> for cloud inference.
+	/// </summary>
+	/// <param name="image">An instance of <see cref="Image"/> to vectorize</param>
+	/// /// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors(Image image) => new()
+	{
+		Vector = image,
+	};
+
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="InferenceObject"/> to a new instance of <see cref="Vectors"/> for cloud inference.
+	/// </summary>
+	/// <param name="inferenceObject">An instance of <see cref="InferenceObject"/> to vectorize</param>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors(InferenceObject inferenceObject) => new()
+	{
+		Vector = inferenceObject,
+	};
 }

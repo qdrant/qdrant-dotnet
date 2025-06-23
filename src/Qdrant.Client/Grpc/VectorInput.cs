@@ -85,33 +85,33 @@ public partial class VectorInput
 		Id = id
 	};
 
-	// /// <summary>
-	// /// Implicitly converts a <see cref="Document"/> to a new instance of <see cref="VectorInput"/>
-	// /// </summary>
-	// /// <param name="document">an instance of <see cref="Document"/></param>
-	// /// <returns>a new instance of <see cref="VectorInput"/></returns>
-	// public static implicit operator VectorInput(Document document) => new()
-	// {
-	// 	Document = document
-	// };
+	/// <summary>
+	/// Implicitly converts a <see cref="Document"/> to a new instance of <see cref="VectorInput"/> for cloud inference.
+	/// </summary>
+	/// <param name="document">an instance of <see cref="Document"/></param>
+	/// <returns>a new instance of <see cref="VectorInput"/></returns>
+	public static implicit operator VectorInput(Document document) => new()
+	{
+		Document = document
+	};
 
-	// /// <summary>
-	// /// Implicitly converts an <see cref="Image"/> to a new instance of <see cref="VectorInput"/>
-	// /// </summary>
-	// /// <param name="image">an instance of <see cref="Image"/></param>
-	// /// <returns>a new instance of <see cref="VectorInput"/></returns>
-	// public static implicit operator VectorInput(Image image) => new()
-	// {
-	// 	Image = image
-	// };
+	/// <summary>
+	/// Implicitly converts an <see cref="Image"/> to a new instance of <see cref="VectorInput"/> for cloud inference.
+	/// </summary>
+	/// <param name="image">an instance of <see cref="Image"/></param>
+	/// <returns>a new instance of <see cref="VectorInput"/></returns>
+	public static implicit operator VectorInput(Image image) => new()
+	{
+		Image = image
+	};
 
-	// /// <summary>
-	// /// Implicitly converts an <see cref="InferenceObject"/> to a new instance of <see cref="VectorInput"/>
-	// /// </summary>
-	// /// <param name="obj">an instance of <see cref="InferenceObject"/></param>
-	// /// <returns>a new instance of <see cref="VectorInput"/></returns>
-	// public static implicit operator VectorInput(InferenceObject obj) => new()
-	// {
-	// 	Object = obj
-	// };
+	/// <summary>
+	/// Implicitly converts an <see cref="InferenceObject"/> to a new instance of <see cref="VectorInput"/> for cloud inference.
+	/// </summary>
+	/// <param name="object">an instance of <see cref="InferenceObject"/></param>
+	/// <returns>a new instance of <see cref="VectorInput"/></returns>
+	public static implicit operator VectorInput(InferenceObject @object) => new()
+	{
+		Object = @object
+	};
 }
