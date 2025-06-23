@@ -108,10 +108,10 @@ public partial class VectorInput
 	/// <summary>
 	/// Implicitly converts an <see cref="InferenceObject"/> to a new instance of <see cref="VectorInput"/> for cloud inference.
 	/// </summary>
-	/// <param name="obj">an instance of <see cref="InferenceObject"/></param>
+	/// <param name="object">an instance of <see cref="InferenceObject"/></param>
 	/// <returns>a new instance of <see cref="VectorInput"/></returns>
-	public static implicit operator VectorInput(InferenceObject obj) => new()
+	public static implicit operator VectorInput(InferenceObject @object) => new()
 	{
-		Object = obj
+		Object = @object
 	};
 }
