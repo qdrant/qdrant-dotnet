@@ -141,5 +141,18 @@ public partial class Query
 	/// <returns>a new instance of <see cref="Query"/></returns>
 	public static implicit operator Query(InferenceObject inferenceObject) => new() { Nearest = (VectorInput)inferenceObject };
 
+	/// <summary>
+	/// Implicitly creates new instance of <see cref="Query"/> for re-ranking points with MMR (Maximal Marginal Relevance).
+	/// </summary>
+	/// <param name="nearestWithMmr">A tuple of <see cref="VectorInput"/> and <see cref="Mmr"/></param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query((VectorInput, Mmr) nearestWithMmr) => new()
+	{
+		NearestWithMmr = {
+		Nearest = nearestWithMmr.Item1,
+		Mmr = nearestWithMmr.Item2
+	}
+	};
+
 	#endregion
 }

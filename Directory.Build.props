@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/qdrant/qdrant-dotnet</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/qdrant/qdrant-dotnet/releases</PackageReleaseNotes>
     <PackageTags>qdrant, database, vector, search</PackageTags>
-    <QdrantVersion>v1.14.1</QdrantVersion>
+    <QdrantVersion>dev</QdrantVersion>
   </PropertyGroup>
 
   <PropertyGroup>

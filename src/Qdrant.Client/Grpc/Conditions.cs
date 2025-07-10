@@ -80,6 +80,15 @@ public static class Conditions
 		new() { Field = new FieldCondition { Key = field, Match = new Match { Text = text } } };
 
 	/// <summary>
+	/// Match records where the given field matches the given phrase
+	/// </summary>
+	/// <param name="field">The name of the field</param>
+	/// <param name="phrase">The phrase to match</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition MatchPhrase(string field, string phrase) =>
+		new() { Field = new FieldCondition { Key = field, Match = new Match { Phrase = phrase } } };
+
+	/// <summary>
 	/// Match records where the given field matches the given boolean value.
 	/// </summary>
 	/// <param name="field">The name of the field</param>
