@@ -14,6 +14,27 @@ public partial class Vectors
 		new() { Vector = new() { Data = { values } } };
 
 	/// <summary>
+	/// Implicitly converts a nested array of <see cref="float"/> representing a multi-vector
+	/// to a new instance of <see cref="Vectors"/>
+	/// </summary>
+	/// <param name="values">the nested array of floats</param>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
+	public static implicit operator Vectors(float[][] values)
+	{
+		var vectorsCount = (uint)values.Length;
+		var flatVector = values.SelectMany(v => v).ToArray();
+
+		return new Vectors
+		{
+			Vector = new Vector
+			{
+				Data = { flatVector },
+				VectorsCount = vectorsCount,
+			}
+		};
+	}
+
+	/// <summary>
 	/// Implicitly converts a dictionary of <see cref="string"/> and array of <see cref="float"/> to a new instance
 	/// of <see cref="Vectors"/>
 	/// </summary>
