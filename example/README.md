@@ -19,7 +19,7 @@ Minimal example of instanciating Qdrant client and running a simple request
 First, make sure Qdrant is running. You can start it with Docker:
 
 ```bash
-docker run --rm -it -p 6334:5334 -p 6333:6333 qdrant/qdrant
+docker run --rm -it -p 6334:6334 -p 6333:6333 qdrant/qdrant
 ```
 
 
