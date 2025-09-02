@@ -11,7 +11,7 @@ public partial class Vectors
 	/// <param name="values">the array of floats</param>
 	/// <returns>a new instance of <see cref="Vectors"/></returns>
 	public static implicit operator Vectors(float[] values) =>
-		new() { Vector = new() { Data = { values } } };
+		new() { Vector = new Vector { Dense = new DenseVector { Data = { values } } } };
 
 	/// <summary>
 	/// Implicitly converts a nested array of <see cref="float"/> representing a multi-vector
@@ -21,15 +21,16 @@ public partial class Vectors
 	/// <returns>a new instance of <see cref="Vectors"/></returns>
 	public static implicit operator Vectors(float[][] values)
 	{
-		var vectorsCount = (uint)values.Length;
-		var flatVector = values.SelectMany(v => v).ToArray();
+		var denseVector = values.Select(v => new DenseVector { Data = { v } }).ToArray();
 
 		return new Vectors
 		{
 			Vector = new Vector
 			{
-				Data = { flatVector },
-				VectorsCount = vectorsCount,
+				MultiDense = new MultiDenseVector
+				{
+					Vectors = { denseVector }
+				},
 			}
 		};
 	}
@@ -86,12 +87,11 @@ public partial class Vectors
 		Vector = document,
 	};
 
-
 	/// <summary>
 	/// Implicitly converts an instance of <see cref="Image"/> to a new instance of <see cref="Vectors"/> for cloud inference.
 	/// </summary>
 	/// <param name="image">An instance of <see cref="Image"/> to vectorize</param>
-	/// /// <returns>a new instance of <see cref="Vectors"/></returns>
+	/// <returns>a new instance of <see cref="Vectors"/></returns>
 	public static implicit operator Vectors(Image image) => new()
 	{
 		Vector = image,

@@ -10,7 +10,10 @@ public partial class Vector
 	/// </summary>
 	/// <param name="values">the array of floats</param>
 	/// <returns>a new instance of <see cref="Vector"/></returns>
-	public static implicit operator Vector(float[] values) => new() { Data = { values } };
+	public static implicit operator Vector(float[] values) => new()
+	{
+		Dense = new DenseVector { Data = { values } }
+	};
 
 	/// <summary>
 	/// Implicitly converts a tuple of sparse values array of <see cref="float"/>
@@ -20,8 +23,7 @@ public partial class Vector
 	/// <returns>a new instance of <see cref="Vector"/></returns>
 	public static implicit operator Vector((float[], uint[]) sparseValues) => new()
 	{
-		Data = { sparseValues.Item1 },
-		Indices = new SparseIndices { Data = { sparseValues.Item2 } }
+		Sparse = new SparseVector { Values = { sparseValues.Item1 }, Indices = { sparseValues.Item2 } }
 	};
 
 	/// <summary>
@@ -31,8 +33,7 @@ public partial class Vector
 	/// <returns>a new instance of <see cref="Vector"/></returns>
 	public static implicit operator Vector((float, uint)[] sparseValues) => new()
 	{
-		Data = { sparseValues.Select(v => v.Item1) },
-		Indices = new SparseIndices { Data = { sparseValues.Select(v => v.Item2) } }
+		Sparse = new SparseVector { Values = { sparseValues.Select(v => v.Item1) }, Indices = { sparseValues.Select(v => v.Item2) } }
 	};
 
 	/// <summary>
@@ -43,13 +44,11 @@ public partial class Vector
 	/// <returns>a new instance of <see cref="Vector"/></returns>
 	public static implicit operator Vector(float[][] values)
 	{
-		var vectorsCount = (uint)values.Length;
-		var flatVector = values.SelectMany(v => v).ToArray();
+		var denseVectors = values.Select(v => new DenseVector { Data = { v } }).ToArray();
 
 		return new Vector
 		{
-			Data = { flatVector },
-			VectorsCount = vectorsCount,
+			MultiDense = new MultiDenseVector { Vectors = { denseVectors } },
 		};
 
 	}
