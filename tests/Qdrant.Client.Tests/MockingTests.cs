@@ -70,7 +70,7 @@ public class MockingTests
 		var subject = mockedClient.Object;
 
 		mockedClient.Setup(q => q.HealthAsync(cts.Token))
-					.ReturnsAsync(new HealthCheckReply { Title = "from Moq", Version = "v1.0.0" });
+					.ReturnsAsync(expectedResult);
 
 		var actualResult = await subject.HealthAsync(cts.Token);
 
