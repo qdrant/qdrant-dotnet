@@ -89,6 +89,15 @@ public static class Conditions
 		new() { Field = new FieldCondition { Key = field, Match = new Match { Phrase = phrase } } };
 
 	/// <summary>
+	/// Match records where the given field matches any word in the text
+	/// </summary>
+	/// <param name="field">The name of the field</param>
+	/// <param name="textAny">The text to match</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition MatchTextAny(string field, string textAny) =>
+		new() { Field = new FieldCondition { Key = field, Match = new Match { TextAny = textAny } } };
+
+	/// <summary>
 	/// Match records where the given field matches the given boolean value.
 	/// </summary>
 	/// <param name="field">The name of the field</param>
