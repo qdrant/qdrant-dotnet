@@ -1345,6 +1345,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The points to be upserted.</param>
+	/// <param name="updateFilter">Conditional update filter.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
@@ -1354,10 +1355,12 @@ public class QdrantClient : IDisposable
 	public async Task<UpdateResult> UpsertAsync(
 		string collectionName,
 		IReadOnlyList<PointStruct> points,
+		Filter updateFilter = null,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
+		CancellationToken cancellationToken = default,
+	)
 	{
 		var request = new UpsertPoints
 		{
@@ -1371,6 +1374,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (updateFilter is not null)
+			request.UpdateFilter = updateFilter;
 
 		_logger.Upsert(collectionName, points.Count);
 
@@ -1779,6 +1785,7 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The list of points and vectors to update.</param>
+	/// <param name="updateFilter">Conditional update filter.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
@@ -1788,6 +1795,7 @@ public class QdrantClient : IDisposable
 	public async Task<UpdateResult> UpdateVectorsAsync(
 		string collectionName,
 		IReadOnlyList<PointVectors> points,
+		Filter updateFilter = null,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
@@ -1805,6 +1813,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (updateFilter is not null)
+			request.UpdateFilter = updateFilter;
 
 		_logger.UpdateVectors(collectionName);
 
