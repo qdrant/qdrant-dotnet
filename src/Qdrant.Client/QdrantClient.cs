@@ -1345,6 +1345,28 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The points to be upserted.</param>
+	/// 
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> UpsertAsync(
+		string collectionName,
+		IReadOnlyList<PointStruct> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default
+	)
+	=> UpsertAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <summary>
+	/// Perform insert and updates on points. If a point with a given ID already exists, it will be overwritten.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="points">The points to be upserted.</param>
 	/// <param name="updateFilter">Conditional update filter.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
@@ -1355,11 +1377,11 @@ public class QdrantClient : IDisposable
 	public async Task<UpdateResult> UpsertAsync(
 		string collectionName,
 		IReadOnlyList<PointStruct> points,
-		Filter updateFilter = null,
+		Filter? updateFilter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default,
+		CancellationToken cancellationToken = default
 	)
 	{
 		var request = new UpsertPoints
@@ -1785,6 +1807,26 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The list of points and vectors to update.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> UpdateVectorsAsync(
+		string collectionName,
+		IReadOnlyList<PointVectors> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+	=> UpdateVectorsAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <summary>
+	/// Update named vectors for point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="points">The list of points and vectors to update.</param>
 	/// <param name="updateFilter">Conditional update filter.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
@@ -1795,7 +1837,7 @@ public class QdrantClient : IDisposable
 	public async Task<UpdateResult> UpdateVectorsAsync(
 		string collectionName,
 		IReadOnlyList<PointVectors> points,
-		Filter updateFilter = null,
+		Filter? updateFilter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
