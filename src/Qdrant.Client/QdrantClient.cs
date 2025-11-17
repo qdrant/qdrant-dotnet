@@ -4890,6 +4890,78 @@ public class QdrantClient : IDisposable
 	#region Cluster management
 
 	/// <summary>
+	/// Get cluster information for a collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<CollectionClusterInfoResponse> GetCollectionClusterSetupInfoAsync(
+		string collectionName,
+		CancellationToken cancellationToken = default)
+	{
+		_logger.GetCollectionClusterSetupInfo(collectionName);
+
+		try
+		{
+			var response = await _collectionsClient.CollectionClusterInfoAsync(
+					new CollectionClusterInfoRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.GetCollectionInfo), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Updates the cluster setup for a collection with a pre-configured request.
+	/// </summary>
+	/// <param name="request">The complete cluster setup request with operation details</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	/// <returns>Response indicating whether the operation succeeded</returns>
+	public async Task<UpdateCollectionClusterSetupResponse> UpdateCollectionClusterSetupAsync(
+		UpdateCollectionClusterSetupRequest request,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.UpdateCollectionClusterSetup(request.CollectionName);
+
+		try
+		{
+			var response = await _collectionsClient
+				.UpdateCollectionClusterSetupAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			if (!response.Result)
+				throw new QdrantException($"Collection '{request.CollectionName}' cluster setup could not be updated");
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.UpdateCollectionClusterSetup), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
 	/// Create shard key
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
