@@ -130,7 +130,9 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="initFromCollection">
+	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
+	/// </param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -160,7 +162,69 @@ public class QdrantClient : IDisposable
 		=> CreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Creates a new collection with the given parameters.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection to be created.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a single anonymous vector storage.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
+	/// <param name="replicationFactor">
+	/// Replication factor for collection. Default is 1, minimum is 1.
+	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="writeConsistencyFactor">
+	/// Write consistency factor for collection. Default is 1, minimum is 1.
+	/// Defines how many replicas should apply the operation for us to consider it successful.
+	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
+	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="onDiskPayload">
+	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
+	/// requested. This setting saves RAM by (slightly) increasing the response time.
+	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+	/// </param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task CreateCollectionAsync(
+		string collectionName,
+		VectorParams vectorsConfig,
+		Dictionary<string, Value> metadata,
+		uint shardNumber = 1,
+		uint replicationFactor = 1,
+		uint writeConsistencyFactor = 1,
+		bool onDiskPayload = false,
+		HnswConfigDiff? hnswConfig = null,
+		OptimizersConfigDiff? optimizersConfig = null,
+		WalConfigDiff? walConfig = null,
+		QuantizationConfig? quantizationConfig = null,
+		ShardingMethod? shardingMethod = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> CreateCollectionAsync(
+			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
+			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
+			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	/// <summary>
 	/// Creates a new collection with the given parameters.
@@ -192,7 +256,9 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="initFromCollection">
+	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
+	/// </param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -222,7 +288,69 @@ public class QdrantClient : IDisposable
 		=> CreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Creates a new collection with the given parameters.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection to be created.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a vector storage for each key in the provided map.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
+	/// <param name="replicationFactor">
+	/// Replication factor for collection. Default is 1, minimum is 1.
+	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="writeConsistencyFactor">
+	/// Write consistency factor for collection. Default is 1, minimum is 1.
+	/// Defines how many replicas should apply the operation for us to consider it successful.
+	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
+	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="onDiskPayload">
+	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
+	/// requested. This setting saves RAM by (slightly) increasing the response time.
+	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+	/// </param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task CreateCollectionAsync(
+		string collectionName,
+		VectorParamsMap? vectorsConfig,
+		Dictionary<string, Value> metadata,
+		uint shardNumber = 1,
+		uint replicationFactor = 1,
+		uint writeConsistencyFactor = 1,
+		bool onDiskPayload = false,
+		HnswConfigDiff? hnswConfig = null,
+		OptimizersConfigDiff? optimizersConfig = null,
+		WalConfigDiff? walConfig = null,
+		QuantizationConfig? quantizationConfig = null,
+		ShardingMethod? shardingMethod = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> CreateCollectionAsync(
+			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
+			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
+			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	private async Task CreateCollectionAsync(
 		string collectionName,
@@ -235,10 +363,10 @@ public class QdrantClient : IDisposable
 		OptimizersConfigDiff? optimizersConfig = null,
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
-		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
+		Dictionary<string, Value>? metadata = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -261,11 +389,11 @@ public class QdrantClient : IDisposable
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
 
-		if (initFromCollection is not null)
-			request.InitFromCollection = initFromCollection;
-
 		if (shardingMethod is not null)
 			request.ShardingMethod = (ShardingMethod)shardingMethod;
+
+		if (metadata is not null)
+			request.Metadata.Add(metadata);
 
 		_logger.CreateCollection(collectionName);
 
@@ -321,7 +449,9 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="initFromCollection">
+	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
+	/// </param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -351,7 +481,69 @@ public class QdrantClient : IDisposable
 		=> RecreateCollectionAsync(
 			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection to be created.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a single anonymous vector storage.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
+	/// <param name="replicationFactor">
+	/// Replication factor for collection. Default is 1, minimum is 1.
+	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="writeConsistencyFactor">
+	/// Write consistency factor for collection. Default is 1, minimum is 1.
+	/// Defines how many replicas should apply the operation for us to consider it successful.
+	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
+	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="onDiskPayload">
+	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
+	/// requested. This setting saves RAM by (slightly) increasing the response time.
+	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+	/// </param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task RecreateCollectionAsync(
+		string collectionName,
+		VectorParams vectorsConfig,
+		Dictionary<string, Value> metadata,
+		uint shardNumber = 1,
+		uint replicationFactor = 1,
+		uint writeConsistencyFactor = 1,
+		bool onDiskPayload = false,
+		HnswConfigDiff? hnswConfig = null,
+		OptimizersConfigDiff? optimizersConfig = null,
+		WalConfigDiff? walConfig = null,
+		QuantizationConfig? quantizationConfig = null,
+		ShardingMethod? shardingMethod = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> RecreateCollectionAsync(
+			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
+			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
+			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	/// <summary>
 	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
@@ -383,7 +575,9 @@ public class QdrantClient : IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
+	/// <param name="initFromCollection">
+	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
+	/// </param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -413,7 +607,69 @@ public class QdrantClient : IDisposable
 		=> RecreateCollectionAsync(
 			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection to be created.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a vector storage for each key in the provided map.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
+	/// <param name="replicationFactor">
+	/// Replication factor for collection. Default is 1, minimum is 1.
+	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="writeConsistencyFactor">
+	/// Write consistency factor for collection. Default is 1, minimum is 1.
+	/// Defines how many replicas should apply the operation for us to consider it successful.
+	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
+	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
+	/// </param>
+	/// <param name="onDiskPayload">
+	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
+	/// requested. This setting saves RAM by (slightly) increasing the response time.
+	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
+	/// </param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="shardingMethod">Sharding method.</param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task RecreateCollectionAsync(
+		string collectionName,
+		VectorParamsMap? vectorsConfig,
+		Dictionary<string, Value>? metadata,
+		uint shardNumber = 1,
+		uint replicationFactor = 1,
+		uint writeConsistencyFactor = 1,
+		bool onDiskPayload = false,
+		HnswConfigDiff? hnswConfig = null,
+		OptimizersConfigDiff? optimizersConfig = null,
+		WalConfigDiff? walConfig = null,
+		QuantizationConfig? quantizationConfig = null,
+		ShardingMethod? shardingMethod = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> RecreateCollectionAsync(
+			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
+			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
+			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	private async Task RecreateCollectionAsync(
 		string collectionName,
@@ -426,10 +682,10 @@ public class QdrantClient : IDisposable
 		OptimizersConfigDiff? optimizersConfig = null,
 		WalConfigDiff? walConfig = null,
 		QuantizationConfig? quantizationConfig = null,
-		string? initFromCollection = null,
 		ShardingMethod? shardingMethod = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
+		Dictionary<string, Value>? metadata = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -440,7 +696,7 @@ public class QdrantClient : IDisposable
 		await CreateCollectionAsync(
 				collectionName, vectorsConfig, shardNumber, replicationFactor,
 				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-				initFromCollection, shardingMethod, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken)
+				shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken)
 			.ConfigureAwait(false);
 	}
 
@@ -626,7 +882,45 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Update parameters of the collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a single anonymous vector storage.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="collectionParams">The collection parameters.</param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task UpdateCollectionAsync(
+		string collectionName,
+		VectorParamsDiff vectorsConfig,
+		Dictionary<string, Value> metadata,
+		OptimizersConfigDiff? optimizersConfig = null,
+		CollectionParamsDiff? collectionParams = null,
+		HnswConfigDiff? hnswConfig = null,
+		QuantizationConfigDiff? quantizationConfig = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
+			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -662,7 +956,45 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Update parameters of the collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="vectorsConfig">
+	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
+	/// This overload creates a vector storage for each key in the provided map.
+	/// </param>
+	/// <param name="metadata">Arbitrary metadata for the collection.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="collectionParams">The collection parameters.</param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task UpdateCollectionAsync(
+		string collectionName,
+		VectorParamsDiffMap vectorsConfig,
+		Dictionary<string, Value> metadata,
+		OptimizersConfigDiff? optimizersConfig = null,
+		CollectionParamsDiff? collectionParams = null,
+		HnswConfigDiff? hnswConfig = null,
+		QuantizationConfigDiff? quantizationConfig = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
+			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -693,7 +1025,40 @@ public class QdrantClient : IDisposable
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, timeout, cancellationToken);
+			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
+
+	/// <summary>
+	/// Update parameters of the collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="metadata">Optional metadata for the collection.</param>
+	/// <param name="optimizersConfig">Params for optimizer.</param>
+	/// <param name="collectionParams">The collection parameters.</param>
+	/// <param name="hnswConfig">Params for HNSW index.</param>
+	/// <param name="quantizationConfig">
+	/// Params for quantization, if <c>null</c> - quantization will be disabled.
+	/// </param>
+	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
+	/// <param name="strictModeConfig">Configuration for strict mode.</param>
+	/// <param name="timeout">
+	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
+	/// </param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task UpdateCollectionAsync(
+		string collectionName,
+		Dictionary<string, Value> metadata,
+		OptimizersConfigDiff? optimizersConfig = null,
+		CollectionParamsDiff? collectionParams = null,
+		HnswConfigDiff? hnswConfig = null,
+		QuantizationConfigDiff? quantizationConfig = null,
+		SparseVectorConfig? sparseVectorsConfig = null,
+		StrictModeConfig? strictModeConfig = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
+			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
 	private async Task UpdateCollectionCoreAsync(
 		string collectionName,
@@ -704,6 +1069,7 @@ public class QdrantClient : IDisposable
 		QuantizationConfigDiff? quantizationConfig = null,
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
+		Dictionary<string, Value>? metadata = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default)
 	{
@@ -721,6 +1087,9 @@ public class QdrantClient : IDisposable
 
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
+
+		if (metadata is not null)
+			request.Metadata.Add(metadata);
 
 		_logger.UpdateCollection(collectionName);
 
@@ -976,6 +1345,29 @@ public class QdrantClient : IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The points to be upserted.</param>
+	/// 
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public Task<UpdateResult> UpsertAsync(
+		string collectionName,
+		IReadOnlyList<PointStruct> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default
+	)
+	=> UpsertAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <summary>
+	/// Perform insert and updates on points. If a point with a given ID already exists, it will be overwritten.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="points">The points to be upserted.</param>
+	/// <param name="updateFilter">Conditional update filter.</param>
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
@@ -985,10 +1377,12 @@ public class QdrantClient : IDisposable
 	public async Task<UpdateResult> UpsertAsync(
 		string collectionName,
 		IReadOnlyList<PointStruct> points,
+		Filter? updateFilter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
+		CancellationToken cancellationToken = default
+	)
 	{
 		var request = new UpsertPoints
 		{
@@ -1002,6 +1396,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (updateFilter is not null)
+			request.UpdateFilter = updateFilter;
 
 		_logger.Upsert(collectionName, points.Count);
 
@@ -1416,9 +1813,31 @@ public class QdrantClient : IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	public Task<UpdateResult> UpdateVectorsAsync(
+		string collectionName,
+		IReadOnlyList<PointVectors> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+	=> UpdateVectorsAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <summary>
+	/// Update named vectors for point.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="points">The list of points and vectors to update.</param>
+	/// <param name="updateFilter">Conditional update filter.</param>
+	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
+	/// <param name="ordering">Write ordering guarantees.</param>
+	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
 	public async Task<UpdateResult> UpdateVectorsAsync(
 		string collectionName,
 		IReadOnlyList<PointVectors> points,
+		Filter? updateFilter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
@@ -1436,6 +1855,9 @@ public class QdrantClient : IDisposable
 
 		if (shardKeySelector is not null)
 			request.ShardKeySelector = shardKeySelector;
+
+		if (updateFilter is not null)
+			request.UpdateFilter = updateFilter;
 
 		_logger.UpdateVectors(collectionName);
 
@@ -4466,6 +4888,78 @@ public class QdrantClient : IDisposable
 	#endregion
 
 	#region Cluster management
+
+	/// <summary>
+	/// Get cluster information for a collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<CollectionClusterInfoResponse> GetCollectionClusterSetupInfoAsync(
+		string collectionName,
+		CancellationToken cancellationToken = default)
+	{
+		_logger.GetCollectionClusterSetupInfo(collectionName);
+
+		try
+		{
+			var response = await _collectionsClient.CollectionClusterInfoAsync(
+					new CollectionClusterInfoRequest { CollectionName = collectionName },
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.GetCollectionInfo), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Updates the cluster setup for a collection with a pre-configured request.
+	/// </summary>
+	/// <param name="request">The complete cluster setup request with operation details</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	/// <returns>Response indicating whether the operation succeeded</returns>
+	public async Task<UpdateCollectionClusterSetupResponse> UpdateCollectionClusterSetupAsync(
+		UpdateCollectionClusterSetupRequest request,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		if (timeout is not null)
+			request.Timeout = ConvertTimeout(timeout);
+
+		_logger.UpdateCollectionClusterSetup(request.CollectionName);
+
+		try
+		{
+			var response = await _collectionsClient
+				.UpdateCollectionClusterSetupAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			if (!response.Result)
+				throw new QdrantException($"Collection '{request.CollectionName}' cluster setup could not be updated");
+
+			return response;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.UpdateCollectionClusterSetup), e);
+
+			throw;
+		}
+	}
 
 	/// <summary>
 	/// Create shard key

@@ -57,9 +57,8 @@ public class ApiKeyCertificateThumbprintTests
 
 		var client = new QdrantGrpcClient(callInvoker);
 
-		var response = client.Qdrant.HealthCheck(new HealthCheckRequest());
-		response.Title.Should().NotBeNullOrEmpty();
-		response.Version.Should().NotBeNullOrEmpty();
+		var response = client.Collections.ListAliases(new ListAliasesRequest());
+		response.Aliases.Should().NotBeNull();
 	}
 
 	[Fact]
@@ -83,7 +82,7 @@ public class ApiKeyCertificateThumbprintTests
 
 		var client = new QdrantGrpcClient(callInvoker);
 
-		var exception = Assert.Throws<RpcException>(() => client.Qdrant.HealthCheck(new HealthCheckRequest()));
+		var exception = Assert.Throws<RpcException>(() => client.Collections.ListAliases(new ListAliasesRequest()));
 #if NETFRAMEWORK
 		exception.Status.StatusCode.Should().BeOneOf(StatusCode.Unavailable, StatusCode.Unauthenticated);
 #else
@@ -115,7 +114,7 @@ public class ApiKeyCertificateThumbprintTests
 
 		var client = new QdrantGrpcClient(callInvoker);
 
-		var exception = Assert.Throws<RpcException>(() => client.Qdrant.HealthCheck(new HealthCheckRequest()));
+		var exception = Assert.Throws<RpcException>(() => client.Collections.ListAliases(new ListAliasesRequest()));
 		exception.Status.StatusCode.Should().Be(StatusCode.Internal);
 		exception.InnerException.Should().BeOfType<HttpRequestException>();
 
