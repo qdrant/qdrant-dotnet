@@ -60,4 +60,20 @@ public class MockingTests
 		response.Title.Should().Be("from Moq");
 		response.Version.Should().Be("v1.0.0");
 	}
+
+	[Fact]
+	public async Task CanMockUsingInterface()
+	{
+		var expectedResult = new HealthCheckReply { Title = "from Moq", Version = "v1.0.0" };
+		using var cts = new CancellationTokenSource();
+		var mockedClient = new Mock<IQdrantClient>();
+		var subject = mockedClient.Object;
+
+		mockedClient.Setup(q => q.HealthAsync(cts.Token))
+					.ReturnsAsync(expectedResult);
+
+		var actualResult = await subject.HealthAsync(cts.Token);
+
+		actualResult.Should().BeEquivalentTo(expectedResult);
+	}
 }

@@ -1,103 +1,13 @@
-using System.Runtime.InteropServices;
-using Google.Protobuf.Collections;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Qdrant.Client.Grpc;
 
 namespace Qdrant.Client;
 
-// ReSharper disable UnusedMethodReturnValue.Global
-// ReSharper disable UnusedMember.Global
-
 /// <summary>
 /// Client for the Qdrant vector database.
 /// </summary>
-public class QdrantClient : IQdrantClient, IDisposable
+public interface IQdrantClient
 {
-	private readonly QdrantGrpcClient _grpcClient;
-	private readonly bool _ownsGrpcClient;
-	private bool _isDisposed;
-
-	private readonly Collections.CollectionsClient _collectionsClient;
-	private readonly Points.PointsClient _pointsClient;
-	private readonly Snapshots.SnapshotsClient _snapshotsClient;
-
-	private readonly TimeSpan _grpcTimeout;
-	private readonly ILogger _logger;
-
-	/// <summary>Instantiates a new Qdrant client.</summary>
-	/// <param name="host">The host to connect to.</param>
-	/// <param name="port">The port to connect to. Defaults to 6334.</param>
-	/// <param name="https">Whether to encrypt the connection using HTTPS. Defaults to <c>false</c>.</param>
-	/// <param name="apiKey">The API key to use.</param>
-	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
-	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
-	/// <remarks>
-	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
-	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
-	/// </remarks>
-	public QdrantClient(
-		string host,
-		int port = 6334,
-		bool https = false,
-		string? apiKey = null,
-		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, grpcTimeout, loggerFactory)
-	{
-	}
-
-	/// <summary>Instantiates a new Qdrant client.</summary>
-	/// <param name="address">The address to connect to.</param>
-	/// <param name="apiKey">The API key to use.</param>
-	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
-	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
-	/// <remarks>
-	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
-	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
-	/// </remarks>
-	public QdrantClient(
-		System.Uri address,
-		string? apiKey = null,
-		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-		: this(new QdrantGrpcClient(address, apiKey), ownsGrpcClient: true, grpcTimeout, loggerFactory)
-	{
-	}
-
-	/// <summary>Instantiates a new Qdrant client.</summary>
-	/// <param name="grpcClient">The low-level gRPC client to use.</param>
-	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
-	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
-	/// <remarks>
-	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
-	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
-	/// </remarks>
-	public QdrantClient(
-		QdrantGrpcClient grpcClient,
-		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-		: this(grpcClient, ownsGrpcClient: false, grpcTimeout, loggerFactory)
-	{
-	}
-
-	private QdrantClient(
-		QdrantGrpcClient grpcClient,
-		bool ownsGrpcClient,
-		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-	{
-		_grpcClient = grpcClient;
-		_ownsGrpcClient = ownsGrpcClient;
-
-		_collectionsClient = grpcClient.Collections;
-		_pointsClient = grpcClient.Points;
-		_snapshotsClient = grpcClient.Snapshots;
-		_grpcTimeout = grpcTimeout;
-		_logger = loggerFactory?.CreateLogger("Qdrant.Client") ?? NullLogger.Instance;
-	}
-
 	#region CreateCollection
 
 	/// <summary>
@@ -130,9 +40,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">
-	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
-	/// </param>
+	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -142,7 +50,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task CreateCollectionAsync(
+	Task CreateCollectionAsync(
 		string collectionName,
 		VectorParams vectorsConfig,
 		uint shardNumber = 1,
@@ -158,73 +66,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> CreateCollectionAsync(
-			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Creates a new collection with the given parameters.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection to be created.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a single anonymous vector storage.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
-	/// <param name="replicationFactor">
-	/// Replication factor for collection. Default is 1, minimum is 1.
-	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="writeConsistencyFactor">
-	/// Write consistency factor for collection. Default is 1, minimum is 1.
-	/// Defines how many replicas should apply the operation for us to consider it successful.
-	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
-	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="onDiskPayload">
-	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
-	/// requested. This setting saves RAM by (slightly) increasing the response time.
-	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
-	/// </param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task CreateCollectionAsync(
-		string collectionName,
-		VectorParams vectorsConfig,
-		Dictionary<string, Value> metadata,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> CreateCollectionAsync(
-			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Creates a new collection with the given parameters.
@@ -256,9 +98,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">
-	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
-	/// </param>
+	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -268,7 +108,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task CreateCollectionAsync(
+	Task CreateCollectionAsync(
 		string collectionName,
 		VectorParamsMap? vectorsConfig = null,
 		uint shardNumber = 1,
@@ -284,136 +124,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> CreateCollectionAsync(
-			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Creates a new collection with the given parameters.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection to be created.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a vector storage for each key in the provided map.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
-	/// <param name="replicationFactor">
-	/// Replication factor for collection. Default is 1, minimum is 1.
-	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="writeConsistencyFactor">
-	/// Write consistency factor for collection. Default is 1, minimum is 1.
-	/// Defines how many replicas should apply the operation for us to consider it successful.
-	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
-	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="onDiskPayload">
-	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
-	/// requested. This setting saves RAM by (slightly) increasing the response time.
-	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
-	/// </param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task CreateCollectionAsync(
-		string collectionName,
-		VectorParamsMap? vectorsConfig,
-		Dictionary<string, Value> metadata,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> CreateCollectionAsync(
-			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
-
-	private async Task CreateCollectionAsync(
-		string collectionName,
-		VectorsConfig? vectorsConfig = null,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		Dictionary<string, Value>? metadata = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new CreateCollection
-		{
-			CollectionName = collectionName,
-			VectorsConfig = vectorsConfig,
-			ShardNumber = shardNumber,
-			ReplicationFactor = replicationFactor,
-			WriteConsistencyFactor = writeConsistencyFactor,
-			OnDiskPayload = onDiskPayload,
-			HnswConfig = hnswConfig,
-			OptimizersConfig = optimizersConfig,
-			WalConfig = walConfig,
-			QuantizationConfig = quantizationConfig,
-			SparseVectorsConfig = sparseVectorsConfig,
-			StrictModeConfig = strictModeConfig
-		};
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardingMethod is not null)
-			request.ShardingMethod = (ShardingMethod)shardingMethod;
-
-		if (metadata is not null)
-			request.Metadata.Add(metadata);
-
-		_logger.CreateCollection(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient.CreateAsync(request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			if (!response.Result)
-				throw new QdrantException($"Collection '{collectionName}' could not be created");
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreateCollection), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion CreateCollection
 
@@ -449,9 +160,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">
-	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
-	/// </param>
+	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -461,7 +170,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task RecreateCollectionAsync(
+	Task RecreateCollectionAsync(
 		string collectionName,
 		VectorParams vectorsConfig,
 		uint shardNumber = 1,
@@ -477,73 +186,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecreateCollectionAsync(
-			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection to be created.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a single anonymous vector storage.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
-	/// <param name="replicationFactor">
-	/// Replication factor for collection. Default is 1, minimum is 1.
-	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="writeConsistencyFactor">
-	/// Write consistency factor for collection. Default is 1, minimum is 1.
-	/// Defines how many replicas should apply the operation for us to consider it successful.
-	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
-	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="onDiskPayload">
-	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
-	/// requested. This setting saves RAM by (slightly) increasing the response time.
-	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
-	/// </param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task RecreateCollectionAsync(
-		string collectionName,
-		VectorParams vectorsConfig,
-		Dictionary<string, Value> metadata,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecreateCollectionAsync(
-			collectionName, new VectorsConfig { Params = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
@@ -575,9 +218,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="quantizationConfig">
 	/// Params for quantization, if <c>null</c> - quantization will be disabled.
 	/// </param>
-	/// <param name="initFromCollection">
-	/// (Deprecated as of Qdrant 1.16.0) This parameter is no longer supported by the Qdrant API and will be ignored.
-	/// </param>
+	/// <param name="initFromCollection">Use data stored in another collection to initialize this collection.</param>
 	/// <param name="shardingMethod">Sharding method.</param>
 	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
 	/// <param name="strictModeConfig">Configuration for strict mode.</param>
@@ -587,7 +228,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task RecreateCollectionAsync(
+	Task RecreateCollectionAsync(
 		string collectionName,
 		VectorParamsMap? vectorsConfig = null,
 		uint shardNumber = 1,
@@ -603,102 +244,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecreateCollectionAsync(
-			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Deletes a collection if one exists, and creates a new collection with the given parameters.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection to be created.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a vector storage for each key in the provided map.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="shardNumber">Number of shards in collection. Default is 1, minimum is 1.</param>
-	/// <param name="replicationFactor">
-	/// Replication factor for collection. Default is 1, minimum is 1.
-	/// Defines how many copies of each shard will be created. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="writeConsistencyFactor">
-	/// Write consistency factor for collection. Default is 1, minimum is 1.
-	/// Defines how many replicas should apply the operation for us to consider it successful.
-	/// Increasing this number will make the collection more resilient to inconsistencies, but will also make it fail if
-	/// not enough replicas are available. Does not have any performance impact. Has an effect only in distributed mode.
-	/// </param>
-	/// <param name="onDiskPayload">
-	/// If true - point`s payload will not be stored in memory. It will be read from the disk every time it is
-	/// requested. This setting saves RAM by (slightly) increasing the response time.
-	/// Note: those payload values that are involved in filtering and are indexed - remain in RAM.
-	/// </param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="walConfig">Params for Write-Ahead-Log.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="shardingMethod">Sharding method.</param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task RecreateCollectionAsync(
-		string collectionName,
-		VectorParamsMap? vectorsConfig,
-		Dictionary<string, Value>? metadata,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecreateCollectionAsync(
-			collectionName, vectorsConfig == null ? null : new VectorsConfig { ParamsMap = vectorsConfig }, shardNumber, replicationFactor,
-			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
-
-	private async Task RecreateCollectionAsync(
-		string collectionName,
-		VectorsConfig? vectorsConfig = null,
-		uint shardNumber = 1,
-		uint replicationFactor = 1,
-		uint writeConsistencyFactor = 1,
-		bool onDiskPayload = false,
-		HnswConfigDiff? hnswConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		WalConfigDiff? walConfig = null,
-		QuantizationConfig? quantizationConfig = null,
-		ShardingMethod? shardingMethod = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		Dictionary<string, Value>? metadata = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-
-		if (await CollectionExistsAsync(collectionName, cancellationToken).ConfigureAwait(false))
-			await DeleteCollectionAsync(collectionName, timeout, cancellationToken).ConfigureAwait(false);
-
-		await CreateCollectionAsync(
-				collectionName, vectorsConfig, shardNumber, replicationFactor,
-				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
-				shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken)
-			.ConfigureAwait(false);
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion RecreateCollection
 
@@ -709,29 +255,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<CollectionInfo> GetCollectionInfoAsync(
-		string collectionName,
-		CancellationToken cancellationToken = default)
-	{
-		_logger.GetCollectionInfo(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient.GetAsync(
-					new GetCollectionInfoRequest { CollectionName = collectionName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.GetCollectionInfo), e);
-
-			throw;
-		}
-	}
+	Task<CollectionInfo> GetCollectionInfoAsync(string collectionName, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Gets the names of all existing collections.
@@ -739,32 +263,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<string>> ListCollectionsAsync(CancellationToken cancellationToken = default)
-	{
-		_logger.ListCollections();
-
-		try
-		{
-			var response = await _collectionsClient
-				.ListAsync(
-					new ListCollectionsRequest(),
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			var names = new string[response.Collections.Count];
-			for (var i = 0; i < names.Length; i++)
-				names[i] = response.Collections[i].Name;
-
-			return names;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ListCollections), e);
-
-			throw;
-		}
-	}
+	Task<IReadOnlyList<string>> ListCollectionsAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Drop a collection and all its associated data.
@@ -774,40 +273,10 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task DeleteCollectionAsync(
+	Task DeleteCollectionAsync(
 		string collectionName,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeleteCollection
-		{
-			CollectionName = collectionName,
-		};
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.DeleteCollection(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient
-				.DeleteAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			if (!response.Result)
-				throw new QdrantException($"Collection '{collectionName}' could not be deleted");
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteCollection), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Check if a collection exists.
@@ -816,35 +285,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<bool> CollectionExistsAsync(
-		string collectionName,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new CollectionExistsRequest
-		{
-			CollectionName = collectionName,
-		};
-
-		_logger.CollectionExists(collectionName);
-
-		try
-		{
-
-			var response = await _collectionsClient
-				.CollectionExistsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken).ConfigureAwait(false);
-
-			return response.Result.Exists;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CollectionExists), e);
-
-			throw;
-		}
-	}
+	Task<bool> CollectionExistsAsync(string collectionName, CancellationToken cancellationToken = default);
 
 	#region UpdateCollection
 
@@ -870,7 +311,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task UpdateCollectionAsync(
+	Task UpdateCollectionAsync(
 		string collectionName,
 		VectorParamsDiff vectorsConfig,
 		OptimizersConfigDiff? optimizersConfig = null,
@@ -880,47 +321,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Update parameters of the collection.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a single anonymous vector storage.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="collectionParams">The collection parameters.</param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task UpdateCollectionAsync(
-		string collectionName,
-		VectorParamsDiff vectorsConfig,
-		Dictionary<string, Value> metadata,
-		OptimizersConfigDiff? optimizersConfig = null,
-		CollectionParamsDiff? collectionParams = null,
-		HnswConfigDiff? hnswConfig = null,
-		QuantizationConfigDiff? quantizationConfig = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { Params = vectorsConfig }, optimizersConfig,
-			collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -944,7 +345,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task UpdateCollectionAsync(
+	Task UpdateCollectionAsync(
 		string collectionName,
 		VectorParamsDiffMap vectorsConfig,
 		OptimizersConfigDiff? optimizersConfig = null,
@@ -954,47 +355,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Update parameters of the collection.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="vectorsConfig">
-	/// Configuration of the vector storage. Vector params contains size and distance for the vector storage.
-	/// This overload creates a vector storage for each key in the provided map.
-	/// </param>
-	/// <param name="metadata">Arbitrary metadata for the collection.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="collectionParams">The collection parameters.</param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task UpdateCollectionAsync(
-		string collectionName,
-		VectorParamsDiffMap vectorsConfig,
-		Dictionary<string, Value> metadata,
-		OptimizersConfigDiff? optimizersConfig = null,
-		CollectionParamsDiff? collectionParams = null,
-		HnswConfigDiff? hnswConfig = null,
-		QuantizationConfigDiff? quantizationConfig = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, new VectorsConfigDiff { ParamsMap = vectorsConfig },
-			optimizersConfig, collectionParams, hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Update parameters of the collection.
@@ -1014,7 +375,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task UpdateCollectionAsync(
+	Task UpdateCollectionAsync(
 		string collectionName,
 		OptimizersConfigDiff? optimizersConfig = null,
 		CollectionParamsDiff? collectionParams = null,
@@ -1023,95 +384,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		SparseVectorConfig? sparseVectorsConfig = null,
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, null, timeout, cancellationToken);
-
-	/// <summary>
-	/// Update parameters of the collection.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="metadata">Optional metadata for the collection.</param>
-	/// <param name="optimizersConfig">Params for optimizer.</param>
-	/// <param name="collectionParams">The collection parameters.</param>
-	/// <param name="hnswConfig">Params for HNSW index.</param>
-	/// <param name="quantizationConfig">
-	/// Params for quantization, if <c>null</c> - quantization will be disabled.
-	/// </param>
-	/// <param name="sparseVectorsConfig">Configuration for sparse vectors.</param>
-	/// <param name="strictModeConfig">Configuration for strict mode.</param>
-	/// <param name="timeout">
-	/// Wait for operation commit timeout. If timeout is reached, the request will return with a service error.
-	/// </param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public Task UpdateCollectionAsync(
-		string collectionName,
-		Dictionary<string, Value> metadata,
-		OptimizersConfigDiff? optimizersConfig = null,
-		CollectionParamsDiff? collectionParams = null,
-		HnswConfigDiff? hnswConfig = null,
-		QuantizationConfigDiff? quantizationConfig = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateCollectionCoreAsync(collectionName, vectorsConfig: null, optimizersConfig, collectionParams,
-			hnswConfig, quantizationConfig, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
-
-	private async Task UpdateCollectionCoreAsync(
-		string collectionName,
-		VectorsConfigDiff? vectorsConfig = null,
-		OptimizersConfigDiff? optimizersConfig = null,
-		CollectionParamsDiff? collectionParams = null,
-		HnswConfigDiff? hnswConfig = null,
-		QuantizationConfigDiff? quantizationConfig = null,
-		SparseVectorConfig? sparseVectorsConfig = null,
-		StrictModeConfig? strictModeConfig = null,
-		Dictionary<string, Value>? metadata = null,
-		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new UpdateCollection
-		{
-			CollectionName = collectionName,
-			VectorsConfig = vectorsConfig,
-			OptimizersConfig = optimizersConfig,
-			Params = collectionParams,
-			HnswConfig = hnswConfig,
-			QuantizationConfig = quantizationConfig,
-			SparseVectorsConfig = sparseVectorsConfig,
-			StrictModeConfig = strictModeConfig
-		};
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (metadata is not null)
-			request.Metadata.Add(metadata);
-
-		_logger.UpdateCollection(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient
-				.UpdateAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			if (!response.Result)
-				throw new QdrantException($"Collection '{collectionName}' could not be updated");
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.UpdateCollection), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion UpdateCollection
 
@@ -1131,19 +404,11 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task CreateAliasAsync(
+	Task CreateAliasAsync(
 		string aliasName,
 		string collectionName,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateAliasesAsync(
-			new[]
-			{
-				new AliasOperations
-				{
-					CreateAlias = new CreateAlias { AliasName = aliasName, CollectionName = collectionName }
-				}
-			}, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Renames an existing alias.
@@ -1159,19 +424,11 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task RenameAliasAsync(
+	Task RenameAliasAsync(
 		string oldAliasName,
 		string newAliasName,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateAliasesAsync(
-			new[]
-			{
-				new AliasOperations
-				{
-					RenameAlias = new RenameAlias { OldAliasName = oldAliasName, NewAliasName = newAliasName }
-				}
-			}, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Deletes an alias.
@@ -1186,18 +443,10 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task DeleteAliasAsync(
+	Task DeleteAliasAsync(
 		string aliasName,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> UpdateAliasesAsync(
-			new[]
-			{
-				new AliasOperations
-				{
-					DeleteAlias = new DeleteAlias { AliasName = aliasName }
-				}
-			}, timeout, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Update the aliases of existing collections.
@@ -1212,62 +461,10 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task UpdateAliasesAsync(
+	Task UpdateAliasesAsync(
 		IReadOnlyList<AliasOperations> aliasOperations,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new ChangeAliases { Actions = { aliasOperations } };
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (_logger.IsEnabled(LogLevel.Debug))
-		{
-			foreach (var operation in aliasOperations)
-			{
-				// ReSharper disable ConvertTypeCheckPatternToNullCheck
-				switch (operation)
-				{
-					case { CreateAlias: CreateAlias createAlias }:
-						_logger.CreateAlias(createAlias.AliasName, createAlias.CollectionName);
-						break;
-
-					case { DeleteAlias: DeleteAlias deleteAlias }:
-						_logger.DeleteAlias(deleteAlias.AliasName);
-						break;
-
-					case { RenameAlias: RenameAlias renameAlias }:
-						_logger.RenameAlias(renameAlias.OldAliasName, renameAlias.NewAliasName);
-						break;
-
-					default:
-						throw new ArgumentOutOfRangeException();
-
-				}
-				// ReSharper restore ConvertTypeCheckPatternToNullCheck
-			}
-		}
-
-		try
-		{
-			var response = await _collectionsClient
-				.UpdateAliasesAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			if (!response.Result)
-				throw new QdrantException("Alias update operation(s) could not be performed.");
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed("UpdateAliases", e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Gets a list of all aliases for a collection.
@@ -1276,36 +473,9 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<string>> ListCollectionAliasesAsync(
+	Task<IReadOnlyList<string>> ListCollectionAliasesAsync(
 		string collectionName,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new ListCollectionAliasesRequest { CollectionName = collectionName };
-
-		_logger.ListCollectionAliases(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient
-				.ListCollectionAliasesAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			var names = new string[response.Aliases.Count];
-			for (var i = 0; i < names.Length; i++)
-				names[i] = response.Aliases[i].AliasName;
-
-			return names;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ListCollectionAliases), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Gets a list of all aliases for all existing collections.
@@ -1313,28 +483,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<AliasDescription>> ListAliasesAsync(CancellationToken cancellationToken = default)
-	{
-		_logger.ListAliases();
-
-		try
-		{
-			var response = await _collectionsClient
-				.ListAliasesAsync(
-					new ListAliasesRequest(),
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Aliases;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ListAliases), e);
-
-			throw;
-		}
-	}
+	Task<IReadOnlyList<AliasDescription>> ListAliasesAsync(CancellationToken cancellationToken = default);
 
 	#endregion Alias management
 
@@ -1345,80 +494,19 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="points">The points to be upserted.</param>
-	/// 
 	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
 	/// <param name="ordering">Write ordering guarantees.</param>
 	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> UpsertAsync(
+	Task<UpdateResult> UpsertAsync(
 		string collectionName,
 		IReadOnlyList<PointStruct> points,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default
-	)
-	=> UpsertAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
-
-	/// <summary>
-	/// Perform insert and updates on points. If a point with a given ID already exists, it will be overwritten.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="points">The points to be upserted.</param>
-	/// <param name="updateFilter">Conditional update filter.</param>
-	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
-	/// <param name="ordering">Write ordering guarantees.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public async Task<UpdateResult> UpsertAsync(
-		string collectionName,
-		IReadOnlyList<PointStruct> points,
-		Filter? updateFilter,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default
-	)
-	{
-		var request = new UpsertPoints
-		{
-			CollectionName = collectionName,
-			Points = { points },
-			Wait = wait
-		};
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (updateFilter is not null)
-			request.UpdateFilter = updateFilter;
-
-		_logger.Upsert(collectionName, points.Count);
-
-		try
-		{
-			var response = await _pointsClient.UpsertAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Upsert), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete a point.
@@ -1431,19 +519,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeleteAsync(collectionName,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete points.
@@ -1456,19 +538,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete a point.
@@ -1481,19 +557,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeleteAsync(collectionName,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete points.
@@ -1506,19 +576,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete a point.
@@ -1531,19 +595,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		PointId id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeleteAsync(collectionName,
-			new PointsSelector { Points = new PointsIdsList { Ids = { id } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete points.
@@ -1556,19 +614,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		IReadOnlyList<PointId> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids);
-
-		return DeleteAsync(collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete points.
@@ -1581,55 +633,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteAsync(
+	Task<UpdateResult> DeleteAsync(
 		string collectionName,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeleteAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
-
-	private async Task<UpdateResult> DeleteAsync(
-		string collectionName,
-		PointsSelector pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeletePoints
-		{
-			CollectionName = collectionName,
-			Points = pointsSelector,
-			Wait = wait
-		};
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Delete(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DeleteAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Delete), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieve a point.
@@ -1643,22 +653,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+	Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		PointId id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> RetrieveAsync(
-			collectionName,
-			new[] { id },
-			new WithPayloadSelector { Enable = withPayload },
-			new WithVectorsSelector { Enable = withVectors },
-			readConsistency,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieve a point.
@@ -1672,22 +674,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+	Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		Guid id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> RetrieveAsync(
-			collectionName,
-			new[] { new PointId { Uuid = id.ToString() } },
-			new WithPayloadSelector { Enable = withPayload },
-			new WithVectorsSelector { Enable = withVectors },
-			readConsistency,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieve a point.
@@ -1701,22 +695,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+	Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		ulong id,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> RetrieveAsync(
-			collectionName,
-			new[] { new PointId { Num = id } },
-			new WithPayloadSelector { Enable = withPayload },
-			new WithVectorsSelector { Enable = withVectors },
-			readConsistency,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieve points.
@@ -1730,22 +716,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+	Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		IReadOnlyList<PointId> ids,
 		bool withPayload = true,
 		bool withVectors = false,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> RetrieveAsync(
-			collectionName,
-			ids,
-			new WithPayloadSelector { Enable = withPayload },
-			new WithVectorsSelector { Enable = withVectors },
-			readConsistency,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieve points.
@@ -1759,48 +737,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+	Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
 		string collectionName,
 		IReadOnlyList<PointId> ids,
 		WithPayloadSelector payloadSelector,
 		WithVectorsSelector vectorSelector,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new GetPoints
-		{
-			CollectionName = collectionName,
-			Ids = { ids },
-			WithPayload = payloadSelector,
-			WithVectors = vectorSelector
-		};
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Retrieve(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.GetAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Retrieve), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Update named vectors for point.
@@ -1813,71 +757,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> UpdateVectorsAsync(
+	Task<UpdateResult> UpdateVectorsAsync(
 		string collectionName,
 		IReadOnlyList<PointVectors> points,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	=> UpdateVectorsAsync(collectionName, points, null, wait, ordering, shardKeySelector, cancellationToken);
-
-	/// <summary>
-	/// Update named vectors for point.
-	/// </summary>
-	/// <param name="collectionName">The name of the collection.</param>
-	/// <param name="points">The list of points and vectors to update.</param>
-	/// <param name="updateFilter">Conditional update filter.</param>
-	/// <param name="wait">Whether to wait until the changes have been applied. Defaults to <c>true</c>.</param>
-	/// <param name="ordering">Write ordering guarantees.</param>
-	/// <param name="shardKeySelector">Option for custom sharding to specify used shard keys.</param>
-	/// <param name="cancellationToken">
-	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
-	/// </param>
-	public async Task<UpdateResult> UpdateVectorsAsync(
-		string collectionName,
-		IReadOnlyList<PointVectors> points,
-		Filter? updateFilter,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new UpdatePointVectors
-		{
-			CollectionName = collectionName,
-			Points = { points },
-			Wait = wait
-		};
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (updateFilter is not null)
-			request.UpdateFilter = updateFilter;
-
-		_logger.UpdateVectors(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.UpdateVectorsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.UpdateVectors), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#region DeleteVectors
 
@@ -1893,22 +779,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteVectorsAsync(
+	Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return DeleteVectorsAsync(
-			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
-			shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete named vectors for points.
@@ -1922,22 +800,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteVectorsAsync(
+	Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return DeleteVectorsAsync(
-			collectionName, vectors, new PointsSelector { Points = idsList }, wait, ordering,
-			shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete named vectors for points.
@@ -1951,59 +821,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeleteVectorsAsync(
+	Task<UpdateResult> DeleteVectorsAsync(
 		string collectionName,
 		IReadOnlyList<string> vectors,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeleteVectorsAsync(
-			collectionName, vectors, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
-
-	private async Task<UpdateResult> DeleteVectorsAsync(
-		string collectionName,
-		IReadOnlyList<string> vectors,
-		PointsSelector pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeletePointVectors
-		{
-			CollectionName = collectionName,
-			PointsSelector = pointsSelector,
-			Vectors = new VectorsSelector { Names = { vectors } },
-			Wait = wait
-		};
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.DeleteVectors(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DeleteVectorsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteVectors), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion DeleteVectors
 
@@ -2021,15 +846,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> SetPayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, key, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -2044,7 +868,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		ulong id,
@@ -2052,15 +876,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> SetPayloadAsync(
-			collectionName, payload,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			key,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -2075,7 +891,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<ulong> ids,
@@ -2083,14 +899,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -2105,7 +914,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Guid id,
@@ -2113,15 +922,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> SetPayloadAsync(
-			collectionName, payload,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			key,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -2136,7 +937,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<Guid> ids,
@@ -2144,14 +945,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Sets the payload for the given points.
@@ -2166,7 +960,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> SetPayloadAsync(
+	Task<UpdateResult> SetPayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Filter filter,
@@ -2174,60 +968,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> SetPayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, key, cancellationToken);
-
-	private async Task<UpdateResult> SetPayloadAsync(
-		string collectionName,
-		IReadOnlyDictionary<string, Value> payload,
-		PointsSelector? pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SetPayloadPoints
-		{
-			CollectionName = collectionName,
-			Wait = wait,
-		};
-
-		foreach (var kvp in payload)
-			request.Payload[kvp.Key] = kvp.Value;
-
-		if (pointsSelector is not null)
-			request.PointsSelector = pointsSelector;
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (key is not null)
-			request.Key = key;
-
-		_logger.SetPayload(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SetPayloadAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SetPayload), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion SetPayload
 
@@ -2245,15 +986,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> OverwritePayloadAsync(collectionName, payload, pointsSelector: null, wait, ordering, shardKeySelector, key, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -2268,7 +1008,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		ulong id,
@@ -2276,15 +1016,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> OverwritePayloadAsync(
-			collectionName, payload,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			key,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -2299,7 +1031,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<ulong> ids,
@@ -2307,14 +1039,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -2329,7 +1054,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Guid id,
@@ -2337,15 +1062,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> OverwritePayloadAsync(
-			collectionName, payload,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			key,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -2360,7 +1077,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		IReadOnlyList<Guid> ids,
@@ -2368,14 +1085,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, key, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Overwrites the payload for the given points.
@@ -2390,7 +1100,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> OverwritePayloadAsync(
+	Task<UpdateResult> OverwritePayloadAsync(
 		string collectionName,
 		IReadOnlyDictionary<string, Value> payload,
 		Filter filter,
@@ -2398,60 +1108,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
 		string? key = null,
-		CancellationToken cancellationToken = default)
-		=> OverwritePayloadAsync(
-			collectionName, payload, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, key, cancellationToken);
-
-	private async Task<UpdateResult> OverwritePayloadAsync(
-		string collectionName,
-		IReadOnlyDictionary<string, Value> payload,
-		PointsSelector? pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		string? key = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SetPayloadPoints
-		{
-			CollectionName = collectionName,
-			Wait = wait
-		};
-
-		foreach (var kvp in payload)
-			request.Payload[kvp.Key] = kvp.Value;
-
-		if (pointsSelector is not null)
-			request.PointsSelector = pointsSelector;
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (key is not null)
-			request.Key = key;
-
-		_logger.OverwritePayload(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.OverwritePayloadAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.OverwritePayload), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion OverwritePayload
 
@@ -2468,14 +1125,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeletePayloadAsync(collectionName, keys, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -2489,21 +1145,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeletePayloadAsync(
-			collectionName, keys,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -2517,21 +1166,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -2545,21 +1187,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeletePayloadAsync(
-			collectionName, keys,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -2573,21 +1208,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete specified key payload for points.
@@ -2601,61 +1229,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> DeletePayloadAsync(
+	Task<UpdateResult> DeletePayloadAsync(
 		string collectionName,
 		IReadOnlyList<string> keys,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> DeletePayloadAsync(
-			collectionName, keys, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
-
-	private async Task<UpdateResult> DeletePayloadAsync(
-		string collectionName,
-		IReadOnlyList<string> keys,
-		PointsSelector? pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeletePayloadPoints
-		{
-			CollectionName = collectionName,
-			Keys = { keys },
-			Wait = wait
-		};
-
-		if (pointsSelector is not null)
-			request.PointsSelector = pointsSelector;
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.DeletePayload(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DeletePayloadAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeletePayload), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion DeletePayload
 
@@ -2671,13 +1252,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> ClearPayloadAsync(collectionName, pointsSelector: null, wait, ordering, shardKeySelector, cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2690,19 +1270,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		ulong id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> ClearPayloadAsync(
-			collectionName, new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Num = id } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2715,20 +1289,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		IReadOnlyList<ulong> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Num = id }));
-
-		return ClearPayloadAsync(
-			collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2741,20 +1308,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		Guid id,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> ClearPayloadAsync(
-			collectionName,
-			new PointsSelector { Points = new PointsIdsList { Ids = { new PointId { Uuid = id.ToString() } } } },
-			wait,
-			ordering,
-			shardKeySelector,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2767,20 +1327,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		IReadOnlyList<Guid> ids,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var idsList = new PointsIdsList();
-		idsList.Ids.AddRange(ids.Select(id => new PointId { Uuid = id.ToString() }));
-
-		return ClearPayloadAsync(
-			collectionName, new PointsSelector { Points = idsList }, wait, ordering, shardKeySelector, cancellationToken);
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Remove all payload for specified points.
@@ -2793,57 +1346,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<UpdateResult> ClearPayloadAsync(
+	Task<UpdateResult> ClearPayloadAsync(
 		string collectionName,
 		Filter filter,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-		=> ClearPayloadAsync(collectionName, new PointsSelector { Filter = filter }, wait, ordering, shardKeySelector, cancellationToken);
-
-	private async Task<UpdateResult> ClearPayloadAsync(
-		string collectionName,
-		PointsSelector? pointsSelector,
-		bool wait = true,
-		WriteOrderingType? ordering = null,
-		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new ClearPayloadPoints
-		{
-			CollectionName = collectionName,
-			Wait = wait
-		};
-
-		if (pointsSelector is not null)
-			request.Points = pointsSelector;
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.ClearPayload(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.ClearPayloadAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ClearPayload), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion ClearPayload
 
@@ -2859,48 +1368,14 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<UpdateResult> CreatePayloadIndexAsync(
+	Task<UpdateResult> CreatePayloadIndexAsync(
 		string collectionName,
 		string fieldName,
 		PayloadSchemaType schemaType = PayloadSchemaType.Keyword,
 		PayloadIndexParams? indexParams = null,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new CreateFieldIndexCollection
-		{
-			CollectionName = collectionName,
-			FieldName = fieldName,
-			Wait = wait,
-			FieldType = FieldTypeFromPayloadSchemaType(schemaType)
-		};
-
-		if (indexParams is not null)
-			request.FieldIndexParams = indexParams;
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		_logger.CreatePayloadIndex(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.CreateFieldIndexAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreatePayloadIndex), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Deletes a payload field index in a collection.
@@ -2912,42 +1387,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<UpdateResult> DeletePayloadIndexAsync(
+	Task<UpdateResult> DeletePayloadIndexAsync(
 		string collectionName,
 		string fieldName,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeleteFieldIndexCollection
-		{
-			CollectionName = collectionName,
-			FieldName = fieldName,
-			Wait = wait,
-		};
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		_logger.DeletePayloadIndex(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DeleteFieldIndexAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeletePayloadIndex), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieves closest points based on vector similarity and the given filtering conditions.
@@ -2969,7 +1414,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<ScoredPoint>> SearchAsync(
+	Task<IReadOnlyList<ScoredPoint>> SearchAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
 		Filter? filter = null,
@@ -2984,66 +1429,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ShardKeySelector? shardKeySelector = null,
 		ReadOnlyMemory<uint>? sparseIndices = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SearchPoints
-		{
-			CollectionName = collectionName,
-			Limit = limit,
-			Offset = offset,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		Populate(request.Vector, vector);
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (vectorName is not null)
-			request.VectorName = vectorName;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (sparseIndices is not null)
-		{
-			var sparseIndicesContainer = new SparseIndices();
-			Populate(sparseIndicesContainer.Data, (ReadOnlyMemory<uint>)sparseIndices);
-			request.SparseIndices = sparseIndicesContainer;
-		}
-
-		_logger.Search(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SearchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Search), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieves closest points based on vector similarity and the given filtering conditions.
@@ -3055,49 +1441,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<BatchResult>> SearchBatchAsync(
+	Task<IReadOnlyList<BatchResult>> SearchBatchAsync(
 		string collectionName,
 		IReadOnlyList<SearchPoints> searches,
 		ReadConsistency? readConsistency = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SearchBatchPoints
-		{
-			CollectionName = collectionName,
-		};
-
-		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
-		foreach (var search in searches)
-			search.CollectionName = collectionName;
-
-		request.SearchPoints.AddRange(searches);
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.SearchBatch(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SearchBatchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SearchBatch), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Retrieves closest points based on vector similarity and the given filtering conditions, grouped by a given field.
@@ -3126,7 +1475,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<PointGroup>> SearchGroupsAsync(
+	Task<IReadOnlyList<PointGroup>> SearchGroupsAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
 		string groupBy,
@@ -3143,70 +1492,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ShardKeySelector? shardKeySelector = null,
 		ReadOnlyMemory<uint>? sparseIndices = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SearchPointGroups
-		{
-			CollectionName = collectionName,
-			GroupBy = groupBy,
-			Limit = limit,
-			GroupSize = groupSize,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		Populate(request.Vector, vector);
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (vectorName is not null)
-			request.VectorName = vectorName;
-
-		if (withLookup is not null)
-			request.WithLookup = withLookup;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (sparseIndices is not null)
-		{
-			var sparseIndicesContainer = new SparseIndices();
-			Populate(sparseIndicesContainer.Data, (ReadOnlyMemory<uint>)sparseIndices);
-			request.SparseIndices = sparseIndicesContainer;
-		}
-
-		_logger.SearchGroups(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SearchGroupsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result.Groups;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SearchGroups), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Iterates over all or filtered points.
@@ -3223,7 +1509,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<ScrollResponse> ScrollAsync(
+	Task<ScrollResponse> ScrollAsync(
 		string collectionName,
 		Filter? filter = null,
 		uint limit = 10,
@@ -3233,50 +1519,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		OrderBy? orderBy = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new ScrollPoints
-		{
-			CollectionName = collectionName,
-			Limit = limit,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (offset is not null)
-			request.Offset = offset;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (orderBy is not null)
-			request.OrderBy = orderBy;
-
-		_logger.Scroll(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.ScrollAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Scroll), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3309,7 +1552,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
+	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<ulong> positive,
 		IReadOnlyList<ulong>? negative = null,
@@ -3328,27 +1571,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecommendAsync(
-			collectionName,
-			positive.Select(id => new PointId { Num = id }).ToList(),
-			negative?.Select(id => new PointId { Num = id }).ToList(),
-			positiveVectors,
-			negativeVectors,
-			strategy,
-			filter,
-			searchParams,
-			limit,
-			offset,
-			payloadSelector,
-			vectorsSelector,
-			scoreThreshold,
-			usingVector,
-			lookupFrom,
-			readConsistency,
-			shardKeySelector,
-			timeout,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3381,7 +1604,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
+	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<Guid> positive,
 		IReadOnlyList<Guid>? negative = null,
@@ -3400,27 +1623,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-		=> RecommendAsync(
-			collectionName,
-			positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-			negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-			positiveVectors,
-			negativeVectors,
-			strategy,
-			filter,
-			searchParams,
-			limit,
-			offset,
-			payloadSelector,
-			vectorsSelector,
-			scoreThreshold,
-			usingVector,
-			lookupFrom,
-			readConsistency,
-			shardKeySelector,
-			timeout,
-			cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3453,7 +1656,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
+	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<PointId> positive,
 		IReadOnlyList<PointId>? negative = null,
@@ -3472,73 +1675,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new RecommendPoints
-		{
-			CollectionName = collectionName,
-			Limit = limit,
-			Offset = offset,
-			Positive = { positive },
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		if (negative is not null)
-			request.Negative.AddRange(negative);
-
-		if (positiveVectors is not null)
-			Populate(request.PositiveVectors, positiveVectors.Value);
-
-		if (negativeVectors is not null)
-			Populate(request.NegativeVectors, negativeVectors.Value);
-
-		if (strategy is not null)
-			request.Strategy = strategy.Value;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (lookupFrom is not null)
-			request.LookupFrom = lookupFrom;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Recommend(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.RecommendAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Recommend), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3551,49 +1688,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<BatchResult>> RecommendBatchAsync(
+	Task<IReadOnlyList<BatchResult>> RecommendBatchAsync(
 		string collectionName,
 		IReadOnlyList<RecommendPoints> recommendSearches,
 		ReadConsistency? readConsistency = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new RecommendBatchPoints
-		{
-			CollectionName = collectionName,
-		};
-
-		// TODO: Workaround for https://github.com/qdrant/qdrant/issues/2880
-		foreach (var search in recommendSearches)
-			search.CollectionName = collectionName;
-
-		request.RecommendPoints.AddRange(recommendSearches);
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.RecommendBatch(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.RecommendBatchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SearchBatch), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3630,7 +1730,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
+	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
 		IReadOnlyList<ulong> positive,
@@ -3650,28 +1750,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	=> RecommendGroupsAsync(
-		collectionName,
-		groupBy,
-		positive.Select(id => new PointId { Num = id }).ToList(),
-		negative?.Select(id => new PointId { Num = id }).ToList(),
-		positiveVectors,
-		negativeVectors,
-		strategy,
-		filter,
-		searchParams,
-		limit,
-		groupSize,
-		payloadSelector,
-		vectorsSelector,
-		scoreThreshold,
-		usingVector,
-		withLookup,
-		readConsistency,
-		shardKeySelector,
-		timeout,
-		cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3708,7 +1787,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
+	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
 		IReadOnlyList<Guid> positive,
@@ -3728,28 +1807,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	=> RecommendGroupsAsync(
-		collectionName,
-		groupBy,
-		positive.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-		negative?.Select(id => new PointId { Uuid = id.ToString() }).ToList(),
-		positiveVectors,
-		negativeVectors,
-		strategy,
-		filter,
-		searchParams,
-		limit,
-		groupSize,
-		payloadSelector,
-		vectorsSelector,
-		scoreThreshold,
-		usingVector,
-		withLookup,
-		readConsistency,
-		shardKeySelector,
-		timeout,
-		cancellationToken);
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Look for the points which are closer to stored positive examples and at the same time further to negative
@@ -3786,7 +1844,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
+	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
 		IReadOnlyList<PointId> positive,
@@ -3806,74 +1864,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new RecommendPointGroups
-		{
-			CollectionName = collectionName,
-			GroupBy = groupBy,
-			Limit = limit,
-			GroupSize = groupSize,
-			Positive = { positive },
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		if (negative is not null)
-			request.Negative.AddRange(negative);
-
-		if (positiveVectors is not null)
-			Populate(request.PositiveVectors, positiveVectors.Value);
-
-		if (negativeVectors is not null)
-			Populate(request.NegativeVectors, negativeVectors.Value);
-
-		if (strategy is not null)
-			request.Strategy = strategy.Value;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (withLookup is not null)
-			request.WithLookup = withLookup;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.RecommendGroups(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.RecommendGroupsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result.Groups;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.RecommendGroups), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Performs a batch of operations on a collection.
@@ -3885,43 +1876,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<UpdateResult>> UpdateBatchAsync(
+	Task<IReadOnlyList<UpdateResult>> UpdateBatchAsync(
 		string collectionName,
 		IReadOnlyList<PointsUpdateOperation> operations,
 		bool wait = true,
 		WriteOrderingType? ordering = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new UpdateBatchPoints
-		{
-			CollectionName = collectionName,
-			Wait = wait
-		};
-
-		request.Operations.AddRange(operations);
-
-		if (ordering is not null)
-			request.Ordering = new() { Type = ordering.Value };
-
-		_logger.UpdateBatch(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.UpdateBatchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.UpdateBatch), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Count the points in a collection with the given filtering conditions.
@@ -3936,48 +1896,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<ulong> CountAsync(
+	Task<ulong> CountAsync(
 		string collectionName,
 		Filter? filter = null,
 		bool exact = true,
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new CountPoints
-		{
-			CollectionName = collectionName,
-			Exact = exact
-		};
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Count(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.CountAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result.Count;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Retrieve), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Use context and a target to find the most similar points to the target, constrained by the context.
@@ -4020,7 +1945,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
+	Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		TargetVector target,
 		IReadOnlyList<ContextExamplePair> context,
@@ -4035,63 +1960,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DiscoverPoints
-		{
-			CollectionName = collectionName,
-			Target = target,
-			Context = { context },
-			Limit = limit,
-			Offset = offset,
-		};
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (payloadSelector is not null)
-			request.WithPayload = payloadSelector;
-
-		if (vectorsSelector is not null)
-			request.WithVectors = vectorsSelector;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (lookupFrom is not null)
-			request.LookupFrom = lookupFrom;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Discover(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DiscoverAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Discover), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Use context to find points constrained by the context.
@@ -4133,7 +2002,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
+	Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		IReadOnlyList<ContextExamplePair> context,
 		Filter? filter = null,
@@ -4147,62 +2016,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DiscoverPoints
-		{
-			CollectionName = collectionName,
-			Context = { context },
-			Limit = limit,
-			Offset = offset,
-		};
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (payloadSelector is not null)
-			request.WithPayload = payloadSelector;
-
-		if (vectorsSelector is not null)
-			request.WithVectors = vectorsSelector;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (lookupFrom is not null)
-			request.LookupFrom = lookupFrom;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Discover(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DiscoverAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Discover), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Batch request points based on { positive, negative } pairs of examples, and/or a target
@@ -4214,44 +2028,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<BatchResult>> DiscoverBatchAsync(
+	Task<IReadOnlyList<BatchResult>> DiscoverBatchAsync(
 		string collectionName,
 		IReadOnlyList<DiscoverPoints> discoverPoints,
 		ReadConsistency? readConsistency = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DiscoverBatchPoints
-		{
-			CollectionName = collectionName,
-			DiscoverPoints = { discoverPoints },
-		};
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.DiscoverBatch(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.DiscoverBatchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DiscoverBatch), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Perform facet counts. For each value in the field, count the number of points that have this value and match the conditions.
@@ -4267,7 +2049,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<FacetResponse> FacetAsync(
+	Task<FacetResponse> FacetAsync(
 		string collectionName,
 		string key,
 		Filter? filter = null,
@@ -4276,47 +2058,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new FacetCounts
-		{
-			CollectionName = collectionName,
-			Key = key,
-			Limit = limit,
-			Exact = exact
-		};
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.Facet(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.FacetAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Facet), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Compute distance matrix for sampled points with a pair based output format.
@@ -4332,7 +2074,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<SearchMatrixPairs> SearchMatrixPairsAsync(
+	Task<SearchMatrixPairs> SearchMatrixPairsAsync(
 		string collectionName,
 		Filter? filter = null,
 		ulong sample = 10,
@@ -4341,49 +2083,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SearchMatrixPoints
-		{
-			CollectionName = collectionName,
-			Sample = sample,
-			Limit = limit
-		};
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.SearchMatrixPairs(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SearchMatrixPairsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SearchMatrixPairs), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Compute distance matrix for sampled points with an offset based output format.
@@ -4399,7 +2099,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<SearchMatrixOffsets> SearchMatrixOffsetsAsync(
+	Task<SearchMatrixOffsets> SearchMatrixOffsetsAsync(
 		string collectionName,
 		Filter? filter = null,
 		ulong sample = 10,
@@ -4408,49 +2108,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ReadConsistency? readConsistency = null,
 		ShardKeySelector? shardKeySelector = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new SearchMatrixPoints
-		{
-			CollectionName = collectionName,
-			Sample = sample,
-			Limit = limit
-		};
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		_logger.SearchMatrixOffsets(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.SearchMatrixOffsetsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.SearchMatrixOffsets), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion Point management
 
@@ -4463,27 +2121,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<SnapshotDescription> CreateSnapshotAsync(string collectionName, CancellationToken cancellationToken = default)
-	{
-		_logger.CreateSnapshot(collectionName);
-
-		try
-		{
-			var response = await _snapshotsClient.CreateAsync(
-					new CreateSnapshotRequest { CollectionName = collectionName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.SnapshotDescription;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreateSnapshot), e);
-
-			throw;
-		}
-	}
+	Task<SnapshotDescription> CreateSnapshotAsync(string collectionName, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Universally query points.
@@ -4508,7 +2146,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<ScoredPoint>> QueryAsync(
+	Task<IReadOnlyList<ScoredPoint>> QueryAsync(
 		string collectionName,
 		Query? query = null,
 		IReadOnlyList<PrefetchQuery>? prefetch = null,
@@ -4524,66 +2162,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		ShardKeySelector? shardKeySelector = null,
 		LookupLocation? lookupFrom = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new QueryPoints
-		{
-			CollectionName = collectionName,
-			Limit = limit,
-			Offset = offset,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		if (query is not null)
-			request.Query = query;
-
-		if (prefetch is not null)
-			request.Prefetch.AddRange(prefetch);
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (lookupFrom is not null)
-			request.LookupFrom = lookupFrom;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.Query(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.QueryAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.Query), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Universally query points in batch.
@@ -4598,45 +2177,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<BatchResult>> QueryBatchAsync(
+	Task<IReadOnlyList<BatchResult>> QueryBatchAsync(
 		string collectionName,
 		IReadOnlyList<QueryPoints> queries,
 		ReadConsistency? readConsistency = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new QueryBatchPoints
-		{
-			CollectionName = collectionName,
-		};
-
-		request.QueryPoints.AddRange(queries);
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.SearchBatch(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.QueryBatchAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.QueryBatch), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Universally query points.
@@ -4662,7 +2208,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="lookupFrom">The location to use for IDs lookup, if not specified - use the current collection and the 'usingVector' vector</param>
 	/// <param name="timeout">If set, overrides global timeout setting for this request.</param>
 	/// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.</param>
-	public async Task<IReadOnlyList<PointGroup>> QueryGroupsAsync(
+	Task<IReadOnlyList<PointGroup>> QueryGroupsAsync(
 		string collectionName,
 		string groupBy,
 		Query? query = null,
@@ -4680,70 +2226,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		WithLookup? withLookup = null,
 		LookupLocation? lookupFrom = null,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new QueryPointGroups
-		{
-			CollectionName = collectionName,
-			GroupBy = groupBy,
-			Limit = limit,
-			GroupSize = groupSize,
-			WithPayload = payloadSelector ?? new WithPayloadSelector { Enable = true },
-			WithVectors = vectorsSelector ?? new WithVectorsSelector { Enable = false }
-		};
-
-		if (query is not null)
-			request.Query = query;
-
-		if (prefetch is not null)
-			request.Prefetch.AddRange(prefetch);
-
-		if (usingVector is not null)
-			request.Using = usingVector;
-
-		if (filter is not null)
-			request.Filter = filter;
-
-		if (scoreThreshold is not null)
-			request.ScoreThreshold = scoreThreshold.Value;
-
-		if (searchParams is not null)
-			request.Params = searchParams;
-
-		if (readConsistency is not null)
-			request.ReadConsistency = readConsistency;
-
-		if (shardKeySelector is not null)
-			request.ShardKeySelector = shardKeySelector;
-
-		if (withLookup is not null)
-			request.WithLookup = withLookup;
-
-		if (lookupFrom is not null)
-			request.LookupFrom = lookupFrom;
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.QueryGroups(collectionName);
-
-		try
-		{
-			var response = await _pointsClient.QueryGroupsAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.Result.Groups;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.QueryGroups), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Get list of snapshots for a collection.
@@ -4752,27 +2235,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<SnapshotDescription>> ListSnapshotsAsync(string collectionName, CancellationToken cancellationToken = default)
-	{
-		_logger.ListSnapshots(collectionName);
-
-		try
-		{
-			var response = await _snapshotsClient.ListAsync(
-					new ListSnapshotsRequest { CollectionName = collectionName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.SnapshotDescriptions;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ListSnapshots), e);
-
-			throw;
-		}
-	}
+	Task<IReadOnlyList<SnapshotDescription>> ListSnapshotsAsync(string collectionName, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete snapshot for a given collection.
@@ -4782,25 +2245,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task DeleteSnapshotAsync(string collectionName, string snapshotName, CancellationToken cancellationToken = default)
-	{
-		_logger.DeleteSnapshot(collectionName, snapshotName);
-
-		try
-		{
-			await _snapshotsClient.DeleteAsync(
-					new DeleteSnapshotRequest { CollectionName = collectionName, SnapshotName = snapshotName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteSnapshot), e);
-
-			throw;
-		}
-	}
+	Task DeleteSnapshotAsync(string collectionName, string snapshotName, CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Create snapshot for a whole storage.
@@ -4808,27 +2253,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<SnapshotDescription> CreateFullSnapshotAsync(CancellationToken cancellationToken = default)
-	{
-		_logger.CreateFullSnapshot();
-
-		try
-		{
-			var response = await _snapshotsClient.CreateFullAsync(
-					new CreateFullSnapshotRequest(),
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.SnapshotDescription;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreateFullSnapshot), e);
-
-			throw;
-		}
-	}
+	Task<SnapshotDescription> CreateFullSnapshotAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// List all snapshots for a whole storage.
@@ -4836,27 +2261,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<IReadOnlyList<SnapshotDescription>> ListFullSnapshotsAsync(CancellationToken cancellationToken = default)
-	{
-		_logger.ListFullSnapshots();
-
-		try
-		{
-			var response = await _snapshotsClient.ListFullAsync(
-					new ListFullSnapshotsRequest(),
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response.SnapshotDescriptions;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.ListFullSnapshots), e);
-
-			throw;
-		}
-	}
+	Task<IReadOnlyList<SnapshotDescription>> ListFullSnapshotsAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete snapshot for a whole storage.
@@ -4865,25 +2270,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task DeleteFullSnapshotAsync(string snapshotName, CancellationToken cancellationToken = default)
-	{
-		_logger.DeleteFullSnapshot(snapshotName);
-
-		try
-		{
-			await _snapshotsClient.DeleteFullAsync(
-					new DeleteFullSnapshotRequest { SnapshotName = snapshotName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteFullSnapshot), e);
-
-			throw;
-		}
-	}
+	Task DeleteFullSnapshotAsync(string snapshotName, CancellationToken cancellationToken = default);
 
 	#endregion
 
@@ -4896,29 +2283,9 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<CollectionClusterInfoResponse> GetCollectionClusterSetupInfoAsync(
+	Task<CollectionClusterInfoResponse> GetCollectionClusterSetupInfoAsync(
 		string collectionName,
-		CancellationToken cancellationToken = default)
-	{
-		_logger.GetCollectionClusterSetupInfo(collectionName);
-
-		try
-		{
-			var response = await _collectionsClient.CollectionClusterInfoAsync(
-					new CollectionClusterInfoRequest { CollectionName = collectionName },
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.GetCollectionInfo), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Updates the cluster setup for a collection with a pre-configured request.
@@ -4929,37 +2296,10 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
 	/// <returns>Response indicating whether the operation succeeded</returns>
-	public async Task<UpdateCollectionClusterSetupResponse> UpdateCollectionClusterSetupAsync(
+	Task<UpdateCollectionClusterSetupResponse> UpdateCollectionClusterSetupAsync(
 		UpdateCollectionClusterSetupRequest request,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		_logger.UpdateCollectionClusterSetup(request.CollectionName);
-
-		try
-		{
-			var response = await _collectionsClient
-				.UpdateCollectionClusterSetupAsync(
-					request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			if (!response.Result)
-				throw new QdrantException($"Collection '{request.CollectionName}' cluster setup could not be updated");
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.UpdateCollectionClusterSetup), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Create shard key
@@ -4970,48 +2310,11 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<CreateShardKeyResponse> CreateShardKeyAsync(
+	Task<CreateShardKeyResponse> CreateShardKeyAsync(
 		string collectionName,
 		CreateShardKey createShardKey,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new CreateShardKeyRequest
-		{
-			CollectionName = collectionName,
-			Request = createShardKey,
-		};
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (createShardKey.ShardKey.HasKeyword)
-		{
-			_logger.CreateShardKey(createShardKey.ShardKey.Keyword, collectionName);
-		}
-		else
-		{
-			_logger.CreateShardKey(createShardKey.ShardKey.Number.ToString(), collectionName);
-		}
-
-		try
-		{
-			var response = await _collectionsClient
-				.CreateShardKeyAsync(
-					request: request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreateShardKey), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	/// <summary>
 	/// Delete shard key
@@ -5022,48 +2325,11 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
-	public async Task<DeleteShardKeyResponse> DeleteShardKeyAsync(
+	Task<DeleteShardKeyResponse> DeleteShardKeyAsync(
 		string collectionName,
 		DeleteShardKey deleteShardKey,
 		TimeSpan? timeout = null,
-		CancellationToken cancellationToken = default)
-	{
-		var request = new DeleteShardKeyRequest
-		{
-			CollectionName = collectionName,
-			Request = deleteShardKey,
-		};
-
-		if (timeout is not null)
-			request.Timeout = ConvertTimeout(timeout);
-
-		if (deleteShardKey.ShardKey.HasKeyword)
-		{
-			_logger.DeleteShardKey(deleteShardKey.ShardKey.Keyword, collectionName);
-		}
-		else
-		{
-			_logger.DeleteShardKey(deleteShardKey.ShardKey.Number.ToString(), collectionName);
-		}
-
-		try
-		{
-			var response = await _collectionsClient
-				.DeleteShardKeyAsync(
-					request: request,
-					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
-
-			return response;
-		}
-		catch (Exception e)
-		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteShardKey), e);
-
-			throw;
-		}
-	}
+		CancellationToken cancellationToken = default);
 
 	#endregion Cluster management
 
@@ -5076,72 +2342,5 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// a <see cref="HealthCheckReply"/> indicating the health status of the Qdrant service.
 	/// </returns>
 	/// <exception cref="RpcException">occurs when server is unavailable</exception>
-	public async Task<HealthCheckReply> HealthAsync(CancellationToken cancellationToken = default) =>
-		await _grpcClient.Qdrant.HealthCheckAsync(
-			new HealthCheckRequest(),
-			deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
-			cancellationToken: cancellationToken).ConfigureAwait(false);
-
-	internal static FieldType FieldTypeFromPayloadSchemaType(PayloadSchemaType schemaType) =>
-		schemaType switch
-		{
-			PayloadSchemaType.Keyword => FieldType.Keyword,
-			PayloadSchemaType.Integer => FieldType.Integer,
-			PayloadSchemaType.Float => FieldType.Float,
-			PayloadSchemaType.Bool => FieldType.Bool,
-			PayloadSchemaType.Geo => FieldType.Geo,
-			PayloadSchemaType.Text => FieldType.Text,
-			PayloadSchemaType.Datetime => FieldType.Datetime,
-			PayloadSchemaType.Uuid => FieldType.Uuid,
-
-			_ => throw new ArgumentException("Invalid PayloadSchemaType: " + schemaType, nameof(schemaType))
-		};
-
-	private static void Populate<T>(RepeatedField<T> repeatedField, ReadOnlyMemory<T> memory)
-	{
-		if (MemoryMarshal.TryGetArray(memory, out var segment) &&
-			segment.Offset == 0 &&
-			segment.Count == segment.Array!.Length)
-			repeatedField.Add(segment.Array);
-		else
-		{
-			foreach (var f in memory.Span)
-				repeatedField.Add(f);
-		}
-	}
-
-	private static ulong ConvertTimeout(TimeSpan? timeout)
-		=> timeout switch
-		{
-			null => 0,
-
-			// ReSharper disable once CompareOfFloatsByEqualityOperator
-			{ TotalSeconds: var seconds } => Math.Floor(seconds) == seconds
-				? (ulong)seconds
-				: throw new ArgumentException("Sub-second components in timeout are not supported")
-		};
-
-
-	/// <inheritdoc />
-	public void Dispose()
-	{
-		Dispose(true);
-		GC.SuppressFinalize(this);
-	}
-
-	/// <summary>
-	/// Releases the resources used by the current instance of <see cref="QdrantClient"/>.
-	/// </summary>
-	/// <param name="disposing">Indicates whether the method is called from <see cref="Dispose()"/>
-	/// or a finalizer.</param>
-	protected virtual void Dispose(bool disposing)
-	{
-		if (!_isDisposed)
-		{
-			_isDisposed = true;
-
-			if (disposing && _ownsGrpcClient)
-				_grpcClient.Dispose();
-		}
-	}
+	Task<HealthCheckReply> HealthAsync(CancellationToken cancellationToken = default);
 }
