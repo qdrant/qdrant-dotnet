@@ -2277,6 +2277,31 @@ public interface IQdrantClient
 	#region Cluster management
 
 	/// <summary>
+	/// Get cluster information for a collection.
+	/// </summary>
+	/// <param name="collectionName">The name of the collection.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	Task<CollectionClusterInfoResponse> GetCollectionClusterSetupInfoAsync(
+		string collectionName,
+		CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Updates the cluster setup for a collection with a pre-configured request.
+	/// </summary>
+	/// <param name="request">The complete cluster setup request with operation details</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	/// <returns>Response indicating whether the operation succeeded</returns>
+	Task<UpdateCollectionClusterSetupResponse> UpdateCollectionClusterSetupAsync(
+		UpdateCollectionClusterSetupRequest request,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default);
+
+	/// <summary>
 	/// Create shard key
 	/// </summary>
 	/// <param name="collectionName">The name of the collection</param>
