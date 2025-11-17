@@ -163,6 +163,12 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(5001, LogLevel.Debug, "Delete shard key '{key}' for collection '{collection}'")]
 	public static partial void DeleteShardKey(this ILogger logger, string key, string collection);
 
+	[LoggerMessage(5002, LogLevel.Debug, "Get collection cluster info for '{collection}'")]
+	public static partial void GetCollectionClusterSetupInfo(this ILogger logger, string collection);
+
+	[LoggerMessage(5003, LogLevel.Debug, "Update collection cluster setup for '{collection}'")]
+	public static partial void UpdateCollectionClusterSetup(this ILogger logger, string collection);
+
 	#endregion
 
 	[LoggerMessage(99999, LogLevel.Error, "Operation failed: {operation}")]

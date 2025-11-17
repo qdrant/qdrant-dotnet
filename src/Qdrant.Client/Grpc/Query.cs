@@ -34,6 +34,13 @@ public partial class Query
 	public static implicit operator Query(Fusion input) => new() { Fusion = input };
 
 	/// <summary>
+	/// Implicitly converts a <see cref="Rrf"/>  to a new instance of <see cref="Query"/> for reciprocal rank fusion.
+	/// </summary>
+	/// <param name="rrf">An instance of <see cref="Rrf"/></param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(Rrf rrf) => new() { Rrf = rrf };
+
+	/// <summary>
 	/// Implicitly converts a <see cref="OrderBy"/>  to a new instance of <see cref="Query"/>
 	/// </summary>
 	/// <param name="orderBy">An instance of <see cref="OrderBy"/> </param>
