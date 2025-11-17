@@ -23,11 +23,20 @@ public class CollectionTests : IAsyncLifetime
 	[Fact]
 	public async Task CreateCollection_for_existing_collection()
 	{
-		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+		var collectionName = "collection_1";
+		var expectedMessage = $"Collection '{collectionName}' could not be created";
 
-		await Assert.ThrowsAsync<RpcException>(
-			() => _client.CreateCollectionAsync("collection_1",
+		await _client.CreateCollectionAsync(collectionName, new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+		var exception = await Assert.ThrowsAsync<QdrantException>(
+			() => _client.CreateCollectionAsync(collectionName,
 				new VectorParams { Size = 4, Distance = Distance.Cosine }));
+
+		exception.Message.Should().Be(expectedMessage);
+		exception.InnerException.Should().NotBeNull()
+					.And.BeOfType<RpcException>()
+					.Which
+						.StatusCode.Should().Be(StatusCode.AlreadyExists);
 	}
 
 	[Fact]
@@ -109,9 +118,17 @@ public class CollectionTests : IAsyncLifetime
 	[Fact]
 	public async Task GetInfo_with_missing_collection()
 	{
-		// TODO: Possibly translate this RpcException to a QdrantException (as e.g. Delete throws)
-		var exception = await Assert.ThrowsAsync<RpcException>(() => _client.GetCollectionInfoAsync("collection_1"));
-		exception.StatusCode.Should().Be(StatusCode.NotFound);
+		var collectionName = "collection_1";
+		var expectedMessage = $"Could not get info for collection '{collectionName}'";
+
+		// TODO: Possibly improve this QdrantException (as e.g. Delete throws)
+		var exception = await Assert.ThrowsAsync<QdrantException>(() => _client.GetCollectionInfoAsync(collectionName));
+
+		exception.Message.Should().Be(expectedMessage);
+		exception.InnerException.Should().NotBeNull()
+					.And.BeOfType<RpcException>()
+					.Which
+						.StatusCode.Should().Be(StatusCode.NotFound);
 	}
 
 	[Fact]

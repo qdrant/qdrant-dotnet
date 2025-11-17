@@ -409,9 +409,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CreateCollection), e);
-
-			throw;
+			throw new QdrantException($"Collection '{collectionName}' could not be created", e);
 		}
 	}
 
@@ -727,9 +725,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.GetCollectionInfo), e);
-
-			throw;
+			throw new QdrantException($"Could not get info for collection '{collectionName}'", e);
 		}
 	}
 
@@ -803,9 +799,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.DeleteCollection), e);
-
-			throw;
+			throw new QdrantException($"Collection '{collectionName}' could not be deleted", e);
 		}
 	}
 
@@ -840,9 +834,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.CollectionExists), e);
-
-			throw;
+			throw new QdrantException($"Could not check existence of collection '{collectionName}'", e);
 		}
 	}
 
@@ -1107,9 +1099,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed(nameof(LoggingExtensions.UpdateCollection), e);
-
-			throw;
+			throw new QdrantException($"Collection '{collectionName}' could not be updated", e);
 		}
 	}
 
@@ -1263,9 +1253,7 @@ public class QdrantClient : IDisposable
 		}
 		catch (Exception e)
 		{
-			_logger.OperationFailed("UpdateAliases", e);
-
-			throw;
+			throw new QdrantException("Alias update operation(s) could not be performed.", e);
 		}
 	}
 
