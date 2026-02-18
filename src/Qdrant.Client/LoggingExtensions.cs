@@ -169,6 +169,9 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(5003, LogLevel.Debug, "Update collection cluster setup for '{collection}'")]
 	public static partial void UpdateCollectionClusterSetup(this ILogger logger, string collection);
 
+	[LoggerMessage(5004, LogLevel.Debug, "List the shard keys for '{collection}'")]
+	public static partial void ListShardKeys(this ILogger logger, string collection);
+
 	#endregion
 
 	[LoggerMessage(99999, LogLevel.Error, "Operation failed: {operation}")]

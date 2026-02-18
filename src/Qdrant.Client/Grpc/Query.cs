@@ -161,5 +161,12 @@ public partial class Query
 	}
 	};
 
+	/// <summary>
+	/// Implicitly converts an instance of <see cref="RelevanceFeedbackInput"/> to a new instance of <see cref="Query"/> for search with feedback from some oracle.
+	/// </summary>
+	/// <param name="relevanceFeedback">An instance of <see cref="RelevanceFeedbackInput"/> to query against</param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(RelevanceFeedbackInput relevanceFeedback) => new() { RelevanceFeedback = relevanceFeedback };
+
 	#endregion
 }
