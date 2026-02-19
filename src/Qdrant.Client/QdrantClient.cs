@@ -1402,6 +1402,23 @@ public class QdrantClient : IQdrantClient, IDisposable
 
 		_logger.Upsert(collectionName, points.Count);
 
+		return await UpsertAsync(request, cancellationToken).ConfigureAwait(false);
+	}
+
+	/// <summary>
+	/// Perform insert and updates on points. If a point with a given ID already exists, it will be overwritten.
+	/// </summary>
+	/// <param name="request">The upsert request.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<UpdateResult> UpsertAsync(
+		UpsertPoints request,
+		CancellationToken cancellationToken = default
+	)
+	{
+		_logger.Upsert(request.CollectionName, request.Points.Count);
+
 		try
 		{
 			var response = await _pointsClient.UpsertAsync(
@@ -5060,6 +5077,45 @@ public class QdrantClient : IQdrantClient, IDisposable
 		catch (Exception e)
 		{
 			_logger.OperationFailed(nameof(LoggingExtensions.DeleteShardKey), e);
+
+			throw;
+		}
+	}
+
+	/// <summary>
+	/// Delete shard key
+	/// </summary>
+	/// <param name="collectionName">The name of the collection</param>
+	/// <param name="timeout">Wait timeout for operation commit in seconds, if not specified - default value will be supplied</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	public async Task<IReadOnlyList<ShardKeyDescription>> ListShardKeysAsync(
+		string collectionName,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+	{
+		var request = new ListShardKeysRequest
+		{
+			CollectionName = collectionName,
+		};
+
+		_logger.ListShardKeys(collectionName);
+
+		try
+		{
+			var response = await _collectionsClient
+				.ListShardKeysAsync(
+					request: request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.ShardKeys;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.ListShardKeys), e);
 
 			throw;
 		}
