@@ -29,15 +29,27 @@ public class QdrantChannel : ChannelBase, IDisposable
 
 	/// <inheritdoc />
 	public override CallInvoker CreateCallInvoker()
-		=> Disposed
-			? throw new ObjectDisposedException(nameof(QdrantChannel))
-			: _configuration.ApiKey is null
-				? _channel.CreateCallInvoker()
-				: _channel.Intercept(metadata =>
-				{
-					metadata.Add("api-key", _configuration.ApiKey);
-					return metadata;
-				});
+	{
+		if (Disposed)
+			throw new ObjectDisposedException(nameof(QdrantChannel));
+
+		var hasApiKey = _configuration.ApiKey is not null;
+		var hasHeaders = _configuration.Headers.Count > 0;
+
+		if (!hasApiKey && !hasHeaders)
+			return _channel.CreateCallInvoker();
+
+		return _channel.Intercept(metadata =>
+		{
+			if (hasApiKey)
+				metadata.Add("api-key", _configuration.ApiKey!);
+
+			foreach (var header in _configuration.Headers)
+				metadata.Add(header.Key, header.Value);
+
+			return metadata;
+		});
+	}
 
 	/// <summary>
 	/// Creates a <see cref="QdrantChannel"/> for the specified address.

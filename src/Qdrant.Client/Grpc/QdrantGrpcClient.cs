@@ -19,8 +19,13 @@ public partial class QdrantGrpcClient : IDisposable
 	/// <param name="host">The host to connect to.</param>
 	/// <param name="port">The port to connect to. Defaults to 6334.</param>
 	/// <param name="apiKey">The API key to use.</param>
-	public QdrantGrpcClient(string host, int port = 6334, string? apiKey = null)
-		: this(new UriBuilder("http", host, port).Uri, apiKey)
+	/// <param name="headers">Optional headers to send with every gRPC request.</param>
+	public QdrantGrpcClient(
+		string host,
+		int port = 6334,
+		string? apiKey = null,
+		IDictionary<string, string>? headers = null)
+		: this(new UriBuilder("http", host, port).Uri, apiKey, headers)
 	{
 	}
 
@@ -30,9 +35,16 @@ public partial class QdrantGrpcClient : IDisposable
 	/// </summary>
 	/// <param name="address">The address to connect to.</param>
 	/// <param name="apiKey">The API key to use.</param>
-	public QdrantGrpcClient(System.Uri address, string? apiKey = null)
+	/// <param name="headers">Optional headers to send with every gRPC request.</param>
+	public QdrantGrpcClient(System.Uri address, string? apiKey = null, IDictionary<string, string>? headers = null)
 	{
-		_ownedChannel = QdrantChannel.ForAddress(address, new() { ApiKey = apiKey });
+		var config = new ClientConfiguration { ApiKey = apiKey };
+		if (headers is not null)
+		{
+			foreach (var kvp in headers)
+				config.Headers[kvp.Key] = kvp.Value;
+		}
+		_ownedChannel = QdrantChannel.ForAddress(address, config);
 		_callInvoker = _ownedChannel.CreateCallInvoker();
 	}
 
