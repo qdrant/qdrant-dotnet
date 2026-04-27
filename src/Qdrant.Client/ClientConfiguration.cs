@@ -14,4 +14,9 @@ public class ClientConfiguration
 	/// The certificate thumbprint to use when using a self-signed certificate for TLS.
 	/// </summary>
 	public string? CertificateThumbprint { get; set; }
+
+	/// <summary>
+	/// Optional headers to send with every gRPC request.
+	/// </summary>
+	public Dictionary<string, string> Headers { get; set; } = [];
 }

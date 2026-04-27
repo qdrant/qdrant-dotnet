@@ -33,6 +33,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="apiKey">The API key to use.</param>
 	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <param name="headers">Optional headers to send with every gRPC request.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
@@ -43,8 +44,9 @@ public class QdrantClient : IQdrantClient, IDisposable
 		bool https = false,
 		string? apiKey = null,
 		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, grpcTimeout, loggerFactory)
+		ILoggerFactory? loggerFactory = null,
+		IDictionary<string, string>? headers = null)
+		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, grpcTimeout, loggerFactory, headers)
 	{
 	}
 
@@ -53,6 +55,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="apiKey">The API key to use.</param>
 	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <param name="headers">Optional headers to send with every gRPC request.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
@@ -61,8 +64,9 @@ public class QdrantClient : IQdrantClient, IDisposable
 		System.Uri address,
 		string? apiKey = null,
 		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null)
-		: this(new QdrantGrpcClient(address, apiKey), ownsGrpcClient: true, grpcTimeout, loggerFactory)
+		ILoggerFactory? loggerFactory = null,
+		IDictionary<string, string>? headers = null)
+		: this(new QdrantGrpcClient(address, apiKey, headers), ownsGrpcClient: true, grpcTimeout, loggerFactory)
 	{
 	}
 
