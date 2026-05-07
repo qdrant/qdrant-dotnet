@@ -80,6 +80,12 @@ internal static partial class LoggingExtensions
 	[LoggerMessage(3014, LogLevel.Debug, "Delete payload field index in '{collection}'")]
 	public static partial void DeletePayloadIndex(this ILogger logger, string collection);
 
+	[LoggerMessage(3032, LogLevel.Debug, "Create vector name '{vectorName}' in '{collection}'")]
+	public static partial void CreateVectorName(this ILogger logger, string collection, string vectorName);
+
+	[LoggerMessage(3033, LogLevel.Debug, "Delete vector name '{vectorName}' in '{collection}'")]
+	public static partial void DeleteVectorName(this ILogger logger, string collection, string vectorName);
+
 	[LoggerMessage(3015, LogLevel.Debug, "Search on '{collection}'")]
 	public static partial void Search(this ILogger logger, string collection);
 

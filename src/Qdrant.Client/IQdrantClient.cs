@@ -1395,6 +1395,28 @@ public interface IQdrantClient
 		CancellationToken cancellationToken = default);
 
 	/// <summary>
+	/// Creates a new named vector on a collection.
+	/// </summary>
+	/// <param name="request">The create vector name request.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	Task<UpdateResult> CreateVectorNameAsync(
+		CreateVectorNameRequest request,
+		CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Deletes a named vector from a collection.
+	/// </summary>
+	/// <param name="request">The delete vector name request.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	Task<UpdateResult> DeleteVectorNameAsync(
+		DeleteVectorNameRequest request,
+		CancellationToken cancellationToken = default);
+
+	/// <summary>
 	/// Retrieves closest points based on vector similarity and the given filtering conditions.
 	/// </summary>
 	/// <param name="collectionName">The name of the collection.</param>

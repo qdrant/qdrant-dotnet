@@ -1404,8 +1404,6 @@ public class QdrantClient : IQdrantClient, IDisposable
 		if (updateFilter is not null)
 			request.UpdateFilter = updateFilter;
 
-		_logger.Upsert(collectionName, points.Count);
-
 		return await UpsertAsync(request, cancellationToken).ConfigureAwait(false);
 	}
 
@@ -2965,6 +2963,56 @@ public class QdrantClient : IQdrantClient, IDisposable
 		catch (Exception e)
 		{
 			_logger.OperationFailed(nameof(LoggingExtensions.DeletePayloadIndex), e);
+
+			throw;
+		}
+	}
+
+	/// <inheritdoc />
+	public async Task<UpdateResult> CreateVectorNameAsync(
+		CreateVectorNameRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		_logger.CreateVectorName(request.CollectionName, request.VectorName);
+
+		try
+		{
+			var response = await _pointsClient.CreateVectorNameAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.CreateVectorName), e);
+
+			throw;
+		}
+	}
+
+	/// <inheritdoc />
+	public async Task<UpdateResult> DeleteVectorNameAsync(
+		DeleteVectorNameRequest request,
+		CancellationToken cancellationToken = default)
+	{
+		_logger.DeleteVectorName(request.CollectionName, request.VectorName);
+
+		try
+		{
+			var response = await _pointsClient.DeleteVectorNameAsync(
+					request,
+					deadline: _grpcTimeout == default ? null : DateTime.UtcNow.Add(_grpcTimeout),
+					cancellationToken: cancellationToken)
+				.ConfigureAwait(false);
+
+			return response.Result;
+		}
+		catch (Exception e)
+		{
+			_logger.OperationFailed(nameof(LoggingExtensions.DeleteVectorName), e);
 
 			throw;
 		}
