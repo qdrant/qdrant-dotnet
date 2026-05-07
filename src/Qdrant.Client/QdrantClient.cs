@@ -33,7 +33,6 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="apiKey">The API key to use.</param>
 	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
 	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
-	/// <param name="headers">Optional headers to send with every gRPC request.</param>
 	/// <remarks>
 	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
 	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
@@ -44,9 +43,50 @@ public class QdrantClient : IQdrantClient, IDisposable
 		bool https = false,
 		string? apiKey = null,
 		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null,
-		IDictionary<string, string>? headers = null)
+		ILoggerFactory? loggerFactory = null)
+		: this(host, port, https, apiKey, grpcTimeout, loggerFactory, null)
+	{
+	}
+
+	/// <summary>Instantiates a new Qdrant client.</summary>
+	/// <param name="host">The host to connect to.</param>
+	/// <param name="port">The port to connect to.</param>
+	/// <param name="https">Whether to encrypt the connection using HTTPS.</param>
+	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
+	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <param name="headers">Optional headers to send with every gRPC request.</param>
+	/// <remarks>
+	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
+	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
+	/// </remarks>
+	public QdrantClient(
+		string host,
+		int port,
+		bool https,
+		string? apiKey,
+		TimeSpan grpcTimeout,
+		ILoggerFactory? loggerFactory,
+		IDictionary<string, string>? headers)
 		: this(new UriBuilder(https ? "https" : "http", host, port).Uri, apiKey, grpcTimeout, loggerFactory, headers)
+	{
+	}
+
+	/// <summary>Instantiates a new Qdrant client.</summary>
+	/// <param name="address">The address to connect to.</param>
+	/// <param name="apiKey">The API key to use.</param>
+	/// <param name="grpcTimeout">The timeout for gRPC calls to Qdrant; sets the gRPC deadline for all calls.</param>
+	/// <param name="loggerFactory">A logger factory through which to log messages.</param>
+	/// <remarks>
+	/// This type provides higher-level wrappers over the low-level Qdrant gRPC API. If these wrappers aren't
+	/// sufficient, <see cref="QdrantGrpcClient" /> can be used instead for low-level API access.
+	/// </remarks>
+	public QdrantClient(
+		System.Uri address,
+		string? apiKey = null,
+		TimeSpan grpcTimeout = default,
+		ILoggerFactory? loggerFactory = null)
+		: this(address, apiKey, grpcTimeout, loggerFactory, null)
 	{
 	}
 
@@ -62,10 +102,10 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// </remarks>
 	public QdrantClient(
 		System.Uri address,
-		string? apiKey = null,
-		TimeSpan grpcTimeout = default,
-		ILoggerFactory? loggerFactory = null,
-		IDictionary<string, string>? headers = null)
+		string? apiKey,
+		TimeSpan grpcTimeout,
+		ILoggerFactory? loggerFactory,
+		IDictionary<string, string>? headers)
 		: this(new QdrantGrpcClient(address, apiKey, headers), ownsGrpcClient: true, grpcTimeout, loggerFactory)
 	{
 	}
