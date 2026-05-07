@@ -33,19 +33,18 @@ public class QdrantChannel : ChannelBase, IDisposable
 		if (Disposed)
 			throw new ObjectDisposedException(nameof(QdrantChannel));
 
-		var hasApiKey = _configuration.ApiKey is not null;
-		var hasHeaders = _configuration.Headers.Count > 0;
-
-		if (!hasApiKey && !hasHeaders)
-			return _channel.CreateCallInvoker();
-
 		return _channel.Intercept(metadata =>
 		{
-			if (hasApiKey)
-				metadata.Add("api-key", _configuration.ApiKey!);
+			if (_configuration.ApiKey is not null)
+				metadata.Add("api-key", _configuration.ApiKey);
 
 			foreach (var header in _configuration.Headers)
 				metadata.Add(header.Key, header.Value);
+
+			var requestHeaders = RequestHeaders.Current;
+			if (requestHeaders is not null)
+				foreach (var header in requestHeaders)
+					metadata.Add(header.Key, header.Value);
 
 			return metadata;
 		});
