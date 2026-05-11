@@ -19,12 +19,20 @@ public partial class QdrantGrpcClient : IDisposable
 	/// <param name="host">The host to connect to.</param>
 	/// <param name="port">The port to connect to. Defaults to 6334.</param>
 	/// <param name="apiKey">The API key to use.</param>
+	public QdrantGrpcClient(string host, int port = 6334, string? apiKey = null)
+		: this(host, port, apiKey, null)
+	{
+	}
+
+	/// <summary>
+	/// Creates a new low-level gRPC client for Qdrant. Note that <see cref="QdrantClient" /> provides a higher-level,
+	/// easier to use alternative.
+	/// </summary>
+	/// <param name="host">The host to connect to.</param>
+	/// <param name="port">The port to connect to.</param>
+	/// <param name="apiKey">The API key to use.</param>
 	/// <param name="headers">Optional headers to send with every gRPC request.</param>
-	public QdrantGrpcClient(
-		string host,
-		int port = 6334,
-		string? apiKey = null,
-		IDictionary<string, string>? headers = null)
+	public QdrantGrpcClient(string host, int port, string? apiKey, IDictionary<string, string>? headers)
 		: this(new UriBuilder("http", host, port).Uri, apiKey, headers)
 	{
 	}
@@ -35,8 +43,19 @@ public partial class QdrantGrpcClient : IDisposable
 	/// </summary>
 	/// <param name="address">The address to connect to.</param>
 	/// <param name="apiKey">The API key to use.</param>
+	public QdrantGrpcClient(System.Uri address, string? apiKey = null)
+		: this(address, apiKey, null)
+	{
+	}
+
+	/// <summary>
+	/// Creates a new low-level gRPC client for Qdrant. Note that <see cref="QdrantClient" /> provides a higher-level,
+	/// easier to use alternative.
+	/// </summary>
+	/// <param name="address">The address to connect to.</param>
+	/// <param name="apiKey">The API key to use.</param>
 	/// <param name="headers">Optional headers to send with every gRPC request.</param>
-	public QdrantGrpcClient(System.Uri address, string? apiKey = null, IDictionary<string, string>? headers = null)
+	public QdrantGrpcClient(System.Uri address, string? apiKey, IDictionary<string, string>? headers)
 	{
 		var config = new ClientConfiguration { ApiKey = apiKey };
 		if (headers is not null)
