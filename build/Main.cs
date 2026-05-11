@@ -1,10 +1,10 @@
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using System.IO.Compression;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Bullseye;
+using SharpCompress.Common;
 using SharpCompress.Readers;
 using static BuildTargets;
 using static Bullseye.Targets;
@@ -87,13 +87,12 @@ cmd.SetHandler(async (InvocationContext context) =>
 
 		var response = await client.GetAsync(url);
 		await using var stream = await response.Content.ReadAsStreamAsync();
-		await using var gzip = new GZipStream(stream, CompressionMode.Decompress);
-		var reader = ReaderFactory.Open(gzip);
+		using var reader = ReaderFactory.OpenReader(stream);
 		while (reader.MoveToNextEntry())
 		{
 			var entry = reader.Entry;
 			if (!entry.IsDirectory && protoFileRegex.IsMatch(entry.Key!) && !privateProtoFileRegex.IsMatch(entry.Key!))
-				reader.WriteEntryToDirectory(protosTagDir);
+				reader.WriteEntryToDirectory(protosTagDir, new ExtractionOptions { ExtractFullPath = false, Overwrite = true });
 		}
 
 		{
