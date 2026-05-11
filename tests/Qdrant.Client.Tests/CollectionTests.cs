@@ -195,6 +195,41 @@ public class CollectionTests : IAsyncLifetime
 		Assert.Empty(await _client.ListCollectionAliasesAsync("collection_1"));
 	}
 
+	[Fact]
+	public async Task CreateAndDeleteVector()
+	{
+		const string collectionName = "collection_1";
+
+		await _client.CreateCollectionAsync(collectionName, new VectorParamsMap
+		{
+			Map = { ["vector_1"] = new() { Size = 4, Distance = Distance.Dot } }
+		});
+
+		await _client.CreateVectorNameAsync(new()
+		{
+			CollectionName = collectionName,
+			VectorName = "vector_2",
+			Wait = true,
+			DenseConfig = new() { Size = 8, Distance = Distance.Cosine }
+		});
+
+		var info = await _client.GetCollectionInfoAsync(collectionName);
+		var vectors = info.Config.Params.VectorsConfig.ParamsMap.Map;
+		vectors.Should().HaveCount(2).And.ContainKeys("vector_1", "vector_2");
+
+		await _client.DeleteVectorNameAsync(new()
+		{
+			CollectionName = collectionName,
+			VectorName = "vector_2",
+			Wait = true
+		});
+
+		info = await _client.GetCollectionInfoAsync(collectionName);
+		vectors = info.Config.Params.VectorsConfig.ParamsMap.Map;
+		vectors.Should().HaveCount(1).And.ContainKeys("vector_1");
+	}
+
+
 	public async Task InitializeAsync()
 	{
 		foreach (var collection in await _client.ListCollectionsAsync())
