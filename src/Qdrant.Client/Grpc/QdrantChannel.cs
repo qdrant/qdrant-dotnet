@@ -96,17 +96,27 @@ public class QdrantChannel : ChannelBase, IDisposable
 			};
 		}
 #else
-		var primaryHandler = new HttpClientHandler();
+		HttpMessageHandler primaryHandler;
 		if (configuration.CertificateThumbprint is not null)
 		{
-			primaryHandler.ServerCertificateCustomValidationCallback =
-				CertificateValidation.Thumbprint(configuration.CertificateThumbprint);
+			// Thumbprint validation requires HttpClientHandler's callback shape.
+			primaryHandler = new HttpClientHandler
+			{
+				ServerCertificateCustomValidationCallback =
+					CertificateValidation.Thumbprint(configuration.CertificateThumbprint)
+			};
+		}
+		else
+		{
+#if NET6_0_OR_GREATER
+			// Match Grpc.Net.Client's default handler; HttpClientHandler would drop
+			// EnableMultipleHttp2Connections and cap throughput under concurrency.
+			primaryHandler = new SocketsHttpHandler { EnableMultipleHttp2Connections = true };
+#else
+			primaryHandler = new HttpClientHandler();
+#endif
 		}
 
-		// Advertise a Qdrant-branded "qdrant-dotnet/<version>" token in the
-		// User-Agent. Grpc.Net.Client does not let us set the User-Agent through
-		// gRPC metadata, so we add it at the HTTP layer via a delegating handler
-		// that wraps the primary handler.
 		channelOptions.HttpHandler = new UserAgentHandler { InnerHandler = primaryHandler };
 #endif
 
