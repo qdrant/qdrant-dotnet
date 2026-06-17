@@ -1,6 +1,4 @@
-#if NETFRAMEWORK
 using System.Net.Http;
-#endif
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
@@ -84,6 +82,11 @@ public class QdrantChannel : ChannelBase, IDisposable
 	public static QdrantChannel ForAddress(System.Uri address, ClientConfiguration configuration)
 	{
 		var channelOptions = new GrpcChannelOptions();
+
+#if NETFRAMEWORK
+		// .NET Framework has finicky HTTP/2 support, so preserve the original
+		// behavior: only set an HttpClientHandler when certificate validation is
+		// required and otherwise let Grpc.Net.Client pick its default handler.
 		if (configuration.CertificateThumbprint is not null)
 		{
 			channelOptions.HttpHandler = new HttpClientHandler
@@ -92,6 +95,21 @@ public class QdrantChannel : ChannelBase, IDisposable
 					CertificateValidation.Thumbprint(configuration.CertificateThumbprint)
 			};
 		}
+#else
+		var primaryHandler = new HttpClientHandler();
+		if (configuration.CertificateThumbprint is not null)
+		{
+			primaryHandler.ServerCertificateCustomValidationCallback =
+				CertificateValidation.Thumbprint(configuration.CertificateThumbprint);
+		}
+
+		// Advertise a Qdrant-branded "qdrant-dotnet/<version>" token in the
+		// User-Agent. Grpc.Net.Client does not let us set the User-Agent through
+		// gRPC metadata, so we add it at the HTTP layer via a delegating handler
+		// that wraps the primary handler.
+		channelOptions.HttpHandler = new UserAgentHandler { InnerHandler = primaryHandler };
+#endif
+
 		var channel = GrpcChannel.ForAddress(address, channelOptions);
 		return new QdrantChannel(channel, configuration);
 	}
