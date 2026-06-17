@@ -1,6 +1,4 @@
-#if NETFRAMEWORK
 using System.Net.Http;
-#endif
 using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
@@ -84,6 +82,11 @@ public class QdrantChannel : ChannelBase, IDisposable
 	public static QdrantChannel ForAddress(System.Uri address, ClientConfiguration configuration)
 	{
 		var channelOptions = new GrpcChannelOptions();
+
+#if NETFRAMEWORK
+		// .NET Framework has finicky HTTP/2 support, so preserve the original
+		// behavior: only set an HttpClientHandler when certificate validation is
+		// required and otherwise let Grpc.Net.Client pick its default handler.
 		if (configuration.CertificateThumbprint is not null)
 		{
 			channelOptions.HttpHandler = new HttpClientHandler
@@ -92,6 +95,31 @@ public class QdrantChannel : ChannelBase, IDisposable
 					CertificateValidation.Thumbprint(configuration.CertificateThumbprint)
 			};
 		}
+#else
+		HttpMessageHandler primaryHandler;
+		if (configuration.CertificateThumbprint is not null)
+		{
+			// Thumbprint validation requires HttpClientHandler's callback shape.
+			primaryHandler = new HttpClientHandler
+			{
+				ServerCertificateCustomValidationCallback =
+					CertificateValidation.Thumbprint(configuration.CertificateThumbprint)
+			};
+		}
+		else
+		{
+#if NET6_0_OR_GREATER
+			// Match Grpc.Net.Client's default handler; HttpClientHandler would drop
+			// EnableMultipleHttp2Connections and cap throughput under concurrency.
+			primaryHandler = new SocketsHttpHandler { EnableMultipleHttp2Connections = true };
+#else
+			primaryHandler = new HttpClientHandler();
+#endif
+		}
+
+		channelOptions.HttpHandler = new UserAgentHandler { InnerHandler = primaryHandler };
+#endif
+
 		var channel = GrpcChannel.ForAddress(address, channelOptions);
 		return new QdrantChannel(channel, configuration);
 	}
