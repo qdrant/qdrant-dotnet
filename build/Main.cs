@@ -13,7 +13,6 @@ using static SimpleExec.Command;
 const string packOutput = "nuget";
 const string protosDir = "protos";
 const string project = "Qdrant.Client";
-const string grpcNamespace = "Qdrant.Client.Grpc";
 
 var doc = XDocument.Load("Directory.Build.props");
 var qdrantVersion = doc.Descendants(XName.Get("QdrantVersion", "http://schemas.microsoft.com/developer/msbuild/2003"))
@@ -105,25 +104,6 @@ cmd.SetHandler(async (InvocationContext context) =>
 				if (line.StartsWith("import") && privateProtoFileRegex.IsMatch(line))
 					contents.RemoveAt(i);
 			}
-			File.WriteAllLines(file, contents);
-		}
-
-		// add csharp namespace to qdrant package proto files if they don't contain one
-		foreach (var file in Directory.EnumerateFiles(protosTagDir))
-		{
-			var contents = File.ReadAllLines(file).ToList();
-			if (contents.Any(line => line.Contains("option csharp_namespace")))
-				continue;
-
-			for (var i = 0; i < contents.Count; i++)
-			{
-				if (contents[i].StartsWith("package qdrant"))
-				{
-					contents.Insert(i + 1, $"option csharp_namespace = \"{grpcNamespace}\";");
-					break;
-				}
-			}
-
 			File.WriteAllLines(file, contents);
 		}
 	});
