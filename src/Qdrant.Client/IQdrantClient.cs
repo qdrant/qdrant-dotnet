@@ -1436,6 +1436,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> SearchAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -1463,6 +1464,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	Task<IReadOnlyList<BatchResult>> SearchBatchAsync(
 		string collectionName,
 		IReadOnlyList<SearchPoints> searches,
@@ -1497,6 +1499,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	Task<IReadOnlyList<PointGroup>> SearchGroupsAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -1574,6 +1577,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<ulong> positive,
@@ -1626,6 +1630,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<Guid> positive,
@@ -1678,6 +1683,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<PointId> positive,
@@ -1710,6 +1716,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	Task<IReadOnlyList<BatchResult>> RecommendBatchAsync(
 		string collectionName,
 		IReadOnlyList<RecommendPoints> recommendSearches,
@@ -1752,6 +1759,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -1809,6 +1817,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -1866,6 +1875,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -1967,6 +1977,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		TargetVector target,
@@ -2024,6 +2035,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		IReadOnlyList<ContextExamplePair> context,
@@ -2050,6 +2062,7 @@ public interface IQdrantClient
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	Task<IReadOnlyList<BatchResult>> DiscoverBatchAsync(
 		string collectionName,
 		IReadOnlyList<DiscoverPoints> discoverPoints,

@@ -147,13 +147,13 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task Search()
+	public async Task QueryNearest()
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.SearchAsync(
+		var points = await _client.QueryAsync(
 			"collection_1",
-			new[] { 10.4f, 11.4f },
+			query: new float[] { 10.4f, 11.4f },
 			limit: 1);
 
 		points.Should().HaveCount(1);
@@ -166,16 +166,16 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task SearchBatch()
+	public async Task QueryBatch()
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var batchResults = await _client.SearchBatchAsync(
+		var batchResults = await _client.QueryBatchAsync(
 			"collection_1",
-			new SearchPoints[]
+			new QueryPoints[]
 			{
-				new() { Vector = { 10.4f, 11.4f }, Limit = 1 },
-				new() { Vector = { 3.4f, 4.4f }, Limit = 1 }
+				new() { Query = new float[] { 10.4f, 11.4f }, Limit = 1 },
+				new() { Query = new float[] { 3.4f, 4.4f }, Limit = 1 }
 			});
 
 		Assert.Collection(
@@ -185,7 +185,7 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task SearchGroups()
+	public async Task QueryNearestGroups()
 	{
 		await CreateAndSeedCollection("collection_1");
 
@@ -199,10 +199,10 @@ public class PointTests : IAsyncLifetime
 			}
 		});
 
-		var groups = await _client.SearchGroupsAsync(
+		var groups = await _client.QueryGroupsAsync(
 			"collection_1",
-			new[] { 10.4f, 11.4f },
 			groupBy: "foo",
+			query: new float[] { 10.4f, 11.4f },
 			groupSize: 2);
 
 		Assert.Equal(2, groups.Count);
@@ -230,27 +230,30 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task Recommend()
+	public async Task QueryRecommend()
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RecommendAsync("collection_1", positive: new PointId[] { 8 }, limit: 1);
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: new RecommendInput { Positive = { (VectorInput)8ul } },
+			limit: 1);
 
 		var point = Assert.Single(points);
 		Assert.Equal(9ul, point.Id);
 	}
 
 	[Fact]
-	public async Task RecommendBatch()
+	public async Task QueryRecommendBatch()
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var batchResults = await _client.RecommendBatchAsync(
+		var batchResults = await _client.QueryBatchAsync(
 			"collection_1",
-			new RecommendPoints[]
+			new QueryPoints[]
 			{
-				new() { Positive = { 8 }, Limit = 1 },
-				new() { Positive = { 9 }, Limit = 1 }
+				new() { Query = new RecommendInput { Positive = { (VectorInput)8ul } }, Limit = 1 },
+				new() { Query = new RecommendInput { Positive = { (VectorInput)9ul } }, Limit = 1 }
 			});
 
 		Assert.Collection(
@@ -260,7 +263,7 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task RecommendGroups()
+	public async Task QueryRecommendGroups()
 	{
 		await CreateAndSeedCollection("collection_1");
 
@@ -274,10 +277,10 @@ public class PointTests : IAsyncLifetime
 			}
 		});
 
-		var groups = await _client.RecommendGroupsAsync(
+		var groups = await _client.QueryGroupsAsync(
 			"collection_1",
 			groupBy: "foo",
-			positive: new PointId[] { 9 },
+			query: new RecommendInput { Positive = { (VectorInput)9ul } },
 			groupSize: 2);
 
 		Assert.Single(groups);
@@ -285,15 +288,19 @@ public class PointTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task Recommend_with_vector()
+	public async Task QueryRecommend_with_vector()
 	{
 		await CreateAndSeedCollection("collection_1");
 
-		var points = await _client.RecommendAsync(
+		var points = await _client.QueryAsync(
 			"collection_1",
-			positive: new PointId[] { 8 },
-			positiveVectors: new Vector[] {
-				new float[] { 3.5f, 4.5f }
+			query: new RecommendInput
+			{
+				Positive =
+				{
+					(VectorInput)8ul,
+					(VectorInput)new float[] { 3.5f, 4.5f }
+				}
 			},
 			limit: 1
 		);

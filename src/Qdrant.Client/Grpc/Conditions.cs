@@ -71,6 +71,15 @@ public static class Conditions
 		new() { Field = new FieldCondition { Key = field, Match = new Match { Keyword = keyword } } };
 
 	/// <summary>
+	/// Match records where the given field starts with the given prefix
+	/// </summary>
+	/// <param name="field">The name of the field</param>
+	/// <param name="prefix">The prefix to match</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition MatchPrefix(string field, string prefix) =>
+		new() { Field = new FieldCondition { Key = field, Match = new Match { Prefix = prefix } } };
+
+	/// <summary>
 	/// Match records where the given field matches the given text
 	/// </summary>
 	/// <param name="field">The name of the field</param>
@@ -275,6 +284,15 @@ public static class Conditions
 	public static Condition Filter(Filter filter) => new() { Filter = filter };
 
 	/// <summary>
+	/// Match records assigned to a specific slice.
+	/// </summary>
+	/// <param name="total">The total number of slices</param>
+	/// <param name="index">The zero-based slice index</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition Slice(uint total, uint index) =>
+		new() { Slice = new SliceCondition { Total = total, Index = index } };
+
+	/// <summary>
 	/// Matches records where the given field has values inside the provided DateTime range.
 	/// </summary>
 	/// <param name="field">The name of the field</param>
@@ -316,5 +334,4 @@ public static class Conditions
 	};
 
 }
-
 
