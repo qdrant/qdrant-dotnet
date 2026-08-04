@@ -12,15 +12,17 @@ public class SparseVectorTests : IAsyncLifetime
 	public SparseVectorTests(QdrantFixture qdrantFixture) => _client = qdrantFixture.CreateClient();
 
 	[Fact]
-	public async Task Search()
+	public async Task Query()
 	{
 		await CreateAndSeedSparseCollection("collection_1");
 
-		var points = await _client.SearchAsync(
+		var points = await _client.QueryAsync(
 			"collection_1",
-			new[] { 10.4f, 11.4f },
-			sparseIndices: new[] { 0u, 1u },
-			vectorName: "sparse-name",
+			query: new Query
+			{
+				Nearest = (VectorInput)(new float[] { 10.4f, 11.4f }, new uint[] { 0, 1 })
+			},
+			usingVector: "sparse-name",
 			limit: 1);
 
 		points.Should().HaveCount(1);
@@ -33,7 +35,7 @@ public class SparseVectorTests : IAsyncLifetime
 	}
 
 	[Fact]
-	public async Task SearchGroups()
+	public async Task QueryGroups()
 	{
 		await CreateAndSeedSparseCollection("collection_1");
 
@@ -47,13 +49,15 @@ public class SparseVectorTests : IAsyncLifetime
 			}
 		});
 
-		var groups = await _client.SearchGroupsAsync(
+		var groups = await _client.QueryGroupsAsync(
 			"collection_1",
-			new[] { 10.4f, 11.4f },
 			groupBy: "foo",
+			query: new Query
+			{
+				Nearest = (VectorInput)(new float[] { 10.4f, 11.4f }, new uint[] { 0, 1 })
+			},
 			groupSize: 2,
-			vectorName: "sparse-name",
-			sparseIndices: new[] { 0u, 1u });
+			usingVector: "sparse-name");
 
 		Assert.Equal(2, groups.Count);
 		Assert.Single(groups, g => g.Hits.Count == 2);

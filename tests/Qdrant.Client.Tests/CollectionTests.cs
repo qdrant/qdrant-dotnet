@@ -83,9 +83,9 @@ public class CollectionTests : IAsyncLifetime
 	public async Task UpdateCollection()
 	{
 		await _client.CreateCollectionAsync("collection_1",
-			new VectorParams { Size = 4, Distance = Distance.Cosine, OnDisk = true });
+			new VectorParams { Size = 4, Distance = Distance.Cosine, Memory = Memory.Cold });
 
-		await _client.UpdateCollectionAsync("collection_1", new VectorParamsDiff { OnDisk = false });
+		await _client.UpdateCollectionAsync("collection_1", new VectorParamsDiff { Memory = Memory.Cached });
 	}
 
 	[Fact]

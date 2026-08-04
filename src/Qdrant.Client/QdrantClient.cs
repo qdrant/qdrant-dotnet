@@ -421,7 +421,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 			ShardNumber = shardNumber,
 			ReplicationFactor = replicationFactor,
 			WriteConsistencyFactor = writeConsistencyFactor,
-			OnDiskPayload = onDiskPayload,
+			Payload = new PayloadStorageParams { Memory = onDiskPayload ? Memory.Cold : Memory.Cached },
 			HnswConfig = hnswConfig,
 			OptimizersConfig = optimizersConfig,
 			WalConfig = walConfig,
@@ -3078,6 +3078,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public async Task<IReadOnlyList<ScoredPoint>> SearchAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -3164,6 +3165,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	public async Task<IReadOnlyList<BatchResult>> SearchBatchAsync(
 		string collectionName,
 		IReadOnlyList<SearchPoints> searches,
@@ -3235,6 +3237,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	public async Task<IReadOnlyList<PointGroup>> SearchGroupsAsync(
 		string collectionName,
 		ReadOnlyMemory<float> vector,
@@ -3418,6 +3421,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<ulong> positive,
@@ -3490,6 +3494,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<Guid> positive,
@@ -3562,6 +3567,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public async Task<IReadOnlyList<ScoredPoint>> RecommendAsync(
 		string collectionName,
 		IReadOnlyList<PointId> positive,
@@ -3660,6 +3666,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	public async Task<IReadOnlyList<BatchResult>> RecommendBatchAsync(
 		string collectionName,
 		IReadOnlyList<RecommendPoints> recommendSearches,
@@ -3739,6 +3746,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -3817,6 +3825,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	public Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -3895,6 +3904,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryGroupsAsync instead.")]
 	public async Task<IReadOnlyList<PointGroup>> RecommendGroupsAsync(
 		string collectionName,
 		string groupBy,
@@ -4129,6 +4139,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		TargetVector target,
@@ -4242,6 +4253,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryAsync instead.")]
 	public async Task<IReadOnlyList<ScoredPoint>> DiscoverAsync(
 		string collectionName,
 		IReadOnlyList<ContextExamplePair> context,
@@ -4323,6 +4335,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="cancellationToken">
 	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
 	/// </param>
+	[Obsolete("Use QueryBatchAsync instead.")]
 	public async Task<IReadOnlyList<BatchResult>> DiscoverBatchAsync(
 		string collectionName,
 		IReadOnlyList<DiscoverPoints> discoverPoints,
@@ -4719,7 +4732,12 @@ public class QdrantClient : IQdrantClient, IDisposable
 			CollectionName = collectionName,
 		};
 
-		request.QueryPoints.AddRange(queries);
+		request.QueryPoints.AddRange(queries.Select(query =>
+		{
+			var copy = query.Clone();
+			copy.CollectionName = collectionName;
+			return copy;
+		}));
 
 		if (readConsistency is not null)
 			request.ReadConsistency = readConsistency;
@@ -4727,7 +4745,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 		if (timeout is not null)
 			request.Timeout = ConvertTimeout(timeout);
 
-		_logger.SearchBatch(collectionName);
+		_logger.QueryBatch(collectionName);
 
 		try
 		{

@@ -80,7 +80,7 @@ client adds a `qdrant-dotnet/<version>` token to the request `User-Agent`
 alongside the gRPC library token, e.g.:
 
 ```
-grpc-dotnet/2.71.0 (.NET 8.0.4; CLR 8.0.4; net8.0; linux; x64) qdrant-dotnet/1.18.0
+grpc-dotnet/2.71.0 (.NET 8.0.4; CLR 8.0.4; net8.0; linux; x64) qdrant-dotnet/1.19.0
 ```
 
 This lets server-side tooling attribute traffic to the .NET client and its
