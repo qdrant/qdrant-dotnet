@@ -396,7 +396,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 			writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
 			shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken);
 
-	private async Task CreateCollectionAsync(
+	private Task CreateCollectionAsync(
 		string collectionName,
 		VectorsConfig? vectorsConfig = null,
 		uint shardNumber = 1,
@@ -439,7 +439,13 @@ public class QdrantClient : IQdrantClient, IDisposable
 		if (metadata is not null)
 			request.Metadata.Add(metadata);
 
-		_logger.CreateCollection(collectionName);
+		return CreateCollectionAsync(request, cancellationToken);
+	}
+
+	/// <inheritdoc />
+	public async Task CreateCollectionAsync(CreateCollection request, CancellationToken cancellationToken = default)
+	{
+		_logger.CreateCollection(request.CollectionName);
 
 		try
 		{
@@ -449,7 +455,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 				.ConfigureAwait(false);
 
 			if (!response.Result)
-				throw new QdrantException($"Collection '{collectionName}' could not be created");
+				throw new QdrantException($"Collection '{request.CollectionName}' could not be created");
 		}
 		catch (Exception e)
 		{
@@ -742,6 +748,18 @@ public class QdrantClient : IQdrantClient, IDisposable
 				writeConsistencyFactor, onDiskPayload, hnswConfig, optimizersConfig, walConfig, quantizationConfig,
 				shardingMethod, sparseVectorsConfig, strictModeConfig, metadata, timeout, cancellationToken)
 			.ConfigureAwait(false);
+	}
+
+	/// <inheritdoc />
+	public async Task RecreateCollectionAsync(CreateCollection request, CancellationToken cancellationToken = default)
+	{
+		if (await CollectionExistsAsync(request.CollectionName, cancellationToken).ConfigureAwait(false))
+		{
+			var timeout = request.HasTimeout ? TimeSpan.FromSeconds(request.Timeout) : (TimeSpan?)null;
+			await DeleteCollectionAsync(request.CollectionName, timeout, cancellationToken).ConfigureAwait(false);
+		}
+
+		await CreateCollectionAsync(request, cancellationToken).ConfigureAwait(false);
 	}
 
 	#endregion RecreateCollection
@@ -4616,7 +4634,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
 	/// <param name="prefetch">Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.</param>
-	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used..</param>
+	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used. For a text query, the payload field whose text index to search.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="scoreThreshold">Return points with scores better than this threshold.</param>
 	/// <param name="searchParams">Search config.</param>
@@ -4775,7 +4793,7 @@ public class QdrantClient : IQdrantClient, IDisposable
 	/// <param name="groupBy">Payload field to group by, must be a string or number field.</param>
 	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
 	/// <param name="prefetch">Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.</param>
-	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used..</param>
+	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used. For a text query, the payload field whose text index to search.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="scoreThreshold">Return points with scores better than this threshold.</param>
 	/// <param name="searchParams">Search config.</param>
