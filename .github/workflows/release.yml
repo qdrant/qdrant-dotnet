@@ -6,11 +6,13 @@ on:
     
 permissions:
   checks: write
+  id-token: write # Required for NuGet trusted publishing (OIDC)
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    environment: release
     steps:
     - name: Checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,9 +30,15 @@ jobs:
       run: dotnet pack -c Release -o nuget --no-build --nologo
       shell: bash
 
+    - name: NuGet login
+      id: login
+      uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+      with:
+        user: ${{ vars.NUGET_USER }}
+
     - name: Publish NuGet package
       env:
-        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
       run: dotnet nuget push nuget/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
       shell: bash
 
