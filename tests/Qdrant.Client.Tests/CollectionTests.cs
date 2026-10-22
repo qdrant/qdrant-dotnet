@@ -89,6 +89,37 @@ public class CollectionTests : IAsyncLifetime
 	}
 
 	[Fact]
+	public async Task CreateCollection_with_id_tracker()
+	{
+		await _client.CreateCollectionAsync(new CreateCollection
+		{
+			CollectionName = "collection_1",
+			VectorsConfig = new VectorsConfig { Params = new VectorParams { Size = 4, Distance = Distance.Cosine } },
+			IdTracker = new IdTrackerParams { Memory = Memory.Cached }
+		});
+
+		var info = await _client.GetCollectionInfoAsync("collection_1");
+		info.Config.Params.IdTracker.Memory.Should().Be(Memory.Cached);
+		info.CreatedAt.Should().NotBeNull();
+	}
+
+	[Fact]
+	public async Task RecreateCollection_with_id_tracker()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
+
+		await _client.RecreateCollectionAsync(new CreateCollection
+		{
+			CollectionName = "collection_1",
+			VectorsConfig = new VectorsConfig { Params = new VectorParams { Size = 4, Distance = Distance.Cosine } },
+			IdTracker = new IdTrackerParams { Memory = Memory.Pinned }
+		});
+
+		var info = await _client.GetCollectionInfoAsync("collection_1");
+		info.Config.Params.IdTracker.Memory.Should().Be(Memory.Pinned);
+	}
+
+	[Fact]
 	public async Task UpdateCollection_with_no_changes()
 	{
 		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Cosine });
