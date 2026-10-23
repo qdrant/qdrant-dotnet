@@ -80,6 +80,15 @@ public static class Conditions
 		new() { Field = new FieldCondition { Key = field, Match = new Match { Prefix = prefix } } };
 
 	/// <summary>
+	/// Match records where the given field contains the given substring
+	/// </summary>
+	/// <param name="field">The name of the field</param>
+	/// <param name="substring">The substring to match</param>
+	/// <returns>a new instance of <see cref="Condition"/></returns>
+	public static Condition MatchSubstring(string field, string substring) =>
+		new() { Field = new FieldCondition { Key = field, Match = new Match { Substring = substring } } };
+
+	/// <summary>
 	/// Match records where the given field matches the given text
 	/// </summary>
 	/// <param name="field">The name of the field</param>

@@ -126,6 +126,15 @@ public interface IQdrantClient
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default);
 
+	/// <summary>
+	/// Creates a new collection from a <see cref="CreateCollection"/> request.
+	/// </summary>
+	/// <param name="request">The collection to create.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	Task CreateCollectionAsync(CreateCollection request, CancellationToken cancellationToken = default);
+
 	#endregion CreateCollection
 
 	#region RecreateCollection
@@ -245,6 +254,15 @@ public interface IQdrantClient
 		StrictModeConfig? strictModeConfig = null,
 		TimeSpan? timeout = null,
 		CancellationToken cancellationToken = default);
+
+	/// <summary>
+	/// Deletes a collection if one exists, and creates a new collection from a <see cref="CreateCollection"/> request.
+	/// </summary>
+	/// <param name="request">The collection to create.</param>
+	/// <param name="cancellationToken">
+	/// The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None" />.
+	/// </param>
+	Task RecreateCollectionAsync(CreateCollection request, CancellationToken cancellationToken = default);
 
 	#endregion RecreateCollection
 
@@ -2167,7 +2185,7 @@ public interface IQdrantClient
 	/// <param name="collectionName">The name of the collection.</param>
 	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
 	/// <param name="prefetch">Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.</param>
-	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used..</param>
+	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used. For a text query, the payload field whose text index to search.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="scoreThreshold">Return points with scores better than this threshold.</param>
 	/// <param name="searchParams">Search config.</param>
@@ -2229,7 +2247,7 @@ public interface IQdrantClient
 	/// <param name="groupBy">Payload field to group by, must be a string or number field.</param>
 	/// <param name="query">Query to perform. If missing, returns points ordered by their IDs.</param>
 	/// <param name="prefetch">Sub-requests to perform first. If present, the query will be performed on the results of the prefetches.</param>
-	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used..</param>
+	/// <param name="usingVector">Name of the vector to use for querying. If missing, the default vector is used. For a text query, the payload field whose text index to search.</param>
 	/// <param name="filter">Filter conditions - return only those points that satisfy the specified conditions.</param>
 	/// <param name="scoreThreshold">Return points with scores better than this threshold.</param>
 	/// <param name="searchParams">Search config.</param>

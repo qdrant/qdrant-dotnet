@@ -401,6 +401,13 @@ public class PointTests : IAsyncLifetime
 		updateResult.Status.Should().Be(UpdateStatus.Completed);
 	}
 
+	private static PointStruct TextPoint(ulong id, string field, string text) => new()
+	{
+		Id = id,
+		Vectors = new[] { 0.1f, 0.2f, 0.3f, 0.4f },
+		Payload = { [field] = text }
+	};
+
 	public async Task InitializeAsync()
 	{
 		foreach (var collection in await _client.ListCollectionsAsync())
@@ -531,6 +538,133 @@ public class PointTests : IAsyncLifetime
 		);
 
 		Assert.Equal(2, points.Count);
+	}
+
+	[Fact]
+	public async Task QueryFormula()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: new Formula
+			{
+				Expression = new SumExpression
+				{
+					Sum =
+					{
+						new MaxExpression { Max = { "$score", 2f } },
+						new MinExpression { Min = { "$score", 0f } },
+						Expression.FromAcosh(1f)
+					}
+				}
+			},
+			prefetch: new List<PrefetchQuery> { new() { Query = new float[] { 3.5f, 4.5f } } }
+		);
+
+		Assert.Equal(2, points.Count);
+		Assert.All(points, p => p.Score.Should().BeApproximately(2f, 1e-6f));
+	}
+
+	[Fact]
+	public async Task QueryText()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Dot });
+
+		var status = await _client.CreatePayloadIndexAsync(
+			"collection_1",
+			fieldName: "title",
+			schemaType: PayloadSchemaType.Text,
+			indexParams: new PayloadIndexParams
+			{
+				TextIndexParams = new()
+				{
+					Tokenizer = TokenizerType.Word,
+					Scoring = new TextScoringParams { Type = TextScoringType.Bm25 }
+				}
+			}
+		);
+		Assert.Equal(UpdateStatus.Completed, status.Status);
+
+		await _client.UpsertAsync("collection_1", new[]
+		{
+			TextPoint(1, "title", "vector search engine"),
+			TextPoint(2, "title", "search search search"),
+			TextPoint(3, "title", "relational database")
+		});
+
+		var points = await _client.QueryAsync(
+			"collection_1",
+			query: new TextQuery { Query = "vector search" },
+			usingVector: "title");
+
+		Assert.Equal(2, points.Count);
+		Assert.Equal(1ul, points[0].Id);
+		Assert.Equal(2ul, points[1].Id);
+
+		var tuned = await _client.QueryAsync(
+			"collection_1",
+			query: new TextQuery { Query = "vector search", Bm25 = new Bm25Params { K = 2f, B = 0.5f } },
+			usingVector: "title");
+
+		Assert.Equal(2, tuned.Count);
+		Assert.NotEqual(points[0].Score, tuned[0].Score);
+	}
+
+	[Fact]
+	public async Task ScrollWithSubstringMatch()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Dot });
+		await _client.CreatePayloadIndexAsync("collection_1", fieldName: "sku", schemaType: PayloadSchemaType.Keyword);
+
+		await _client.UpsertAsync("collection_1", new[]
+		{
+			TextPoint(1, "sku", "AB-1234-XY"),
+			TextPoint(2, "sku", "CD-5678-XY")
+		});
+
+		var response = await _client.ScrollAsync("collection_1", filter: MatchSubstring("sku", "1234"));
+
+		var point = Assert.Single(response.Result);
+		Assert.Equal(1ul, point.Id);
+	}
+
+	[Fact]
+	public async Task ScrollWithCodeTokenizer()
+	{
+		await _client.CreateCollectionAsync("collection_1", new VectorParams { Size = 4, Distance = Distance.Dot });
+		await _client.CreatePayloadIndexAsync(
+			"collection_1",
+			fieldName: "source",
+			schemaType: PayloadSchemaType.Text,
+			indexParams: new PayloadIndexParams { TextIndexParams = new() { Tokenizer = TokenizerType.Code } }
+		);
+
+		await _client.UpsertAsync("collection_1", new[]
+		{
+			TextPoint(10, "source", "fn getUserName() {}"),
+			TextPoint(11, "source", "fn deleteFile() {}")
+		});
+
+		var response = await _client.ScrollAsync("collection_1", filter: MatchText("source", "get_user_name"));
+
+		var point = Assert.Single(response.Result);
+		Assert.Equal(10ul, point.Id);
+	}
+
+	[Fact]
+	public async Task CreateNestedFieldIndex()
+	{
+		await CreateAndSeedCollection("collection_1");
+
+		var status = await _client.CreatePayloadIndexAsync(
+			"collection_1",
+			fieldName: "offers[].price",
+			schemaType: PayloadSchemaType.Float,
+			indexParams: new PayloadIndexParams { FloatIndexParams = new() { Nested = "offers" } }
+		);
+
+		Assert.Equal(UpdateStatus.Completed, status.Status);
 	}
 
 	[Fact]

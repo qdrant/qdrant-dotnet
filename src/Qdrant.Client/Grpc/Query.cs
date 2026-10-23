@@ -62,6 +62,13 @@ public partial class Query
 	public static implicit operator Query(Formula formula) => new() { Formula = formula };
 
 	/// <summary>
+	/// Implicitly converts a <see cref="TextQuery"/>  to a new instance of <see cref="Query"/> for BM25 text search.
+	/// </summary>
+	/// <param name="text">An instance of <see cref="TextQuery"/> </param>
+	/// <returns>a new instance of <see cref="Query"/></returns>
+	public static implicit operator Query(TextQuery text) => new() { Text = text };
+
+	/// <summary>
 	/// Explicitly creates a <see cref="Query"/> to order points by a payload field.
 	/// </summary>
 	/// <param name="key">Name of the payload field to order by</param>

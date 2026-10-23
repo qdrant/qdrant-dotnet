@@ -122,5 +122,23 @@ namespace Qdrant.Client.Grpc
 		/// </summary>
 		public static Expression FromLinDecay(DecayParamsExpression decay) =>
 			new() { LinDecay = decay };
+
+		/// <summary>
+		/// Converts an <see cref="Expression"/> to its inverse hyperbolic cosine.
+		/// </summary>
+		public static Expression FromAcosh(Expression expr) =>
+			new() { Acosh = expr };
+
+		/// <summary>
+		/// Implicitly converts a <see cref="MaxExpression"/> to a new instance of <see cref="Expression"/>.
+		/// </summary>
+		public static implicit operator Expression(MaxExpression max) =>
+			new() { Max = max };
+
+		/// <summary>
+		/// Implicitly converts a <see cref="MinExpression"/> to a new instance of <see cref="Expression"/>.
+		/// </summary>
+		public static implicit operator Expression(MinExpression min) =>
+			new() { Min = min };
 	}
 }
