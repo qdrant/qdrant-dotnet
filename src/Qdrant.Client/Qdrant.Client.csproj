@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <Protobuf Include="..\..\protos\$(QdrantVersion)\*.proto" GrpcServices="Client" Link="Grpc\protos\$(QdrantVersion)\*.proto" Visible="false" />
+    <Protobuf Include="Serverless\serverless_collections.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>

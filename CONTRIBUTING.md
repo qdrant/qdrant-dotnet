@@ -115,6 +115,16 @@ For OSX/Linux
 
 5. Submit your pull request and get those approvals.
 
+### Qdrant Serverless
+
+[`QdrantServerlessClient.cs`](https://github.com/qdrant/qdrant-dotnet/blob/main/src/Qdrant.Client/QdrantServerlessClient.cs) uses a copy of the [serverless collections proto](https://github.com/qdrant/qdrant-cloud-public-api/blob/main/proto/qdrant/serverless/collections.proto) in [`src/Qdrant.Client/Serverless`](https://github.com/qdrant/qdrant-dotnet/tree/main/src/Qdrant.Client/Serverless), next to its implicit converters. To update it:
+
+```bash
+./build.sh sync-serverless-proto
+```
+
+Its tests run against a live serverless space when `QDRANT_SERVERLESS_URL` and `QDRANT_SERVERLESS_API_KEY` are set, and are skipped otherwise.
+
 ### Releasing a New Version
 
 Once the new Qdrant version is live:

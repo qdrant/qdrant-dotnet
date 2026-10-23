@@ -113,6 +113,11 @@ public partial class QdrantGrpcClient : IDisposable
 	/// </summary>
 	public virtual Snapshots.SnapshotsClient Snapshots => new(_callInvoker);
 
+	/// <summary>
+	/// Gets the client for Qdrant Serverless collections
+	/// </summary>
+	public virtual Serverless.CollectionsService.CollectionsServiceClient ServerlessCollections => new(_callInvoker);
+
 	/// <inheritdoc />
 	public void Dispose()
 	{

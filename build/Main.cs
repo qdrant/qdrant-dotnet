@@ -13,6 +13,7 @@ using static SimpleExec.Command;
 const string packOutput = "nuget";
 const string protosDir = "protos";
 const string project = "Qdrant.Client";
+const string serverlessProto = "src/Qdrant.Client/Serverless/serverless_collections.proto";
 
 var doc = XDocument.Load("Directory.Build.props");
 var qdrantVersion = doc.Descendants(XName.Get("QdrantVersion", "http://schemas.microsoft.com/developer/msbuild/2003"))
@@ -108,6 +109,35 @@ cmd.SetHandler(async (InvocationContext context) =>
 		}
 	});
 
+	Target(SyncServerlessProto, async () =>
+	{
+		const string url =
+			"https://raw.githubusercontent.com/qdrant/qdrant-cloud-public-api/main/proto/qdrant/serverless/collections.proto";
+		const string header =
+			"""
+			// Source: https://github.com/qdrant/qdrant-cloud-public-api/blob/main/proto/qdrant/serverless/collections.proto
+			// Renamed because the protobuf registry already has the regular qdrant "collections.proto".
+			// buf.validate options are stripped: they are server-side only.
+			// Regenerate with: ./build.sh sync-serverless-proto
+
+			""";
+
+		using var client = new HttpClient();
+		var proto = await client.GetStringAsync(url);
+
+		// buf.validate is server-side only and would need an extra proto dependency. Only plain
+		// single-option lists are stripped. Anything else is left in place and fails the check.
+		const string csharpNamespace = "option csharp_namespace = \"Qdrant.Client.Grpc.Serverless\";";
+		proto = proto.Replace("import \"buf/validate/validate.proto\";\n", "");
+		proto = Regex.Replace(proto, @"\s*\[\(buf\.validate\.[^\[\]""',]*\]", "");
+		proto = proto.Replace("package qdrant.serverless;\n", $"package qdrant.serverless;\n\n{csharpNamespace}\n");
+		if (proto.Contains("buf.validate") || proto.Contains("buf/validate") || !proto.Contains(csharpNamespace))
+			throw new InvalidOperationException("unexpected serverless proto, update sync-serverless-proto");
+
+		await File.WriteAllTextAsync(serverlessProto, header + "\n" + proto);
+		Console.WriteLine($"Synced {serverlessProto}");
+	});
+
 	Target(Format, [Restore], () =>
 	{
 		Run("dotnet", "format");
@@ -154,4 +184,5 @@ internal static class BuildTargets
 	public const string Format = "format";
 	public const string Pack = "pack";
 	public const string DownloadProtos = "download-protos";
+	public const string SyncServerlessProto = "sync-serverless-proto";
 }
