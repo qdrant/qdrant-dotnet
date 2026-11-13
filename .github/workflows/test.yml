@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
       with:
         dotnet-version: | 
           6.x
@@ -37,7 +37,7 @@ jobs:
       shell: bash
       
     - name: Test Results
-      uses: mikepenz/action-junit-report@6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d # v6.6.1
+      uses: mikepenz/action-junit-report@4a26df3e2ae132254ba12a53f65a388d0961e786 # v6.7.0
       if: always()
       with:
         fail_on_failure: true
