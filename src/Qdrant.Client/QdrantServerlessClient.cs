@@ -24,6 +24,7 @@ public class QdrantServerlessClient : IDisposable
 
 	private readonly CollectionsService.CollectionsServiceClient _collectionsClient;
 	private readonly Points.PointsClient _pointsClient;
+	private readonly QdrantClient _points;
 
 	private readonly TimeSpan _grpcTimeout;
 	private readonly ILogger _logger;
@@ -70,6 +71,7 @@ public class QdrantServerlessClient : IDisposable
 		_ownsGrpcClient = ownsGrpcClient;
 		_collectionsClient = grpcClient.ServerlessCollections;
 		_pointsClient = grpcClient.Points;
+		_points = new QdrantClient(grpcClient, grpcTimeout, loggerFactory);
 		_grpcTimeout = grpcTimeout;
 		_logger = loggerFactory?.CreateLogger("Qdrant.Client") ?? NullLogger.Instance;
 	}
@@ -173,6 +175,26 @@ public class QdrantServerlessClient : IDisposable
 
 	#region Points
 
+	/// <inheritdoc cref="QdrantClient.QueryAsync(string, Query?, IReadOnlyList{PrefetchQuery}?, string?, Filter?, float?, SearchParams?, ulong, ulong, WithPayloadSelector?, WithVectorsSelector?, ReadConsistency?, ShardKeySelector?, LookupLocation?, TimeSpan?, CancellationToken)"/>
+	public Task<IReadOnlyList<ScoredPoint>> QueryAsync(
+		string collectionName,
+		Query? query = null,
+		IReadOnlyList<PrefetchQuery>? prefetch = null,
+		string? usingVector = null,
+		Filter? filter = null,
+		float? scoreThreshold = null,
+		SearchParams? searchParams = null,
+		ulong limit = 10,
+		ulong offset = 0,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		LookupLocation? lookupFrom = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> _points.QueryAsync(collectionName, query, prefetch, usingVector, filter, scoreThreshold, searchParams, limit, offset, payloadSelector, vectorsSelector, readConsistency, shardKeySelector, lookupFrom, timeout, cancellationToken);
+
 	/// <summary>
 	/// Universally queries points: search, recommend, discover, hybrid and multi-stage queries.
 	/// </summary>
@@ -189,6 +211,15 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.QueryAsync(r, options),
 			request,
 			cancellationToken).ConfigureAwait(false)).Result;
+
+	/// <inheritdoc cref="QdrantClient.QueryBatchAsync(string, IReadOnlyList{QueryPoints}, ReadConsistency?, TimeSpan?, CancellationToken)"/>
+	public Task<IReadOnlyList<BatchResult>> QueryBatchAsync(
+		string collectionName,
+		IReadOnlyList<QueryPoints> queries,
+		ReadConsistency? readConsistency = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> _points.QueryBatchAsync(collectionName, queries, readConsistency, timeout, cancellationToken);
 
 	/// <summary>
 	/// Runs several queries in one request.
@@ -207,6 +238,28 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken).ConfigureAwait(false)).Result;
 
+	/// <inheritdoc cref="QdrantClient.QueryGroupsAsync(string, string, Query?, IReadOnlyList{PrefetchQuery}?, string?, Filter?, float?, SearchParams?, ulong, ulong, WithPayloadSelector?, WithVectorsSelector?, ReadConsistency?, ShardKeySelector?, WithLookup?, LookupLocation?, TimeSpan?, CancellationToken)"/>
+	public Task<IReadOnlyList<PointGroup>> QueryGroupsAsync(
+		string collectionName,
+		string groupBy,
+		Query? query = null,
+		IReadOnlyList<PrefetchQuery>? prefetch = null,
+		string? usingVector = null,
+		Filter? filter = null,
+		float? scoreThreshold = null,
+		SearchParams? searchParams = null,
+		ulong limit = 10,
+		ulong groupSize = 1,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		WithLookup? withLookup = null,
+		LookupLocation? lookupFrom = null,
+		TimeSpan? timeout = null,
+		CancellationToken cancellationToken = default)
+		=> _points.QueryGroupsAsync(collectionName, groupBy, query, prefetch, usingVector, filter, scoreThreshold, searchParams, limit, groupSize, payloadSelector, vectorsSelector, readConsistency, shardKeySelector, withLookup, lookupFrom, timeout, cancellationToken);
+
 	/// <summary>
 	/// Queries points grouped by a payload field.
 	/// </summary>
@@ -223,6 +276,61 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.QueryGroupsAsync(r, options),
 			request,
 			cancellationToken).ConfigureAwait(false)).Result.Groups;
+
+	/// <inheritdoc cref="QdrantClient.RetrieveAsync(string, PointId, bool, bool, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		PointId id,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.RetrieveAsync(collectionName, id, withPayload, withVectors, readConsistency, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.RetrieveAsync(string, Guid, bool, bool, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		Guid id,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.RetrieveAsync(collectionName, id, withPayload, withVectors, readConsistency, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.RetrieveAsync(string, ulong, bool, bool, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		ulong id,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.RetrieveAsync(collectionName, id, withPayload, withVectors, readConsistency, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.RetrieveAsync(string, IReadOnlyList{PointId}, bool, bool, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		IReadOnlyList<PointId> ids,
+		bool withPayload = true,
+		bool withVectors = false,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.RetrieveAsync(collectionName, ids, withPayload, withVectors, readConsistency, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.RetrieveAsync(string, IReadOnlyList{PointId}, WithPayloadSelector, WithVectorsSelector, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<IReadOnlyList<RetrievedPoint>> RetrieveAsync(
+		string collectionName,
+		IReadOnlyList<PointId> ids,
+		WithPayloadSelector payloadSelector,
+		WithVectorsSelector vectorSelector,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.RetrieveAsync(collectionName, ids, payloadSelector, vectorSelector, readConsistency, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Retrieves points by IDs.
@@ -241,6 +349,20 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken).ConfigureAwait(false)).Result;
 
+	/// <inheritdoc cref="QdrantClient.ScrollAsync(string, Filter?, uint, PointId?, WithPayloadSelector?, WithVectorsSelector?, ReadConsistency?, ShardKeySelector?, OrderBy?, CancellationToken)"/>
+	public Task<ScrollResponse> ScrollAsync(
+		string collectionName,
+		Filter? filter = null,
+		uint limit = 10,
+		PointId? offset = null,
+		WithPayloadSelector? payloadSelector = null,
+		WithVectorsSelector? vectorsSelector = null,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		OrderBy? orderBy = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ScrollAsync(collectionName, filter, limit, offset, payloadSelector, vectorsSelector, readConsistency, shardKeySelector, orderBy, cancellationToken);
+
 	/// <summary>
 	/// Returns a page of points and the offset of the next page.
 	/// </summary>
@@ -257,6 +379,16 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.ScrollAsync(r, options),
 			request,
 			cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.CountAsync(string, Filter?, bool, ReadConsistency?, ShardKeySelector?, CancellationToken)"/>
+	public Task<ulong> CountAsync(
+		string collectionName,
+		Filter? filter = null,
+		bool exact = true,
+		ReadConsistency? readConsistency = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.CountAsync(collectionName, filter, exact, readConsistency, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Counts points.
@@ -275,6 +407,27 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken).ConfigureAwait(false)).Result.Count;
 
+	/// <inheritdoc cref="QdrantClient.UpsertAsync(string, IReadOnlyList{PointStruct}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> UpsertAsync(
+		string collectionName,
+		IReadOnlyList<PointStruct> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.UpsertAsync(collectionName, points, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.UpsertAsync(string, IReadOnlyList{PointStruct}, Filter?, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> UpsertAsync(
+		string collectionName,
+		IReadOnlyList<PointStruct> points,
+		Filter? updateFilter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.UpsertAsync(collectionName, points, updateFilter, wait, ordering, shardKeySelector, cancellationToken);
+
 	/// <summary>
 	/// Inserts or overwrites points.
 	/// </summary>
@@ -291,6 +444,76 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.UpsertAsync(r, options),
 			request,
 			cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, ulong, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, Guid, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, PointId, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		PointId id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, IReadOnlyList{PointId}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		IReadOnlyList<PointId> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteAsync(string, Filter, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteAsync(
+		string collectionName,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteAsync(collectionName, filter, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Deletes points.
@@ -309,6 +532,27 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken);
 
+	/// <inheritdoc cref="QdrantClient.UpdateVectorsAsync(string, IReadOnlyList{PointVectors}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> UpdateVectorsAsync(
+		string collectionName,
+		IReadOnlyList<PointVectors> points,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.UpdateVectorsAsync(collectionName, points, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.UpdateVectorsAsync(string, IReadOnlyList{PointVectors}, Filter?, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> UpdateVectorsAsync(
+		string collectionName,
+		IReadOnlyList<PointVectors> points,
+		Filter? updateFilter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.UpdateVectorsAsync(collectionName, points, updateFilter, wait, ordering, shardKeySelector, cancellationToken);
+
 	/// <summary>
 	/// Updates vectors of points.
 	/// </summary>
@@ -325,6 +569,39 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.UpdateVectorsAsync(r, options),
 			request,
 			cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteVectorsAsync(string, IReadOnlyList{string}, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteVectorsAsync(
+		string collectionName,
+		IReadOnlyList<string> vectors,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteVectorsAsync(collectionName, vectors, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteVectorsAsync(string, IReadOnlyList{string}, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteVectorsAsync(
+		string collectionName,
+		IReadOnlyList<string> vectors,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteVectorsAsync(collectionName, vectors, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeleteVectorsAsync(string, IReadOnlyList{string}, Filter, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeleteVectorsAsync(
+		string collectionName,
+		IReadOnlyList<string> vectors,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeleteVectorsAsync(collectionName, vectors, filter, wait, ordering, shardKeySelector, cancellationToken);
 
 	/// <summary>
 	/// Removes vectors from points.
@@ -343,6 +620,77 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken);
 
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, ulong, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, id, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, ids, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, Guid, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, id, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, ids, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.SetPayloadAsync(string, IReadOnlyDictionary{string, Value}, Filter, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> SetPayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.SetPayloadAsync(collectionName, payload, filter, wait, ordering, shardKeySelector, key, cancellationToken);
+
 	/// <summary>
 	/// Sets payload fields of points.
 	/// </summary>
@@ -359,6 +707,77 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.SetPayloadAsync(r, options),
 			request,
 			cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, ulong, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, id, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, ids, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, Guid, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, id, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, ids, wait, ordering, shardKeySelector, key, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.OverwritePayloadAsync(string, IReadOnlyDictionary{string, Value}, Filter, bool, WriteOrderingType?, ShardKeySelector?, string?, CancellationToken)"/>
+	public Task<UpdateResult> OverwritePayloadAsync(
+		string collectionName,
+		IReadOnlyDictionary<string, Value> payload,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		string? key = null,
+		CancellationToken cancellationToken = default)
+		=> _points.OverwritePayloadAsync(collectionName, payload, filter, wait, ordering, shardKeySelector, key, cancellationToken);
 
 	/// <summary>
 	/// Replaces the entire payload of points.
@@ -377,6 +796,71 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken);
 
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, ulong, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, Guid, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.DeletePayloadAsync(string, IReadOnlyList{string}, Filter, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> DeletePayloadAsync(
+		string collectionName,
+		IReadOnlyList<string> keys,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.DeletePayloadAsync(collectionName, keys, filter, wait, ordering, shardKeySelector, cancellationToken);
+
 	/// <summary>
 	/// Removes payload fields from points.
 	/// </summary>
@@ -394,6 +878,65 @@ public class QdrantServerlessClient : IDisposable
 			request,
 			cancellationToken);
 
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, ulong, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		ulong id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, IReadOnlyList{ulong}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		IReadOnlyList<ulong> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, Guid, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		Guid id,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, id, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, IReadOnlyList{Guid}, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		IReadOnlyList<Guid> ids,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, ids, wait, ordering, shardKeySelector, cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.ClearPayloadAsync(string, Filter, bool, WriteOrderingType?, ShardKeySelector?, CancellationToken)"/>
+	public Task<UpdateResult> ClearPayloadAsync(
+		string collectionName,
+		Filter filter,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		ShardKeySelector? shardKeySelector = null,
+		CancellationToken cancellationToken = default)
+		=> _points.ClearPayloadAsync(collectionName, filter, wait, ordering, shardKeySelector, cancellationToken);
+
 	/// <summary>
 	/// Removes the entire payload of points.
 	/// </summary>
@@ -410,6 +953,15 @@ public class QdrantServerlessClient : IDisposable
 			(options, r) => _pointsClient.ClearPayloadAsync(r, options),
 			request,
 			cancellationToken);
+
+	/// <inheritdoc cref="QdrantClient.UpdateBatchAsync(string, IReadOnlyList{PointsUpdateOperation}, bool, WriteOrderingType?, CancellationToken)"/>
+	public Task<IReadOnlyList<UpdateResult>> UpdateBatchAsync(
+		string collectionName,
+		IReadOnlyList<PointsUpdateOperation> operations,
+		bool wait = true,
+		WriteOrderingType? ordering = null,
+		CancellationToken cancellationToken = default)
+		=> _points.UpdateBatchAsync(collectionName, operations, wait, ordering, cancellationToken);
 
 	/// <summary>
 	/// Runs several update operations in one request.

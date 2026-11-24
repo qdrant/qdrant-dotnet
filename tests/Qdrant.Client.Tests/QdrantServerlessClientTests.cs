@@ -120,22 +120,16 @@ public sealed class QdrantServerlessClientTests : IAsyncLifetime
 	[ServerlessFact]
 	public async Task Points()
 	{
-		await Client.CreateCollectionAsync(_collectionName, new Serverless.CollectionConfig
-		{
-			DenseVectors = { [""] = new Serverless.DenseVectorConfig { Size = 4, Distance = Serverless.Distance.Dot } },
-			PayloadIndexes = { ["color"] = new Serverless.KeywordIndex() },
-		});
+		Serverless.CollectionConfig config = new Serverless.DenseVectorConfig { Size = 4, Distance = Serverless.Distance.Dot };
+		config.PayloadIndexes.Add("color", new Serverless.KeywordIndex());
+		await Client.CreateCollectionAsync(_collectionName, config);
 
-		await Client.UpsertAsync(new UpsertPoints
+		var upsert = await Client.UpsertAsync(_collectionName, new List<PointStruct>
 		{
-			CollectionName = _collectionName,
-			Wait = true,
-			Points =
-			{
-				new PointStruct { Id = 1, Vectors = new[] { 1f, 0, 0, 0 }, Payload = { ["color"] = "red" } },
-				new PointStruct { Id = 2, Vectors = new[] { 0f, 1, 0, 0 }, Payload = { ["color"] = "blue" } },
-			}
+			new() { Id = 1, Vectors = new[] { 1f, 0, 0, 0 }, Payload = { ["color"] = "red" } },
+			new() { Id = 2, Vectors = new[] { 0f, 1, 0, 0 }, Payload = { ["color"] = "blue" } },
 		});
+		upsert.Status.Should().Be(UpdateStatus.Completed);
 
 		// Reads can lag a few seconds behind writes.
 		await Eventually(async () =>
@@ -148,11 +142,7 @@ public sealed class QdrantServerlessClientTests : IAsyncLifetime
 
 		await Eventually(async () =>
 		{
-			var hits = await Client.QueryAsync(new QueryPoints
-			{
-				CollectionName = _collectionName,
-				Query = new[] { 1f, 0, 0, 0 }
-			});
+			var hits = await Client.QueryAsync(_collectionName, new[] { 1f, 0, 0, 0 });
 			return hits.Count == 2 && hits[0].Id.Num == 1;
 		});
 
@@ -173,7 +163,7 @@ public sealed class QdrantServerlessClientTests : IAsyncLifetime
 		});
 		points.Should().HaveCount(1);
 
-		var delete = await Client.DeleteAsync(new DeletePoints { CollectionName = _collectionName, Wait = true, Points = 2 });
+		var delete = await Client.DeleteAsync(_collectionName, 2ul);
 		delete.Status.Should().Be(UpdateStatus.Completed);
 	}
 
