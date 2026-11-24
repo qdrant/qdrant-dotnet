@@ -72,7 +72,16 @@ public sealed class QdrantServerlessClientTests : IAsyncLifetime
 					Stopwords = new Serverless.StopwordsSet { Languages = { "english" } },
 					Stemmer = new Serverless.SnowballParams { Language = "english" }
 				},
-				["body"] = new Serverless.TextIndex { Stemmer = new Serverless.DisabledStemmer() },
+				["body"] = new Serverless.TextIndex
+				{
+					Stemmer = new Serverless.DisabledStemmer(),
+					Scoring = new Serverless.TextScoringParams { Type = Serverless.TextScoringType.Bm25 }
+				},
+				["source"] = new Serverless.TextIndex
+				{
+					Tokenizer = Serverless.Tokenizer.Code,
+					Scoring = new Serverless.TextScoringParams()
+				},
 			}
 		};
 

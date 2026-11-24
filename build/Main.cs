@@ -126,10 +126,12 @@ cmd.SetHandler(async (InvocationContext context) =>
 		var proto = await client.GetStringAsync(url);
 
 		// buf.validate is server-side only and would need an extra proto dependency. Only plain
-		// single-option lists are stripped. Anything else is left in place and fails the check.
+		// single-option lists and brace-delimited message options are stripped. Anything else is
+		// left in place and fails the check.
 		const string csharpNamespace = "option csharp_namespace = \"Qdrant.Client.Grpc.Serverless\";";
 		proto = proto.Replace("import \"buf/validate/validate.proto\";\n", "");
 		proto = Regex.Replace(proto, @"\s*\[\(buf\.validate\.[^\[\]""',]*\]", "");
+		proto = Regex.Replace(proto, @"\n[ \t]*option \(buf\.validate\.[\w.]+\)[\w.]* = \{[^{}]*\};", "");
 		proto = proto.Replace("package qdrant.serverless;\n", $"package qdrant.serverless;\n\n{csharpNamespace}\n");
 		if (proto.Contains("buf.validate") || proto.Contains("buf/validate") || !proto.Contains(csharpNamespace))
 			throw new InvalidOperationException("unexpected serverless proto, update sync-serverless-proto");
