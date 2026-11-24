@@ -35,6 +35,9 @@ jobs:
     - name: Test
       run: dotnet test -c Release --logger:"junit;LogFilePath=$(pwd)/output/test-results/junit-{assembly}-{framework}-test-results.xml" --no-build -f net8.0 --nologo
       shell: bash
+      env:
+        QDRANT_SERVERLESS_URL: ${{ secrets.QDRANT_SERVERLESS_URL }}
+        QDRANT_SERVERLESS_API_KEY: ${{ secrets.QDRANT_SERVERLESS_API_KEY }}
       
     - name: Test Results
       uses: mikepenz/action-junit-report@4a26df3e2ae132254ba12a53f65a388d0961e786 # v6.7.0
